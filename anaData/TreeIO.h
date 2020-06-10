@@ -87,6 +87,7 @@ namespace TreeIO
   Double_t        true_beam_startDirY;
   Double_t        true_beam_startDirZ;
 
+  Double_t        reco_beam_endZ;
   //======================================= Truth Hist out =======================================
  TH1I * hbeamType = 0x0;
  TH1I * hndaughter = 0x0;
@@ -105,7 +106,9 @@ namespace TreeIO
  TH1D *hpn = 0x0;
 
 //======================================= Rec Hist out =======================================
- TH1I * hBeamPosCut = 0x0;
+ TH1I * hBeamPosPass = 0x0;
+ TH1D * hBeamEndZ = 0x0;
+ TH1I * hBeamEndZPass = 0x0;
 
 //==============================================================================
 //==============================================================================
@@ -281,13 +284,19 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
   tree->SetBranchAddress("true_beam_startZ", &true_beam_startZ);
   tree->SetBranchAddress("true_beam_startDirZ", &true_beam_startDirZ);
 
+  tree->SetBranchAddress("reco_beam_endZ", &reco_beam_endZ);
+
   return tree;
 }
 
 void IniRecHist(TList * lout, const TString tag)
 {
   hbeamType = new TH1I("h0beamType"+tag,  "", 30, -4.5, 25.5); lout->Add(hbeamType);
-  hBeamPosCut = new TH1I("h1BeamPosCut"+tag, "", 4, -0.5, 3.5); lout->Add(hBeamPosCut);
+
+  hBeamPosPass = new TH1I("h1BeamPosPass"+tag, "", 4, -0.5, 3.5); lout->Add(hBeamPosPass);
+
+  hBeamEndZ = new TH1D("h2BeamEndZ"+tag,"",50, 0, 500); lout->Add(hBeamEndZ);
+  hBeamEndZPass = new TH1I("h2BeamEndZPass"+tag,"",4, -0.5, 3.5); lout->Add(hBeamEndZPass);
 }
 
 void IniTruthHist(TList * lout, const TString tag)
@@ -350,7 +359,7 @@ bool manual_beamPos_mc(const double beam_startX, const double beam_startY, const
   return true;
 }
 
-bool GetBeamPosCut()
+bool GetBeamPosPass()
 {
   //https://github.com/calcuttj/PionStudies/blob/master/rDataFrame/eventSelection.C
   /*
