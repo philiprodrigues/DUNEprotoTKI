@@ -40,6 +40,7 @@ namespace TreeIO
   double ndof;
 
   //======================================= tree in =======================================
+  //--------------------------------------- anaTruth ---------------------------------------
   //true_beam_daughter_PDG->size()
   //(*true_beam_daughter_PDG)[0]
   vector<int> *true_beam_daughter_PDG=0x0;
@@ -70,6 +71,9 @@ namespace TreeIO
   int true_daughter_nPiPlus = -999;
   int true_daughter_nProton = -999;
 
+  //--------------------------------------- anaRec ---------------------------------------
+  int reco_beam_type = -999;
+
   //======================================= Truth Hist out =======================================
  TH1I * hbeamType = 0x0;
  TH1I * hndaughter = 0x0;
@@ -93,6 +97,9 @@ TTree * GetOutputTree(TList * lout, const TString tag)
 {
   TTree * tout = new TTree("tree", tag); lout->Add(tout);
  
+  //definitely need this to avoid memory-resident Tree
+  tout->SetDirectory(0);
+
   tout->Branch("dalphat",&dalphat);
   tout->Branch("dphit",&dphit);
   tout->Branch("dpt",&dpt);
@@ -211,6 +218,7 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
  reco_daughter_allTrack_Chi2_ndof = (vector<int>*)0x15413a0
    */
 
+  //--------------------------------------- anaTruth ---------------------------------------
   tree->SetBranchAddress("true_beam_daughter_PDG", &true_beam_daughter_PDG);
   tree->SetBranchAddress("true_beam_daughter_startPx", &true_beam_daughter_startPx);
   tree->SetBranchAddress("true_beam_daughter_startPy", &true_beam_daughter_startPy);
@@ -238,12 +246,15 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
   tree->SetBranchAddress("true_daughter_nPiPlus", &true_daughter_nPiPlus);
   tree->SetBranchAddress("true_daughter_nProton", &true_daughter_nProton);
 
+  //--------------------------------------- anaRec ---------------------------------------
+  tree->SetBranchAddress("reco_beam_type", &reco_beam_type);
+
   return tree;
 }
 
 void IniRecHist(TList * lout, const TString tag)
 {
-
+  hbeamType = new TH1I("h0beamType"+tag,  "", 30, -4.5, 25.5); lout->Add(hbeamType);
 }
 
 void IniTruthHist(TList * lout, const TString tag)

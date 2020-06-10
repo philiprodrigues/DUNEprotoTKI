@@ -191,7 +191,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
   cout<<"\n\n                       Running anaRec kPiZero "<<kPiZero<<" TrackingProton "<<kTrackingProton<<endl<<endl;
 
   TTree * tree = GetInputTree("pionana/beamana");
-  //test TTree * tout = GetOutputTree(lout, tag);
+  TTree * tout = GetOutputTree(lout, tag);  
   IniRecHist(lout, tag);
 
   //==============================================================================================================
@@ -212,7 +212,13 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     ientry++;
    
     //===========================================================
+    //1. primary beam type 
+    hbeamType->Fill(reco_beam_type);
+    if(reco_beam_type!=13){//13: Pandora "track like"
+      continue;
+    }
 
+    tout->Fill();
   }
 
   cout<<"All entries "<<ientry<<endl;
