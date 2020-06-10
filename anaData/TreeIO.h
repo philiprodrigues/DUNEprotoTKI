@@ -74,6 +74,19 @@ namespace TreeIO
   //--------------------------------------- anaRec ---------------------------------------
   int reco_beam_type = -999;
 
+  Double_t        reco_beam_startX;
+  Double_t        reco_beam_startY;
+  Double_t        reco_beam_startZ;
+  Double_t        reco_beam_trackDirX;
+  Double_t        reco_beam_trackDirY;
+  Double_t        reco_beam_trackDirZ;
+  Double_t        true_beam_startX;
+  Double_t        true_beam_startY;
+  Double_t        true_beam_startZ;
+  Double_t        true_beam_startDirX;
+  Double_t        true_beam_startDirY;
+  Double_t        true_beam_startDirZ;
+
   //======================================= Truth Hist out =======================================
  TH1I * hbeamType = 0x0;
  TH1I * hndaughter = 0x0;
@@ -92,6 +105,10 @@ namespace TreeIO
  TH1D *hpn = 0x0;
 
 //======================================= Rec Hist out =======================================
+ TH1I * hBeamPosCut = 0x0;
+
+//==============================================================================
+//==============================================================================
 
 TTree * GetOutputTree(TList * lout, const TString tag)
 {
@@ -249,12 +266,28 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
   //--------------------------------------- anaRec ---------------------------------------
   tree->SetBranchAddress("reco_beam_type", &reco_beam_type);
 
+  tree->SetBranchAddress("reco_beam_startX", &reco_beam_startX);
+  tree->SetBranchAddress("reco_beam_trackDirX", &reco_beam_trackDirX);
+  tree->SetBranchAddress("true_beam_startX", &true_beam_startX);
+  tree->SetBranchAddress("true_beam_startDirX", &true_beam_startDirX);
+
+  tree->SetBranchAddress("reco_beam_startY", &reco_beam_startY);
+  tree->SetBranchAddress("reco_beam_trackDirY", &reco_beam_trackDirY);
+  tree->SetBranchAddress("true_beam_startY", &true_beam_startY);
+  tree->SetBranchAddress("true_beam_startDirY", &true_beam_startDirY);
+
+  tree->SetBranchAddress("reco_beam_startZ", &reco_beam_startZ);
+  tree->SetBranchAddress("reco_beam_trackDirZ", &reco_beam_trackDirZ);
+  tree->SetBranchAddress("true_beam_startZ", &true_beam_startZ);
+  tree->SetBranchAddress("true_beam_startDirZ", &true_beam_startDirZ);
+
   return tree;
 }
 
 void IniRecHist(TList * lout, const TString tag)
 {
   hbeamType = new TH1I("h0beamType"+tag,  "", 30, -4.5, 25.5); lout->Add(hbeamType);
+  hBeamPosCut = new TH1I("h1BeamPosCut"+tag, "", 4, -0.5, 3.5); lout->Add(hBeamPosCut);
 }
 
 void IniTruthHist(TList * lout, const TString tag)
@@ -282,6 +315,56 @@ void IniTruthHist(TList * lout, const TString tag)
 
    const double Hbin[]={0.000000, 0.025000, 0.050000, 0.075000, 0.100000, 0.125000, 0.150000, 0.175000, 0.200000, 0.225000, 0.250000, 0.275000, 0.300000, 0.350000, 0.400000, 0.450000, 0.500000, 0.550000, 0.600000, 0.650000, 0.700000, 0.800000, 1.000000, 1.200000, 2.000000};
    hpn = new TH1D("pn","", sizeof(Hbin)/sizeof(double)-1, Hbin); lout->Add(hpn);
+}
+
+bool manual_beamPos_mc(const double beam_startX, const double beam_startY, const double beam_startZ, const double beam_dirX, const double beam_dirY,   const double beam_dirZ, const double true_dirX,   const double true_dirY, const double true_dirZ,   const double true_startX, const double true_startY, const double true_startZ) 
+{
+  //https://github.com/calcuttj/PionStudies/blob/master/rDataFrame/eventSelection.h
+
+  //For MC from Owen Goodwins studies
+  const double xlow = -3.,  xhigh = 7.,  ylow = -8.,  yhigh = 7.;
+  const double zlow = 27.5,  zhigh = 32.5,  coslow = 0.93;
+
+  const double projectX = (true_startX + -1*true_startZ*(true_dirX/true_dirZ) );
+  const double projectY = (true_startY + -1*true_startZ*(true_dirY/true_dirZ) );
+  const double cos = true_dirX*beam_dirX + true_dirY*beam_dirY + true_dirZ*beam_dirZ;
+
+  if ( (beam_startX - projectX) < xlow )
+    return false;
+  
+  if ( (beam_startX - projectX) > xhigh )
+    return false;
+
+  if ( (beam_startY - projectY) < ylow )
+    return false;
+
+  if ( (beam_startY - projectY) > yhigh )
+    return false;
+  
+  if (beam_startZ < zlow || zhigh < beam_startZ)
+    return false;
+  
+  if ( cos < coslow)
+    return false;
+
+  return true;
+}
+
+bool GetBeamPosCut()
+{
+  //https://github.com/calcuttj/PionStudies/blob/master/rDataFrame/eventSelection.C
+  /*
+.Define("passBeamCut", manual_beamPos_mc, 
+            {"reco_beam_startX", "reco_beam_startY", "reco_beam_startZ",
+             "reco_beam_trackDirX", "reco_beam_trackDirY", "reco_beam_trackDirZ",
+             "true_beam_startDirX", "true_beam_startDirY", "true_beam_startDirZ",
+             "true_beam_startX", "true_beam_startY", "true_beam_startZ"})
+   */
+
+  return manual_beamPos_mc(reco_beam_startX, reco_beam_startY, reco_beam_startZ,
+                           reco_beam_trackDirX, reco_beam_trackDirY, reco_beam_trackDirZ,
+                           true_beam_startDirX, true_beam_startDirY, true_beam_startDirZ,
+                           true_beam_startX, true_beam_startY, true_beam_startZ);
 }
 
 }

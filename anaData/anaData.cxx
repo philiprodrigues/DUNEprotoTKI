@@ -218,6 +218,14 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       continue;
     }
 
+    //2. beam position MC cut
+    //bool manual_beamPos_mc(const double beam_startX, const double beam_startY, const double beam_startZ, const double beam_dirX, const double beam_dirY,   const double beam_dirZ, const double true_dirX,   const double true_dirY, const double true_dirZ,   const double true_startX, const double true_startY, const double true_startZ) 
+    const bool kPassBeamPos = GetBeamPosCut();
+    hBeamPosCut->Fill(kPassBeamPos);
+    if(!kPassBeamPos){
+      continue;
+    }
+
     tout->Fill();
   }
 
