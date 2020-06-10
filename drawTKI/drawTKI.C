@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
 
   TList * lout= new TList;
 
-  TFile *fin = new TFile(Form("../anaData/output/outanaData_%s_TrackingProton.root", tag.Data()));
+  TFile *fin = new TFile(Form("../anaData/output/outanaData_%s_TrackingProton_anaTruth.root", tag.Data()));
   if(!fin->IsOpen()){
     cout<<"fin not open!"<<endl;
     exit(1);

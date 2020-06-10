@@ -9,10 +9,13 @@ compile_exe.sh anaData -lstyle -I../style  -L../style || return 1
 
 #exit
 
-for ii in 0 1
+for kPiZero in 0 1
 do 
-    for jj in 0 1
+    for kProton in 0 1
     do
-        ./anaData $ii $jj >seeana${ii}${jj}.log 
+        for kTruth in 1
+        do
+            ./anaData $kPiZero $kProton $kTruth >seeana${kPiZero}${kProton}${kTruth}.log 
+        done
     done
 done

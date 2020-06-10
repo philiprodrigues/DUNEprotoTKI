@@ -242,7 +242,7 @@ int main(int argc, char* argv[])
   tag+=(kProton?"Proton":"PiPlus");
   TList * lout= new TList;
 
-  const TString inputfn = Form("../anaData/output/outanaData_%s.root", tag.Data());
+  const TString inputfn = Form("../anaData/output/outanaData_%s_anaTruth.root", tag.Data());
   TFile *fin = new TFile(inputfn);
   if(!fin->IsOpen()){
     cout<<"fin not open!"<<endl;
