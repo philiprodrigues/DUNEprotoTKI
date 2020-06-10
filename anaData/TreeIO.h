@@ -87,6 +87,7 @@ namespace TreeIO
  TH1D *hdpt = 0x0;
  TH1D *hpn = 0x0;
 
+//======================================= Rec Hist out =======================================
 
 TTree * GetOutputTree(TList * lout, const TString tag)
 {
@@ -238,6 +239,11 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
   tree->SetBranchAddress("true_daughter_nProton", &true_daughter_nProton);
 
   return tree;
+}
+
+void IniRecHist(TList * lout, const TString tag)
+{
+
 }
 
 void IniTruthHist(TList * lout, const TString tag)

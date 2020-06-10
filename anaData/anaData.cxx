@@ -183,12 +183,49 @@ double getRecFromTruth(const int targetid, const vector<int> * reco_daughter_PFP
   return rpm;
 }
 
-TString anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
+void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
 {
   const bool kPiZero = tag.Contains("MPiZero");
   const bool kTrackingProton = !tag.Contains("TrackingPiPlus");
 
-  cout<<"\n\n                       Running kPiZero "<<kPiZero<<" TrackingProton "<<kTrackingProton<<endl<<endl;
+  cout<<"\n\n                       Running anaRec kPiZero "<<kPiZero<<" TrackingProton "<<kTrackingProton<<endl<<endl;
+
+  TTree * tree = GetInputTree("pionana/beamana");
+  //test TTree * tout = GetOutputTree(lout, tag);
+  IniRecHist(lout, tag);
+
+  //==============================================================================================================
+  int ientry = 0;
+  while(tree->GetEntry(ientry)){
+    if(ientry%100000==0){
+      printf("myEntries %d\n", ientry);
+    }
+    
+    if(nEntryToStop>0){
+      if(ientry>=nEntryToStop){
+        printf("\n\n\n************************  Breaking after %d entries ***********************************************\n\n", nEntryToStop);
+        break;
+      }
+    }
+
+    //do it before the loop continues for any reason
+    ientry++;
+   
+    //===========================================================
+
+  }
+
+  cout<<"All entries "<<ientry<<endl;
+
+  drawHist(lout, "output", tag);
+}
+
+void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
+{
+  const bool kPiZero = tag.Contains("MPiZero");
+  const bool kTrackingProton = !tag.Contains("TrackingPiPlus");
+
+  cout<<"\n\n                       Running anaTruth kPiZero "<<kPiZero<<" TrackingProton "<<kTrackingProton<<endl<<endl;
 
   TTree * tree = GetInputTree("pionana/beamana");
   TTree * tout = GetOutputTree(lout, tag);
@@ -307,8 +344,6 @@ TString anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
   cout<<"All entries "<<ientry<<endl;
 
   drawHist(lout, "output", tag);
-
-  return tag;
 }
 
 int main(int argc, char * argv[])
@@ -343,6 +378,9 @@ int main(int argc, char * argv[])
 
   if(kTruth){
     anaTruth(lout, tag);
+  }
+  else{
+    anaRec(lout, tag);
   }
 
   TFile * fout = new TFile(Form("output/outanaData_%s.root", tag.Data()),"recreate");
