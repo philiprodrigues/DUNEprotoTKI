@@ -67,6 +67,9 @@ int getParticleType(const int pdg)
   else if(pdg==-13){
     type = gkMuPlus;
   }
+  else if(pdg==13){
+    type = gkMuMinus;
+  }
   else if(pdg==321||pdg==-321||pdg==310||pdg==130){
     type = gkKaon;
   }
@@ -105,6 +108,12 @@ void getProfileX(TList *lout)
       TH1D * hcdf = 0x0;
       const double thres = 5;
       TH2D * hnor = style::NormalHist(htmp, hpdf, hcdf, thres, true);
+      hpdf->SetYTitle("p.d.f.");
+      hcdf->SetYTitle("c.d.f.");
+      hpro->SetYTitle("purity");
+      hpdf->SetTitle(htmp->GetName());
+      hcdf->SetTitle(htmp->GetName());
+      hpro->SetTitle(htmp->GetName());
       lout->Add(hpdf);
       lout->Add(hcdf);
       lout->Add(hnor); 
@@ -127,14 +136,16 @@ void drawHist(TList *lout, const TString outdir, const TString tag, const bool k
 
     TH2 * htmp = dynamic_cast<TH2 *>(hh);
     const bool k2d = htmp;
+    gStyle->SetOptTitle(1);
     if(k2d){
       gStyle->SetOptStat(0);
       //gStyle->SetOptStat("enou");
     }
     else{
-      gStyle->SetOptStat("enoum");
+      gStyle->SetOptStat("eoum");
       gStyle->SetStatColor(0);
       gStyle->SetStatStyle(0);
+      gStyle->SetStatY(0.9);
     }
 
     const TString tag = hh->GetName();
@@ -157,7 +168,7 @@ void drawHist(TList *lout, const TString outdir, const TString tag, const bool k
     }
     else{
       if(tag.Contains("profileX")){
-        hh->SetMaximum(1.05);
+        hh->SetMaximum(0.25);
         dopt = "hist";
       }
       else if(tag.Contains("pdf") || tag.Contains("cdf")){

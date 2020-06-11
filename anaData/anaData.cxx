@@ -165,6 +165,17 @@ vector<TLorentzVector> getFSTruth(const bool kPiZero, const vector<int> * pdg, c
   return vec;
 }
 
+int getNTrack(const vector<int> * reco_daughter_allTrack_ID)
+{
+  int ntrack = 0;
+  for(unsigned int ii=0; ii<reco_daughter_allTrack_ID->size(); ii++){
+    if((*reco_daughter_allTrack_ID)[ii] != -1) {
+      ntrack++;
+    }
+  }
+  return ntrack;
+}
+
 double getRecFromTruth(const int targetid, const vector<int> * reco_daughter_PFP_true_byHits_ID, const vector<int> * reco_daughter_allTrack_ID, const vector<double> * reco_daughter_allTrack_momByRange, const vector<vector<double> >* reco_daughter_allTrack_calibrated_dEdX_SCE, vector<double> &endE, vector<double> &startE, const vector<double>* reco_daughter_allTrack_Chi2_proton, const vector<int>* reco_daughter_allTrack_Chi2_ndof, double & chi2, double & ndof)
 {
   double rpm = -999;
@@ -217,6 +228,16 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     ientry++;
    
     //===========================================================
+    //calculate before any cuts! Only filled after ALL cuts!
+    const int TruthBeamType = getParticleType(true_beam_PDG);
+    int  protonIdx = -999, piplusIdx = -999;
+    bool tmpkSig = false;
+    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, true_beam_daughter_PDG, true_beam_daughter_startPx, true_beam_daughter_startPy, true_beam_daughter_startPz, 0x0, nproton, nneutron, nPiZero, ngamma, maxgammaEnergy, protonIdx, piplusIdx, tmpkSig);
+    kSignal = tmpkSig && (true_beam_PDG==211);
+
+    //const bool varTrueBeam = (true_beam_PDG==211);
+    const bool varSignal = kSignal;
+    //===========================================================
    
     /*
     //0. true beam particle //only for cross checking previous study
@@ -246,90 +267,98 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     }
     hBeamEndZPass->Fill(true);
 
+    //3. Beam dEdx cut
+    vector<double> startE, endE;
+    nBeamdEdxCls = getdEdx( *reco_beam_calibrated_dEdX, startE, endE);
+    if(nBeamdEdxCls<6){
+      continue;
+    }
+
+    beamStartE0 = startE[0];
+    beamStartE1 = startE[1];
+    beamStartE2 = startE[2];
+    beamStartE3 = startE[3];
+    beamStartE4 = startE[4];
+    beamStartE5 = startE[5];
+    beamLastE0 = endE[0];
+    beamLastE1 = endE[1];
+    beamLastE2 = endE[2];
+    beamLastE3 = endE[3];
+    beamLastE4 = endE[4];
+    beamLastE5 = endE[5];
+
+    hSignalVsStartE0->Fill(beamStartE0, varSignal);
+    hSignalVsStartE1->Fill(beamStartE1, varSignal);
+    hSignalVsStartE2->Fill(beamStartE2, varSignal);
+
+    hSignalVsLastE0->Fill(beamLastE0, varSignal);
+    hSignalVsLastE1->Fill(beamLastE1, varSignal);
+    hSignalVsLastE2->Fill(beamLastE2, varSignal);
+
+    hSignalVsStartE3->Fill(beamStartE3, varSignal);
+    hSignalVsLastE3->Fill(beamLastE3, varSignal);
+
+    hSignalVsStartE4->Fill(beamStartE4, varSignal);
+    hSignalVsLastE4->Fill(beamLastE4, varSignal);
+
+    hSignalVsStartE5->Fill(beamStartE5, varSignal);
+    hSignalVsLastE5->Fill(beamLastE5, varSignal);
+  
+    //both need to tune for different energy
+    if(beamStartE5>3 || beamStartE4>3){//entrance dEdx at 1 GeV
+      continue;
+    }
+    if(beamLastE5>10 || beamLastE4>10){//Bragg peak
+      continue;
+    }
+
+    hSigAfterVsStartE0->Fill(beamStartE0, varSignal);
+    hSigAfterVsStartE1->Fill(beamStartE1, varSignal);
+    hSigAfterVsStartE2->Fill(beamStartE2, varSignal);
+
+    hSigAfterVsLastE0->Fill(beamLastE0, varSignal);
+    hSigAfterVsLastE1->Fill(beamLastE1, varSignal);
+    hSigAfterVsLastE2->Fill(beamLastE2, varSignal);
+
+    hSigAfterVsStartE3->Fill(beamStartE3, varSignal);
+    hSigAfterVsLastE3->Fill(beamLastE3, varSignal);
+    hSigAfterVsStartE4->Fill(beamStartE4, varSignal);
+    hSigAfterVsLastE4->Fill(beamLastE4, varSignal);
+    hSigAfterVsStartE5->Fill(beamStartE5, varSignal);
+    hSigAfterVsLastE5->Fill(beamLastE5, varSignal);
+
     //============== Benchmark after ALL cuts !!! =========================
     //benchmark
-    const bool varTrueBeam = (true_beam_PDG==211);
-    const bool varSignal = kSignal;
 
-    const int TruthBeamType = getParticleType(true_beam_PDG);
     hTruthBeamType->Fill(TruthBeamType);
-
-    int  protonIdx = -999, piplusIdx = -999;
-    kSignal = false;
-    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, true_beam_daughter_PDG, true_beam_daughter_startPx, true_beam_daughter_startPy, true_beam_daughter_startPz, 0x0, nproton, nneutron, nPiZero, ngamma, maxgammaEnergy, protonIdx, piplusIdx, kSignal);
     hTruthSignal->Fill(kSignal);
    
     //======================= NO cuts below ========================
+    //9. n track daughter
+    nTrack = getNTrack(reco_daughter_allTrack_ID);
+    hBeamNTrack->Fill(nTrack);
+    hSignalVsBeamNTrack->Fill(nTrack, varSignal);
+    hSigAfterVsBeamNTrack->Fill(nTrack, varSignal);
     /*
-    //3. n track daughter
-    hBeamNTrack->Fill(reco_beam_nTrackDaughters);
-    hSignalVsBeamNTrack->Fill(reco_beam_nTrackDaughters, varSignal);
-    hTrueBeamVsBeamNTrack->Fill(reco_beam_nTrackDaughters, varTrueBeam);
+    if(kPiZero){
+      if(nTrack!=1){
+        continue;
+      }
+    }
+    else{
+      if(nTrack!=2){
+        continue;
+      }
+    }
     */
 
     //--- to test
     //Fill kSignal vs variable; the reason for kSignal but not kBeam is the signal is interacting pion, not all pions. Directly choose matrix to optimize for it
     hBeamLen->Fill(reco_beam_len);
-    hTrueBeamVsLen->Fill(reco_beam_len, varTrueBeam);
     hSignalVsLen->Fill(reco_beam_len, varSignal);
+    hSigAfterVsLen->Fill(reco_beam_len, varSignal);
 
-    vector<double> startE, endE;
-    nBeamdEdxCls = getdEdx( *reco_beam_calibrated_dEdX, startE, endE);
-    if(nBeamdEdxCls>=6){
-      beamStartE0 = startE[0];
-      beamStartE1 = startE[1];
-      beamStartE2 = startE[2];
-      beamStartE3 = startE[3];
-      beamStartE4 = startE[4];
-      beamStartE5 = startE[5];
-      beamLastE0 = endE[0];
-      beamLastE1 = endE[1];
-      beamLastE2 = endE[2];
-      beamLastE3 = endE[3];
-      beamLastE4 = endE[4];
-      beamLastE5 = endE[5];
-
-      hTrueBeamVsStartE0->Fill(beamStartE0, varTrueBeam);
-      hTrueBeamVsStartE1->Fill(beamStartE1, varTrueBeam);
-      hTrueBeamVsStartE2->Fill(beamStartE2, varTrueBeam);
-      hTrueBeamVsStartE3->Fill(beamStartE3, varTrueBeam);
-      hTrueBeamVsStartE4->Fill(beamStartE4, varTrueBeam);
-      hTrueBeamVsStartE5->Fill(beamStartE5, varTrueBeam);
-      hTrueBeamVsLastE0->Fill(beamLastE0, varTrueBeam);
-      hTrueBeamVsLastE1->Fill(beamLastE1, varTrueBeam);
-      hTrueBeamVsLastE2->Fill(beamLastE2, varTrueBeam);
-      hTrueBeamVsLastE3->Fill(beamLastE3, varTrueBeam);
-      hTrueBeamVsLastE4->Fill(beamLastE4, varTrueBeam);
-      hTrueBeamVsLastE5->Fill(beamLastE5, varTrueBeam);
-
-      hSignalVsStartE0->Fill(beamStartE0, varSignal);
-      hSignalVsStartE1->Fill(beamStartE1, varSignal);
-      hSignalVsStartE2->Fill(beamStartE2, varSignal);
-      hSignalVsStartE3->Fill(beamStartE3, varSignal);
-      hSignalVsStartE4->Fill(beamStartE4, varSignal);
-      hSignalVsStartE5->Fill(beamStartE5, varSignal);
-      hSignalVsLastE0->Fill(beamLastE0, varSignal);
-      hSignalVsLastE1->Fill(beamLastE1, varSignal);
-      hSignalVsLastE2->Fill(beamLastE2, varSignal);
-      hSignalVsLastE3->Fill(beamLastE3, varSignal);
-      hSignalVsLastE4->Fill(beamLastE4, varSignal);
-      hSignalVsLastE5->Fill(beamLastE5, varSignal);
-    }
-    else{
-      beamStartE0 = -999; 
-      beamStartE1 = -999; 
-      beamStartE2 = -999; 
-      beamStartE3 = -999; 
-      beamStartE4 = -999; 
-      beamStartE5 = -999; 
-      beamLastE0 = -999; 
-      beamLastE1 = -999; 
-      beamLastE2 = -999; 
-      beamLastE3 = -999; 
-      beamLastE4 = -999; 
-      beamLastE5 = -999; 
-    }
-
+    //============= done loop
     
     tout->Fill();
   }
