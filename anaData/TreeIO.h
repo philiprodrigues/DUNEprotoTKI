@@ -135,19 +135,33 @@ namespace TreeIO
  TH1I * hTruthBeamType = 0x0;
  TH1I * hTruthSignal = 0x0;
 
- TH2D * hScoreVsLen = 0x0;
- TH2D * hScoreVsStartE0 = 0x0;
- TH2D * hScoreVsStartE1 = 0x0;
- TH2D * hScoreVsStartE2 = 0x0;
- TH2D * hScoreVsStartE3 = 0x0;
- TH2D * hScoreVsStartE4 = 0x0;
- TH2D * hScoreVsStartE5 = 0x0;
- TH2D * hScoreVsLastE0 = 0x0;
- TH2D * hScoreVsLastE1 = 0x0;
- TH2D * hScoreVsLastE2 = 0x0;
- TH2D * hScoreVsLastE3 = 0x0;
- TH2D * hScoreVsLastE4 = 0x0;
- TH2D * hScoreVsLastE5 = 0x0;
+ TH2D * hSignalVsLen = 0x0;
+ TH2D * hSignalVsStartE0 = 0x0;
+ TH2D * hSignalVsStartE1 = 0x0;
+ TH2D * hSignalVsStartE2 = 0x0;
+ TH2D * hSignalVsStartE3 = 0x0;
+ TH2D * hSignalVsStartE4 = 0x0;
+ TH2D * hSignalVsStartE5 = 0x0;
+ TH2D * hSignalVsLastE0 = 0x0;
+ TH2D * hSignalVsLastE1 = 0x0;
+ TH2D * hSignalVsLastE2 = 0x0;
+ TH2D * hSignalVsLastE3 = 0x0;
+ TH2D * hSignalVsLastE4 = 0x0;
+ TH2D * hSignalVsLastE5 = 0x0;
+
+ TH2D * hTrueBeamVsLen = 0x0;
+ TH2D * hTrueBeamVsStartE0 = 0x0;
+ TH2D * hTrueBeamVsStartE1 = 0x0;
+ TH2D * hTrueBeamVsStartE2 = 0x0;
+ TH2D * hTrueBeamVsStartE3 = 0x0;
+ TH2D * hTrueBeamVsStartE4 = 0x0;
+ TH2D * hTrueBeamVsStartE5 = 0x0;
+ TH2D * hTrueBeamVsLastE0 = 0x0;
+ TH2D * hTrueBeamVsLastE1 = 0x0;
+ TH2D * hTrueBeamVsLastE2 = 0x0;
+ TH2D * hTrueBeamVsLastE3 = 0x0;
+ TH2D * hTrueBeamVsLastE4 = 0x0;
+ TH2D * hTrueBeamVsLastE5 = 0x0;
 //==============================================================================
 //==============================================================================
 
@@ -370,20 +384,35 @@ void IniRecHist(TList * lout, const TString tag)
   const double Sigmax = 1.5;
   const int nE = 20;
   const double Emin = 0;
-  const double Emax = 10;
-  hScoreVsLen = new TH2D("p0ScoreVsLen"+tag,"", nlen, lenmin, lenmax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLen);
-  hScoreVsStartE0 = new TH2D("p0ScoreVsStartE0"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE0);
-  hScoreVsStartE1 = new TH2D("p0ScoreVsStartE1"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE1);
-  hScoreVsStartE2 = new TH2D("p0ScoreVsStartE2"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE2);
-  hScoreVsStartE3 = new TH2D("p0ScoreVsStartE3"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE3);
-  hScoreVsStartE4 = new TH2D("p0ScoreVsStartE4"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE4);
-  hScoreVsStartE5 = new TH2D("p0ScoreVsStartE5"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE5);
-  hScoreVsLastE0 = new TH2D("p0ScoreVsLastE0"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE0);
-  hScoreVsLastE1 = new TH2D("p0ScoreVsLastE1"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE1);
-  hScoreVsLastE2 = new TH2D("p0ScoreVsLastE2"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE2);
-  hScoreVsLastE3 = new TH2D("p0ScoreVsLastE3"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE3);
-  hScoreVsLastE4 = new TH2D("p0ScoreVsLastE4"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE4);
-  hScoreVsLastE5 = new TH2D("p0ScoreVsLastE5"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE5);
+  const double lastEmax = 30;
+  const double startEmax = 10;
+
+  hSignalVsLen = new TH2D("p0SignalVsLen"+tag,"", nlen, lenmin, lenmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsLen);
+  hSignalVsStartE0 = new TH2D("p0SignalVsStartE0"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsStartE0);
+  hSignalVsStartE1 = new TH2D("p0SignalVsStartE1"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsStartE1);
+  hSignalVsStartE2 = new TH2D("p0SignalVsStartE2"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsStartE2);
+  hSignalVsStartE3 = new TH2D("p0SignalVsStartE3"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsStartE3);
+  hSignalVsStartE4 = new TH2D("p0SignalVsStartE4"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsStartE4);
+  hSignalVsStartE5 = new TH2D("p0SignalVsStartE5"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsStartE5);
+  hSignalVsLastE0 = new TH2D("p0SignalVsLastE0"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsLastE0);
+  hSignalVsLastE1 = new TH2D("p0SignalVsLastE1"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsLastE1);
+  hSignalVsLastE2 = new TH2D("p0SignalVsLastE2"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsLastE2);
+  hSignalVsLastE3 = new TH2D("p0SignalVsLastE3"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsLastE3);
+  hSignalVsLastE4 = new TH2D("p0SignalVsLastE4"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsLastE4);
+  hSignalVsLastE5 = new TH2D("p0SignalVsLastE5"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hSignalVsLastE5);
+  hTrueBeamVsLen = new TH2D("p0TrueBeamVsLen"+tag,"", nlen, lenmin, lenmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsLen);
+  hTrueBeamVsStartE0 = new TH2D("p0TrueBeamVsStartE0"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsStartE0);
+  hTrueBeamVsStartE1 = new TH2D("p0TrueBeamVsStartE1"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsStartE1);
+  hTrueBeamVsStartE2 = new TH2D("p0TrueBeamVsStartE2"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsStartE2);
+  hTrueBeamVsStartE3 = new TH2D("p0TrueBeamVsStartE3"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsStartE3);
+  hTrueBeamVsStartE4 = new TH2D("p0TrueBeamVsStartE4"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsStartE4);
+  hTrueBeamVsStartE5 = new TH2D("p0TrueBeamVsStartE5"+tag,"", nE, Emin, startEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsStartE5);
+  hTrueBeamVsLastE0 = new TH2D("p0TrueBeamVsLastE0"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsLastE0);
+  hTrueBeamVsLastE1 = new TH2D("p0TrueBeamVsLastE1"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsLastE1);
+  hTrueBeamVsLastE2 = new TH2D("p0TrueBeamVsLastE2"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsLastE2);
+  hTrueBeamVsLastE3 = new TH2D("p0TrueBeamVsLastE3"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsLastE3);
+  hTrueBeamVsLastE4 = new TH2D("p0TrueBeamVsLastE4"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsLastE4);
+  hTrueBeamVsLastE5 = new TH2D("p0TrueBeamVsLastE5"+tag,"", nE, Emin, lastEmax, nSig, Sigmin, Sigmax); lout->Add(hTrueBeamVsLastE5);
 }
 
 void IniTruthHist(TList * lout, const TString tag)

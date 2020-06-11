@@ -246,10 +246,11 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     hBeamEndZPass->Fill(true);
 
     //Fill kSignal vs variable; the reason for kSignal but not kBeam is the signal is interacting pion, not all pions. Directly choose matrix to optimize for it
-    const double varScore = kSignal;
-
+    const bool varTrueBeam = (true_beam_PDG==211);
+    const bool varSignal = kSignal;
     hBeamLen->Fill(reco_beam_len);
-    hScoreVsLen->Fill(reco_beam_len, varScore);
+    hTrueBeamVsLen->Fill(reco_beam_len, varTrueBeam);
+    hSignalVsLen->Fill(reco_beam_len, varSignal);
 
     vector<double> startE, endE;
     nBeamdEdxCls = getdEdx( *reco_beam_calibrated_dEdX, startE, endE);
@@ -267,18 +268,31 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       beamLastE4 = endE[4];
       beamLastE5 = endE[5];
 
-      hScoreVsStartE0->Fill(beamStartE0, varScore);
-      hScoreVsStartE1->Fill(beamStartE1, varScore);
-      hScoreVsStartE2->Fill(beamStartE2, varScore);
-      hScoreVsStartE3->Fill(beamStartE3, varScore);
-      hScoreVsStartE4->Fill(beamStartE4, varScore);
-      hScoreVsStartE5->Fill(beamStartE5, varScore);
-      hScoreVsLastE0->Fill(beamLastE0, varScore);
-      hScoreVsLastE1->Fill(beamLastE1, varScore);
-      hScoreVsLastE2->Fill(beamLastE2, varScore);
-      hScoreVsLastE3->Fill(beamLastE3, varScore);
-      hScoreVsLastE4->Fill(beamLastE4, varScore);
-      hScoreVsLastE5->Fill(beamLastE5, varScore);
+      hTrueBeamVsStartE0->Fill(beamStartE0, varTrueBeam);
+      hTrueBeamVsStartE1->Fill(beamStartE1, varTrueBeam);
+      hTrueBeamVsStartE2->Fill(beamStartE2, varTrueBeam);
+      hTrueBeamVsStartE3->Fill(beamStartE3, varTrueBeam);
+      hTrueBeamVsStartE4->Fill(beamStartE4, varTrueBeam);
+      hTrueBeamVsStartE5->Fill(beamStartE5, varTrueBeam);
+      hTrueBeamVsLastE0->Fill(beamLastE0, varTrueBeam);
+      hTrueBeamVsLastE1->Fill(beamLastE1, varTrueBeam);
+      hTrueBeamVsLastE2->Fill(beamLastE2, varTrueBeam);
+      hTrueBeamVsLastE3->Fill(beamLastE3, varTrueBeam);
+      hTrueBeamVsLastE4->Fill(beamLastE4, varTrueBeam);
+      hTrueBeamVsLastE5->Fill(beamLastE5, varTrueBeam);
+
+      hSignalVsStartE0->Fill(beamStartE0, varSignal);
+      hSignalVsStartE1->Fill(beamStartE1, varSignal);
+      hSignalVsStartE2->Fill(beamStartE2, varSignal);
+      hSignalVsStartE3->Fill(beamStartE3, varSignal);
+      hSignalVsStartE4->Fill(beamStartE4, varSignal);
+      hSignalVsStartE5->Fill(beamStartE5, varSignal);
+      hSignalVsLastE0->Fill(beamLastE0, varSignal);
+      hSignalVsLastE1->Fill(beamLastE1, varSignal);
+      hSignalVsLastE2->Fill(beamLastE2, varSignal);
+      hSignalVsLastE3->Fill(beamLastE3, varSignal);
+      hSignalVsLastE4->Fill(beamLastE4, varSignal);
+      hSignalVsLastE5->Fill(beamLastE5, varSignal);
     }
     else{
       beamStartE0 = -999; 
