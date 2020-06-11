@@ -217,6 +217,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     ientry++;
    
     //===========================================================
+   
     /*
     //0. true beam particle //only for cross checking previous study
     if(true_beam_PDG != 211 && true_beam_PDG != -13){
@@ -224,20 +225,20 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     }
     */
 
-    //1. primary beam type 
+    //0. primary beam type 
     hRecoBeamType->Fill(reco_beam_type);
     if(reco_beam_type!=13){//13: Pandora "track like"
       continue;
     }
 
-    //2. beam position MC cut
+    //1. beam position MC cut
     const bool kBeamPosPass = GetBeamPosPass();
     hBeamPosPass->Fill(kBeamPosPass);
     if(!kBeamPosPass){
       continue;
     }
 
-    //3. APA3 
+    //2. APA3 
     hBeamEndZ->Fill(reco_beam_endZ);
     if(reco_beam_endZ>=226){
       hBeamEndZPass->Fill(false);
@@ -245,9 +246,29 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     }
     hBeamEndZPass->Fill(true);
 
-    //Fill kSignal vs variable; the reason for kSignal but not kBeam is the signal is interacting pion, not all pions. Directly choose matrix to optimize for it
+    //============== Benchmark after ALL cuts !!! =========================
+    //benchmark
     const bool varTrueBeam = (true_beam_PDG==211);
     const bool varSignal = kSignal;
+
+    const int TruthBeamType = getParticleType(true_beam_PDG);
+    hTruthBeamType->Fill(TruthBeamType);
+
+    int  protonIdx = -999, piplusIdx = -999;
+    kSignal = false;
+    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, true_beam_daughter_PDG, true_beam_daughter_startPx, true_beam_daughter_startPy, true_beam_daughter_startPz, 0x0, nproton, nneutron, nPiZero, ngamma, maxgammaEnergy, protonIdx, piplusIdx, kSignal);
+    hTruthSignal->Fill(kSignal);
+   
+    //======================= NO cuts below ========================
+    /*
+    //3. n track daughter
+    hBeamNTrack->Fill(reco_beam_nTrackDaughters);
+    hSignalVsBeamNTrack->Fill(reco_beam_nTrackDaughters, varSignal);
+    hTrueBeamVsBeamNTrack->Fill(reco_beam_nTrackDaughters, varTrueBeam);
+    */
+
+    //--- to test
+    //Fill kSignal vs variable; the reason for kSignal but not kBeam is the signal is interacting pion, not all pions. Directly choose matrix to optimize for it
     hBeamLen->Fill(reco_beam_len);
     hTrueBeamVsLen->Fill(reco_beam_len, varTrueBeam);
     hSignalVsLen->Fill(reco_beam_len, varSignal);
@@ -309,22 +330,14 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       beamLastE5 = -999; 
     }
 
-    //benchmark
-    const int TruthBeamType = getParticleType(true_beam_PDG);
-    hTruthBeamType->Fill(TruthBeamType);
-
-    int  protonIdx = -999, piplusIdx = -999;
-    kSignal = false;
-    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, true_beam_daughter_PDG, true_beam_daughter_startPx, true_beam_daughter_startPy, true_beam_daughter_startPz, 0x0, nproton, nneutron, nPiZero, ngamma, maxgammaEnergy, protonIdx, piplusIdx, kSignal);
-    hTruthSignal->Fill(kSignal);
-
+    
     tout->Fill();
   }
 
   cout<<"All entries "<<ientry<<endl;
 
   getProfileX(lout);
-  drawHist(lout, "output", tag);
+  drawHist(lout, "output", tag, true);
 }
 
 void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)

@@ -112,7 +112,7 @@ void getProfileX(TList *lout)
   }
 }
 
-void drawHist(TList *lout, const TString outdir, const TString tag)
+void drawHist(TList *lout, const TString outdir, const TString tag, const bool kfast=false)
 {
   TCanvas * c1 = new TCanvas("c1"+tag, "", 1200, 800);
   style::PadSetup(c1);
@@ -157,7 +157,7 @@ void drawHist(TList *lout, const TString outdir, const TString tag)
     }
     else{
       if(tag.Contains("profileX")){
-        hh->SetMaximum(1);
+        hh->SetMaximum(1.05);
         dopt = "hist";
       }
       else if(tag.Contains("pdf") || tag.Contains("cdf")){
@@ -167,8 +167,11 @@ void drawHist(TList *lout, const TString outdir, const TString tag)
     hh->Draw(dopt);
 
     c1->Print(outdir+"/"+tag+".png");
-    c1->Print(outdir+"/"+tag+".pdf");
-    c1->Print(outdir+"/"+tag+".eps");
+
+    if(!kfast){
+      c1->Print(outdir+"/"+tag+".pdf");
+      c1->Print(outdir+"/"+tag+".eps");
+    }
   }
 
 }
