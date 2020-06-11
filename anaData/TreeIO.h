@@ -39,6 +39,20 @@ namespace TreeIO
   double chi2;
   double ndof;
 
+  int nBeamdEdxCls;
+  double beamLastE0; 
+  double beamLastE1; 
+  double beamLastE2; 
+  double beamLastE3; 
+  double beamLastE4; 
+  double beamLastE5;
+  double beamStartE0; 
+  double beamStartE1; 
+  double beamStartE2; 
+  double beamStartE3; 
+  double beamStartE4; 
+  double beamStartE5; 
+
   //======================================= tree in =======================================
   //--------------------------------------- anaTruth ---------------------------------------
   //true_beam_daughter_PDG->size()
@@ -88,6 +102,11 @@ namespace TreeIO
   Double_t        true_beam_startDirZ;
 
   Double_t        reco_beam_endZ;
+
+  Double_t        reco_beam_len;
+
+  vector<double>  *reco_beam_calibrated_dEdX;
+
   //======================================= Truth Hist out =======================================
  TH1I * hbeamType = 0x0;
  TH1I * hndaughter = 0x0;
@@ -106,10 +125,29 @@ namespace TreeIO
  TH1D *hpn = 0x0;
 
 //======================================= Rec Hist out =======================================
+ TH1I * hRecoBeamType = 0x0;
  TH1I * hBeamPosPass = 0x0;
  TH1D * hBeamEndZ = 0x0;
  TH1I * hBeamEndZPass = 0x0;
 
+ TH1D * hBeamLen = 0x0;
+
+ TH1I * hTruthBeamType = 0x0;
+ TH1I * hTruthSignal = 0x0;
+
+ TH2D * hScoreVsLen = 0x0;
+ TH2D * hScoreVsStartE0 = 0x0;
+ TH2D * hScoreVsStartE1 = 0x0;
+ TH2D * hScoreVsStartE2 = 0x0;
+ TH2D * hScoreVsStartE3 = 0x0;
+ TH2D * hScoreVsStartE4 = 0x0;
+ TH2D * hScoreVsStartE5 = 0x0;
+ TH2D * hScoreVsLastE0 = 0x0;
+ TH2D * hScoreVsLastE1 = 0x0;
+ TH2D * hScoreVsLastE2 = 0x0;
+ TH2D * hScoreVsLastE3 = 0x0;
+ TH2D * hScoreVsLastE4 = 0x0;
+ TH2D * hScoreVsLastE5 = 0x0;
 //==============================================================================
 //==============================================================================
 
@@ -154,6 +192,24 @@ TTree * GetOutputTree(TList * lout, const TString tag)
   tout->Branch("startE5",&startE5);
   tout->Branch("chi2",&chi2);
   tout->Branch("ndof",&ndof);
+
+  tout->Branch("nBeamdEdxCls",&nBeamdEdxCls);
+  tout->Branch("beamLastE0",&beamLastE0);
+  tout->Branch("beamLastE1",&beamLastE1);
+  tout->Branch("beamLastE2",&beamLastE2);
+  tout->Branch("beamLastE3",&beamLastE3);
+  tout->Branch("beamLastE4",&beamLastE4);
+  tout->Branch("beamLastE5",&beamLastE5);
+  tout->Branch("beamStartE0",&beamStartE0);
+  tout->Branch("beamStartE1",&beamStartE1);
+  tout->Branch("beamStartE2",&beamStartE2);
+  tout->Branch("beamStartE3",&beamStartE3);
+  tout->Branch("beamStartE4",&beamStartE4);
+  tout->Branch("beamStartE5",&beamStartE5);
+
+  //save input info
+  tout->Branch("true_beam_PDG",&true_beam_PDG);
+  tout->Branch("reco_beam_len",&reco_beam_len);
 
   return tout;
 }
@@ -286,17 +342,48 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
 
   tree->SetBranchAddress("reco_beam_endZ", &reco_beam_endZ);
 
+  tree->SetBranchAddress("reco_beam_len", &reco_beam_len);
+  tree->SetBranchAddress("reco_beam_calibrated_dEdX", &reco_beam_calibrated_dEdX);
+
   return tree;
 }
 
 void IniRecHist(TList * lout, const TString tag)
 {
-  hbeamType = new TH1I("h0beamType"+tag,  "", 30, -4.5, 25.5); lout->Add(hbeamType);
+  hRecoBeamType = new TH1I("h0RecoBeamType"+tag,  "", 30, -4.5, 25.5); lout->Add(hRecoBeamType);
 
   hBeamPosPass = new TH1I("h1BeamPosPass"+tag, "", 4, -0.5, 3.5); lout->Add(hBeamPosPass);
 
   hBeamEndZ = new TH1D("h2BeamEndZ"+tag,"",50, 0, 500); lout->Add(hBeamEndZ);
   hBeamEndZPass = new TH1I("h2BeamEndZPass"+tag,"",4, -0.5, 3.5); lout->Add(hBeamEndZPass);
+
+  const int nlen = 10;
+  const double lenmin = 0;
+  const double lenmax = 250;
+  hBeamLen = new TH1D("h2BeamLen"+tag,"",nlen, lenmin, lenmax); lout->Add(hBeamLen);
+
+  hTruthBeamType = new TH1I("t0TruthBeamType"+tag,  "", 20, -0.5, 19.5); lout->Add(hTruthBeamType);
+  hTruthSignal = new TH1I("t1TruthSignal"+tag,  "", 3, -0.5, 2.5); lout->Add(hTruthSignal);
+
+  const int nSig = 2;
+  const double Sigmin = -0.5;
+  const double Sigmax = 1.5;
+  const int nE = 20;
+  const double Emin = 0;
+  const double Emax = 10;
+  hScoreVsLen = new TH2D("p0ScoreVsLen"+tag,"", nlen, lenmin, lenmax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLen);
+  hScoreVsStartE0 = new TH2D("p0ScoreVsStartE0"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE0);
+  hScoreVsStartE1 = new TH2D("p0ScoreVsStartE1"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE1);
+  hScoreVsStartE2 = new TH2D("p0ScoreVsStartE2"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE2);
+  hScoreVsStartE3 = new TH2D("p0ScoreVsStartE3"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE3);
+  hScoreVsStartE4 = new TH2D("p0ScoreVsStartE4"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE4);
+  hScoreVsStartE5 = new TH2D("p0ScoreVsStartE5"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsStartE5);
+  hScoreVsLastE0 = new TH2D("p0ScoreVsLastE0"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE0);
+  hScoreVsLastE1 = new TH2D("p0ScoreVsLastE1"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE1);
+  hScoreVsLastE2 = new TH2D("p0ScoreVsLastE2"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE2);
+  hScoreVsLastE3 = new TH2D("p0ScoreVsLastE3"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE3);
+  hScoreVsLastE4 = new TH2D("p0ScoreVsLastE4"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE4);
+  hScoreVsLastE5 = new TH2D("p0ScoreVsLastE5"+tag,"", nE, Emin, Emax, nSig, Sigmin, Sigmax); lout->Add(hScoreVsLastE5);
 }
 
 void IniTruthHist(TList * lout, const TString tag)

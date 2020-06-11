@@ -36,7 +36,10 @@ enum{
   gkHyperon,
 
   //14
-  gkNucleus
+  gkNucleus,
+
+  //15
+  gkNotCaredType
 };
 
 
@@ -58,10 +61,13 @@ int getParticleType(const int pdg)
   else if(pdg==-11){
     type = gkPositron;
   }
+  else if(pdg==11){
+    type = gkElectron;
+  }
   else if(pdg==-13){
     type = gkMuPlus;
   }
-  else if(pdg==321||pdg==-321||pdg==310){
+  else if(pdg==321||pdg==-321||pdg==310||pdg==130){
     type = gkKaon;
   }
   else if(pdg==2112){
@@ -70,7 +76,7 @@ int getParticleType(const int pdg)
   else if(pdg==22){
     type = gkGamma;
   }
-  else if(pdg==14){
+  else if(pdg==14 || pdg==-14 || pdg==12 || pdg==-12){
     type = gkNeutrino;
   }
   else if(pdg==3122||pdg==3212||pdg==3222){
@@ -80,13 +86,31 @@ int getParticleType(const int pdg)
     type = gkNucleus;
   }
   else{
-    cout<<"getParticleType unknown pdg "<<pdg<<endl;
-    exit(1);
+    cout<<"getParticleType unknown pdg "<<pdg<<endl; exit(1);
+    //type = gkNotCaredType;
   }
 
   return type;
 }
 
+void getProfileX(TList *lout)
+{
+  const int nhist = lout->GetSize();//the size will increase
+  for(int ii=0; ii<nhist; ii++){
+    TH2D * htmp = dynamic_cast<TH2D *>( lout->At(ii) );
+    if(htmp){
+      TH1D * hpro = htmp->ProfileX(Form("%s_profileX", htmp->GetName())); lout->Add(hpro);
+
+      TH1D * hpdf = 0x0;
+      TH1D * hcdf = 0x0;
+      const double thres = 5;
+      TH2D * hnor = style::NormalHist(htmp, hpdf, hcdf, thres, true);
+      lout->Add(hpdf);
+      lout->Add(hcdf);
+      lout->Add(hnor); 
+    }
+  }
+}
 
 void drawHist(TList *lout, const TString outdir, const TString tag)
 {
@@ -118,10 +142,27 @@ void drawHist(TList *lout, const TString outdir, const TString tag)
     hh->UseCurrentStyle();//can't go after setmarkersize
     hh->SetMaximum(hh->GetBinContent(hh->GetMaximumBin())*1.3);
     hh->SetMinimum(0);
-    //hh->Draw(k2d?"box":"text hist");
     hh->UseCurrentStyle();
     hh->SetMarkerSize(3);
-    hh->Draw("text hist");
+    TString dopt="text hist";
+    if(k2d){
+      if(tag.Contains("profileX")){
+        dopt = "box";
+      }
+      else if(tag.Contains("nor")){
+        dopt = "colz";
+      }
+    }
+    else{
+      if(tag.Contains("profileX")){
+        hh->SetMaximum(0.4);
+        dopt = "hist E";
+      }
+      else if(tag.Contains("pdf") || tag.Contains("cdf")){
+        dopt = "hist";
+      }
+    }
+    hh->Draw(dopt);
 
     c1->Print(outdir+"/"+tag+".png");
     c1->Print(outdir+"/"+tag+".pdf");

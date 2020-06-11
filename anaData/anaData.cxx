@@ -21,6 +21,18 @@ using namespace AnaFunctions;
 using namespace AnaUtils;
 using namespace TreeIO;
 
+int getdEdx(const vector<double> arraydEdx, vector<double> &startE, vector<double> &endE)
+{
+  const unsigned int ncls = arraydEdx.size();
+  for(unsigned int kk=0; kk<ncls; kk++){
+    startE.push_back(arraydEdx[kk]);
+
+    const double endpe = arraydEdx[ncls-1-kk];
+    endE.push_back(endpe);
+  }
+  return ncls;
+}
+
 vector<TLorentzVector> getFSTruth(const bool kPiZero, const vector<int> * pdg, const vector<double> * px, const vector<double> * py, const vector<double> * pz, TH1I * htype, int &nproton, int &nneutron, int &nPiZero, int & ngamma, double & maxgammaEnergy, int & protonIdx, int & piplusIdx, bool & kSignal)
 {
   //if kPiZero false, return 1piplus (1st and 2nd protons)
@@ -143,7 +155,7 @@ vector<TLorentzVector> getFSTruth(const bool kPiZero, const vector<int> * pdg, c
     }
   }
 
-  if(kSignal){
+  if(kSignal && htype){
     const int nbt = bufferType.size();
     for(int ii=0; ii<nbt; ii++){
       htype->Fill(bufferType[ii]);
@@ -167,15 +179,8 @@ double getRecFromTruth(const int targetid, const vector<int> * reco_daughter_PFP
         if(!reco_daughter_allTrack_calibrated_dEdX_SCE){
           printf("reco_daughter_allTrack_calibrated_dEdX_SCE null!\n"); exit(1);
         }
-        const vector<double> arraydEdx = (*reco_daughter_allTrack_calibrated_dEdX_SCE)[ii];
-        const unsigned int ncls = arraydEdx.size();
-        for(unsigned int kk=0; kk<ncls; kk++){
-          const double endpe = arraydEdx[ncls-1-kk];
-          endE.push_back(endpe);
 
-          startE.push_back(arraydEdx[kk]);
-          //printf("test %d %d %f\n", ii, kk, endpe);
-        }
+        getdEdx( (*reco_daughter_allTrack_calibrated_dEdX_SCE)[ii], startE, endE);
         //printf("==================================\n");
       }
     }
@@ -212,8 +217,15 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     ientry++;
    
     //===========================================================
+    /*
+    //0. true beam particle //only for cross checking previous study
+    if(true_beam_PDG != 211 && true_beam_PDG != -13){
+      continue;
+    }
+    */
+
     //1. primary beam type 
-    hbeamType->Fill(reco_beam_type);
+    hRecoBeamType->Fill(reco_beam_type);
     if(reco_beam_type!=13){//13: Pandora "track like"
       continue;
     }
@@ -233,11 +245,71 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     }
     hBeamEndZPass->Fill(true);
 
+    //Fill kSignal vs variable; the reason for kSignal but not kBeam is the signal is interacting pion, not all pions. Directly choose matrix to optimize for it
+    const double varScore = kSignal;
+
+    hBeamLen->Fill(reco_beam_len);
+    hScoreVsLen->Fill(reco_beam_len, varScore);
+
+    vector<double> startE, endE;
+    nBeamdEdxCls = getdEdx( *reco_beam_calibrated_dEdX, startE, endE);
+    if(nBeamdEdxCls>=6){
+      beamStartE0 = startE[0];
+      beamStartE1 = startE[1];
+      beamStartE2 = startE[2];
+      beamStartE3 = startE[3];
+      beamStartE4 = startE[4];
+      beamStartE5 = startE[5];
+      beamLastE0 = endE[0];
+      beamLastE1 = endE[1];
+      beamLastE2 = endE[2];
+      beamLastE3 = endE[3];
+      beamLastE4 = endE[4];
+      beamLastE5 = endE[5];
+
+      hScoreVsStartE0->Fill(beamStartE0, varScore);
+      hScoreVsStartE1->Fill(beamStartE1, varScore);
+      hScoreVsStartE2->Fill(beamStartE2, varScore);
+      hScoreVsStartE3->Fill(beamStartE3, varScore);
+      hScoreVsStartE4->Fill(beamStartE4, varScore);
+      hScoreVsStartE5->Fill(beamStartE5, varScore);
+      hScoreVsLastE0->Fill(beamLastE0, varScore);
+      hScoreVsLastE1->Fill(beamLastE1, varScore);
+      hScoreVsLastE2->Fill(beamLastE2, varScore);
+      hScoreVsLastE3->Fill(beamLastE3, varScore);
+      hScoreVsLastE4->Fill(beamLastE4, varScore);
+      hScoreVsLastE5->Fill(beamLastE5, varScore);
+    }
+    else{
+      beamStartE0 = -999; 
+      beamStartE1 = -999; 
+      beamStartE2 = -999; 
+      beamStartE3 = -999; 
+      beamStartE4 = -999; 
+      beamStartE5 = -999; 
+      beamLastE0 = -999; 
+      beamLastE1 = -999; 
+      beamLastE2 = -999; 
+      beamLastE3 = -999; 
+      beamLastE4 = -999; 
+      beamLastE5 = -999; 
+    }
+
+    //benchmark
+    const int TruthBeamType = getParticleType(true_beam_PDG);
+    hTruthBeamType->Fill(TruthBeamType);
+
+    int  protonIdx = -999, piplusIdx = -999;
+    kSignal = false;
+    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, true_beam_daughter_PDG, true_beam_daughter_startPx, true_beam_daughter_startPy, true_beam_daughter_startPz, 0x0, nproton, nneutron, nPiZero, ngamma, maxgammaEnergy, protonIdx, piplusIdx, kSignal);
+    hTruthSignal->Fill(kSignal);
+
     tout->Fill();
   }
 
   cout<<"All entries "<<ientry<<endl;
 
+  getProfileX(lout);
   drawHist(lout, "output", tag);
 }
 
