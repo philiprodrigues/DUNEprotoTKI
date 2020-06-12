@@ -343,6 +343,11 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     //const bool varTrueBeam = (true_beam_PDG==211);
     const bool varSignal = kSignal;
     //===========================================================
+    //0. true beam particle //"In data the beam Instrumentation is able to filter for these events but is not inside the MC" so read data file has this
+    if(true_beam_PDG != 211 && true_beam_PDG != -13){
+      continue;
+    }
+
     //1. Beam dEdx cut
     hBeamLen->Fill(reco_beam_len);
     hSignalVsLen->Fill(reco_beam_len, varSignal);
@@ -352,12 +357,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     }
     //-> now signal purity 167/5274 = 3.2%, 2627 pi+ beam, 1947 e+
 
-    /*
-    //0. true beam particle //only for cross checking previous study
-    if(true_beam_PDG != 211 && true_beam_PDG != -13){
-      continue;
-    }
-    */
+   
 
     //0. primary beam type 
     hRecoBeamType->Fill(reco_beam_type);
