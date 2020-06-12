@@ -147,11 +147,18 @@ bool cutBeamdEdx(const double varSignal)
   return true;
 }
 
-vector<TLorentzVector> getFSTruth(const bool kPiZero, const vector<int> * pdg, const vector<double> * px, const vector<double> * py, const vector<double> * pz, TH1I * htype, int &nproton, int &nneutron, int &nPiZero, int & ngamma, double & maxgammaEnergy, int & protonIdx, int & piplusIdx, bool & kSignal)
+vector<TLorentzVector> getFSTruth(const bool kPiZero, TH1I * htype, int & protonIdx, int & piplusIdx, bool & tmpksig)
 {
   //if kPiZero false, return 1piplus (1st and 2nd protons)
   //if kPiZero true, return (1st PiZero) (1st and 2nd protons)
   //only use kPiZero in the end at filling
+
+  const vector<int> * pdg = true_beam_daughter_PDG;
+  const vector<double> * px = true_beam_daughter_startPx;
+  const vector<double> * py = true_beam_daughter_startPy;
+  const vector<double> * pz = true_beam_daughter_startPz;
+
+  //===
 
   const int np = pdg->size();
   nproton = 0;
@@ -244,7 +251,7 @@ vector<TLorentzVector> getFSTruth(const bool kPiZero, const vector<int> * pdg, c
   maxgammaEnergy = gammamom[leadinggammaID];
   //==========================================
 
-  //fill vec regardless of kSignal
+  //fill vec regardless of tmpksig
   vector<TLorentzVector> vec;
   vec.push_back(kPiZero?pPiZero:pPiplus);
   vec.push_back(pProton);
@@ -255,21 +262,21 @@ vector<TLorentzVector> getFSTruth(const bool kPiZero, const vector<int> * pdg, c
   }
 
   //Now need kPiZero
-  kSignal = false;
+  tmpksig = false;
   if(nproton>=1 && npartialBkg ==0){
     if(kPiZero){
       if(nPiZero>0 && npiplus==0){
-        kSignal = true;
+        tmpksig = true;
       }
     }
     else{//PiPlus
       if(npiplus==1 && nPiZero==0){
-        kSignal = true;
+        tmpksig = true;
       }
     }
   }
 
-  if(kSignal && htype){
+  if(tmpksig && htype){
     const int nbt = bufferType.size();
     for(int ii=0; ii<nbt; ii++){
       htype->Fill(bufferType[ii]);
@@ -279,7 +286,7 @@ vector<TLorentzVector> getFSTruth(const bool kPiZero, const vector<int> * pdg, c
   return vec;
 }
 
-int getNTrack(const vector<int> * reco_daughter_allTrack_ID)
+int getNTrack()
 {
   int ntrack = 0;
   for(unsigned int ii=0; ii<reco_daughter_allTrack_ID->size(); ii++){
@@ -290,13 +297,21 @@ int getNTrack(const vector<int> * reco_daughter_allTrack_ID)
   return ntrack;
 }
 
-double getRecFromTruth(const int targetid, const vector<int> * reco_daughter_PFP_true_byHits_ID, const vector<int> * reco_daughter_allTrack_ID, const vector<double> * reco_daughter_allTrack_momByRange, const vector<vector<double> >* reco_daughter_allTrack_calibrated_dEdX_SCE, vector<double> &endE, vector<double> &startE, const vector<double>* reco_daughter_allTrack_Chi2_proton, const vector<int>* reco_daughter_allTrack_Chi2_ndof, double & chi2, double & ndof)
+double getRecFromTruth(const int targetid, const vector<double> * mombyrange)
 {
+  vector<double> lastE, startE;
+
   double rpm = -999;
+  int counter = 0;
   for(unsigned int ii = 0; ii < reco_daughter_PFP_true_byHits_ID->size(); ii++){
     if((*reco_daughter_PFP_true_byHits_ID)[ii] == targetid) {
       if((*reco_daughter_allTrack_ID)[ii] != -1) {
-        rpm = (*reco_daughter_allTrack_momByRange)[ii];
+
+        if(counter){
+          printf("rpm already set!! %f %f %d\n", rpm, (*mombyrange)[ii], counter); //exit(1);
+        }
+
+        rpm = (*mombyrange)[ii];
 
         chi2 = (*reco_daughter_allTrack_Chi2_proton)[ii];
         ndof = (*reco_daughter_allTrack_Chi2_ndof)[ii];
@@ -305,11 +320,34 @@ double getRecFromTruth(const int targetid, const vector<int> * reco_daughter_PFP
           printf("reco_daughter_allTrack_calibrated_dEdX_SCE null!\n"); exit(1);
         }
 
-        GetdEdx( (*reco_daughter_allTrack_calibrated_dEdX_SCE)[ii], startE, endE, 0);
+        GetdEdx( (*reco_daughter_allTrack_calibrated_dEdX_SCE)[ii], startE, lastE, 0);
         //printf("==================================\n");
+
+        lastTruncatedMeanE = GetTruncatedMean(lastE, 2, 11, 0.0, 1.0);
+        startTruncatedMeanE = GetTruncatedMean(startE, 2, 11, 0.4, 0.95);
+
+        counter++;
       }
     }
   }
+
+  ndEdxCls = lastE.size();
+  if(ndEdxCls>=6){
+    lastE0 = lastE[0];
+    lastE1 = lastE[1];
+    lastE2 = lastE[2];
+    lastE3 = lastE[3];
+    lastE4 = lastE[4];
+    lastE5 = lastE[5];
+    
+    startE0 = startE[0];
+    startE1 = startE[1];
+    startE2 = startE[2];
+    startE3 = startE[3];
+    startE4 = startE[4];
+    startE5 = startE[5];
+  }
+
   return rpm;
 }
 
@@ -346,7 +384,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     const int TruthBeamType = GetParticleType(true_beam_PDG);
     int  protonIdx = -999, piplusIdx = -999;
     bool tmpkSig = false;
-    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, true_beam_daughter_PDG, true_beam_daughter_startPx, true_beam_daughter_startPy, true_beam_daughter_startPz, 0x0, nproton, nneutron, nPiZero, ngamma, maxgammaEnergy, protonIdx, piplusIdx, tmpkSig);
+    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, 0x0, protonIdx, piplusIdx, tmpkSig);
 
     finPimomentum = vecPiP[0].P();
     finProtonmomentum = vecPiP[1].P();
@@ -405,7 +443,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
    
     //9. n track daughter
-    nTrack = getNTrack(reco_daughter_allTrack_ID);
+    nTrack = getNTrack();
     hBeamNTrack->Fill(nTrack);
     hSignalVsBeamNTrack->Fill(nTrack, varSignal);
     if(kPiZero){
@@ -494,7 +532,7 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
 
     int  protonIdx = -999, piplusIdx = -999;
     kSignal = false;
-    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, true_beam_daughter_PDG, true_beam_daughter_startPx, true_beam_daughter_startPy, true_beam_daughter_startPz, hselectedDaughterType, nproton, nneutron, nPiZero, ngamma, maxgammaEnergy, protonIdx, piplusIdx, kSignal);
+    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, hselectedDaughterType, protonIdx, piplusIdx, kSignal);
     hnexcl->Fill(kSignal);
 
     finPimomentum = vecPiP[0].P();
@@ -521,17 +559,17 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
       hpn->Fill(pn);
     }
 
-    vector<double>* reco_daughter_allTrack_momByRange = 0x0;
+    vector<double>* mombyrange = 0x0;
     bool kDoTracking = false;
     double * recmomentum = 0x0;
 
     if(kTrackingProton){
-      reco_daughter_allTrack_momByRange = reco_daughter_allTrack_momByRange_proton;
+      mombyrange = reco_daughter_allTrack_momByRange_proton;
       kDoTracking = (protonIdx>=0);
       recmomentum = &recProtonmomentum;
     }
     else{
-      reco_daughter_allTrack_momByRange = reco_daughter_allTrack_momByRange_muon;
+      mombyrange = reco_daughter_allTrack_momByRange_muon;
       kDoTracking = (piplusIdx>=0);
       recmomentum = &recPiPlusmomentum;
     }
@@ -541,26 +579,7 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
     //has true proton
     if(kDoTracking){
       const int targetIdx = (*true_beam_daughter_ID)[protonIdx];
-      vector<double> lastE, startE;
-      (*recmomentum) = getRecFromTruth(targetIdx, reco_daughter_PFP_true_byHits_ID, reco_daughter_allTrack_ID, reco_daughter_allTrack_momByRange, reco_daughter_allTrack_calibrated_dEdX_SCE, lastE, startE, reco_daughter_allTrack_Chi2_proton, reco_daughter_allTrack_Chi2_ndof, chi2, ndof);
-
-      ndEdxCls = lastE.size();
-      if(ndEdxCls>=6){
-        lastE0 = lastE[0];
-        lastE1 = lastE[1];
-        lastE2 = lastE[2];
-        lastE3 = lastE[3];
-        lastE4 = lastE[4];
-        lastE5 = lastE[5];
-
-        startE0 = startE[0];
-        startE1 = startE[1];
-        startE2 = startE[2];
-        startE3 = startE[3];
-        startE4 = startE[4];
-        startE5 = startE[5];
-      }
-
+      (*recmomentum) = getRecFromTruth(targetIdx, mombyrange);
       tout->Fill();
     }
   }

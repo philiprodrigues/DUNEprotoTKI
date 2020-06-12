@@ -188,6 +188,7 @@ void DrawHist(TList *lout, const TString outdir, const TString tag, const bool k
 
 }
 
+
 double GetTruncatedMean(vector<double> array, const int nsample)
 {
   const double fracTrun = 0.6;
@@ -204,6 +205,30 @@ double GetTruncatedMean(vector<double> array, const int nsample)
   return sum / (nterm+1E-10);
 }
 
+double GetTruncatedMean(const vector<double> tmparr, const unsigned int nsample0, const unsigned int nsample1, const double lowerFrac, const double upperFrac)
+{
+  //for proton Bragg peak use 0.4-0.95. Seen by CDF of startE using signal proton samples in drawTracking
+
+  if(nsample1>=tmparr.size()){
+    return -999;
+  }
+
+  vector<double> array;
+  for(unsigned int ii=nsample0; ii<=nsample1; ii++){
+    array.push_back(tmparr[ii]);
+  }
+
+  std::sort(array.begin(), array.end());
+
+  double sum =0.0;
+
+  const int iter0 = array.size()*lowerFrac;
+  const int iter1 = array.size()*upperFrac;
+
+  for(int ii=iter0; ii< iter1; ii++){
+    sum += array[ii];
+  }
+  return sum / ( (iter1-iter0)+1E-10);
 }
 
 
@@ -222,6 +247,8 @@ void GetdEdx(const vector<double> arraydEdx, vector<double> &startE, vector<doub
     const double endpe = arraydEdx[ncls-1-kk];
     endE.push_back(endpe);
   }
+}
+
 }
 
 

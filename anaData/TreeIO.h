@@ -36,6 +36,8 @@ namespace TreeIO
   double startE3; 
   double startE4; 
   double startE5; 
+  double lastTruncatedMeanE;
+  double startTruncatedMeanE;
   double chi2;
   double ndof;
 
@@ -225,6 +227,8 @@ TTree * GetOutputTree(TList * lout, const TString tag)
   tout->Branch("startE3",&startE3);
   tout->Branch("startE4",&startE4);
   tout->Branch("startE5",&startE5);
+  tout->Branch("startTruncatedMeanE",&startTruncatedMeanE);
+  tout->Branch("lastTruncatedMeanE",&lastTruncatedMeanE);
   tout->Branch("chi2",&chi2);
   tout->Branch("ndof",&ndof);
 

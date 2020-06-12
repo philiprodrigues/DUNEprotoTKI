@@ -65,6 +65,9 @@ void drawHist(TList* lout)
     }
     else{
       gStyle->SetOptStat("enuomr");
+      gStyle->SetStatColor(0);
+      gStyle->SetStatStyle(0);
+      gStyle->SetStatY(0.9);
     }
 
     hh->UseCurrentStyle();
@@ -146,9 +149,9 @@ void drawTracking(TList *lout, const TString pretag, const TString ESCcut="")
   const TString ytitRes = Form("#it{p}_{%s}^{rec}/#it{p}_{%s}^{true}-1", trackingparticle.Data(), trackingparticle.Data());
   getHist(varResPtrue, xtitPtrue, ytitRes, tree, hResPtrueRec);
 
-  TH1D * hdummypdf = 0x0; 
-  TH1D * hdummycdf = 0x0; 
-  TH2D * hResPtrueRecNor = style::NormalHist(hResPtrueRec, hdummypdf, hdummycdf, 0, true); lout->Add(hResPtrueRecNor); 
+  TH1D * hResPtrueRecpdf = 0x0; 
+  TH1D * hResPtrueReccdf = 0x0; 
+  TH2D * hResPtrueRecNor = style::NormalHist(hResPtrueRec, hResPtrueRecpdf, hResPtrueReccdf, 0, true); lout->Add(hResPtrueRecNor); lout->Add(hResPtrueRecpdf); lout->Add(hResPtrueReccdf);
 
   TH1D * hResRecSignal = new TH1D(pretag+"hResRecSignal",nclCut+"&& kSignal", nRes*3, Resmin, Resmax); lout->Add(hResRecSignal);
   TH1D * hResRecBeam = new TH1D(pretag+"hResRecBeam",nclCut, nRes*3, Resmin, Resmax); lout->Add(hResRecBeam);
@@ -170,7 +173,9 @@ void drawTracking(TList *lout, const TString pretag, const TString ESCcut="")
   TH2D * hResChi2 = new TH2D(pretag+"hResChi2", nclCut, nChi2, Chi2min, Chi2max, nRes, Resmin, Resmax); lout->Add(hResChi2);
   const TString varResChi2 = Form("(%s/%s)-1 : chi2/ndof", varPrec.Data(), varPtrue.Data());
   getHist(varResChi2, xtitChi2, ytitRes, tree, hResChi2);
-  TH2D * hResChi2Nor = style::NormalHist(hResChi2, hdummypdf, hdummycdf, 0, true); lout->Add(hResChi2Nor); 
+  TH1D * hResChi2pdf = 0x0;
+  TH1D * hResChi2cdf = 0x0;
+  TH2D * hResChi2Nor = style::NormalHist(hResChi2, hResChi2pdf, hResChi2cdf, 0, true); lout->Add(hResChi2Nor); lout->Add(hResChi2pdf); lout->Add(hResChi2cdf);
   //========================================================================
   const int nE = 40;
   const double Emin = 0;
@@ -215,7 +220,9 @@ void drawTracking(TList *lout, const TString pretag, const TString ESCcut="")
     const TString varResE = Form("(%s/%s)-1 : ", varPrec.Data(), varPtrue.Data())+varstartE;
     getHist(varResE, xtitstartE+" (MeV/cm)", ytitRes, tree, hResEsRec[ii]);
 
-    TH2D * hResERecNor = style::NormalHist(hResEsRec[ii], hdummypdf, hdummycdf, 0, true); lout->Add(hResERecNor); 
+    TH1D * hResERecpdf = 0x0;
+    TH1D * hResEReccdf = 0x0;
+    TH2D * hResERecNor = style::NormalHist(hResEsRec[ii], hResERecpdf, hResEReccdf, 0, true); lout->Add(hResERecNor); lout->Add(hResERecpdf); lout->Add(hResEReccdf);
   }
 
 }
