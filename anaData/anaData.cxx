@@ -323,8 +323,13 @@ double getRecFromTruth(const int targetid, const vector<double> * mombyrange)
         GetdEdx( (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii], startE, lastE, 0);
         //printf("==================================\n");
 
-        AnaIO::lastTruncatedMeanE = GetTruncatedMean(lastE, 2, 11, 0.0, 1.0);
-        AnaIO::startTruncatedMeanE = GetTruncatedMean(startE, 2, 11, 0.4, 0.95);
+        const int iter0 = 2;
+        AnaIO::lastTruncatedMeanE = GetTruncatedMean(lastE, iter0, iter0-1+10, 0.0, 1.0);
+        AnaIO::startTruncatedMeanE10 = GetTruncatedMean(startE, iter0, iter0-1+10, 0.4, 0.95);
+        AnaIO::startTruncatedMeanE20 = GetTruncatedMean(startE, iter0, iter0-1+20, 0.4, 0.95);
+        AnaIO::startTruncatedMeanE30 = GetTruncatedMean(startE, iter0, iter0-1+30, 0.4, 0.95);
+        AnaIO::startTruncatedMeanE40 = GetTruncatedMean(startE, iter0, iter0-1+40, 0.4, 0.95);
+        AnaIO::startTruncatedMeanE50 = GetTruncatedMean(startE, iter0, iter0-1+50, 0.4, 0.95);
 
         counter++;
       }

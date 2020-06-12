@@ -196,18 +196,34 @@ void drawTracking(TList *lout, const TString pretag, const TString ESCcut="")
   TH1D * hstartE5 = new TH1D(pretag+"h4startE5", nclCut, nE, Emin, Emax); lout->Add(hstartE5);
   TH1D * hstartEs[]={hstartE0, hstartE1, hstartE2, hstartE3, hstartE4, hstartE5};
 
-  TH2D * hResE0Rec = new TH2D(pretag+"h5ResE0Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResE0Rec);
-  TH2D * hResE1Rec = new TH2D(pretag+"h5ResE1Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResE1Rec);
-  TH2D * hResE2Rec = new TH2D(pretag+"h5ResE2Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResE2Rec);
-  TH2D * hResE3Rec = new TH2D(pretag+"h5ResE3Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResE3Rec);
-  TH2D * hResE4Rec = new TH2D(pretag+"h5ResE4Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResE4Rec);
-  TH2D * hResE5Rec = new TH2D(pretag+"h5ResE5Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResE5Rec);
-  TH2D * hResEsRec[]={hResE0Rec, hResE1Rec, hResE2Rec, hResE3Rec, hResE4Rec, hResE5Rec};
+  TH1D * hstartTruncatedMeanE10 = new TH1D(pretag+"h4startTruncatedMeanE10", nclCut, nE, Emin, Emax); lout->Add(hstartTruncatedMeanE10);
+  TH1D * hstartTruncatedMeanE20 = new TH1D(pretag+"h4startTruncatedMeanE20", nclCut, nE, Emin, Emax); lout->Add(hstartTruncatedMeanE20);
+  TH1D * hstartTruncatedMeanE30 = new TH1D(pretag+"h4startTruncatedMeanE30", nclCut, nE, Emin, Emax); lout->Add(hstartTruncatedMeanE30); 
+  TH1D * hstartTruncatedMeanE40 = new TH1D(pretag+"h4startTruncatedMeanE40", nclCut, nE, Emin, Emax); lout->Add(hstartTruncatedMeanE40);
+  TH1D * hstartTruncatedMeanE50 = new TH1D(pretag+"h4startTruncatedMeanE50", nclCut, nE, Emin, Emax); lout->Add(hstartTruncatedMeanE50);
+  TH1D * hstartTruncatedMeanEs[]={0x0, hstartTruncatedMeanE10, hstartTruncatedMeanE20, hstartTruncatedMeanE30, hstartTruncatedMeanE40, hstartTruncatedMeanE50};
+
+  TH2D * hResstartE0Rec = new TH2D(pretag+"h5ResstartE0Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResstartE0Rec);
+  TH2D * hResstartE1Rec = new TH2D(pretag+"h5ResstartE1Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResstartE1Rec);
+  TH2D * hResstartE2Rec = new TH2D(pretag+"h5ResstartE2Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResstartE2Rec);
+  TH2D * hResstartE3Rec = new TH2D(pretag+"h5ResstartE3Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResstartE3Rec);
+  TH2D * hResstartE4Rec = new TH2D(pretag+"h5ResstartE4Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResstartE4Rec);
+  TH2D * hResstartE5Rec = new TH2D(pretag+"h5ResstartE5Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResstartE5Rec);
+  TH2D * hResstartEsRec[]={hResstartE0Rec, hResstartE1Rec, hResstartE2Rec, hResstartE3Rec, hResstartE4Rec, hResstartE5Rec};
+
+  TH2D * hResstartTruncatedMeanE10Rec = new TH2D(pretag+"h5ResstartTruncatedMeanE10Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResstartTruncatedMeanE10Rec);
+  TH2D * hResstartTruncatedMeanE20Rec = new TH2D(pretag+"h5ResstartTruncatedMeanE20Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResstartTruncatedMeanE20Rec);
+  TH2D * hResstartTruncatedMeanE30Rec = new TH2D(pretag+"h5ResstartTruncatedMeanE30Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResstartTruncatedMeanE30Rec);
+  TH2D * hResstartTruncatedMeanE40Rec = new TH2D(pretag+"h5ResstartTruncatedMeanE40Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResstartTruncatedMeanE40Rec);
+  TH2D * hResstartTruncatedMeanE50Rec = new TH2D(pretag+"h5ResstartTruncatedMeanE50Rec", nclCut, nE, Emin, Emax, nRes, Resmin, Resmax); lout->Add(hResstartTruncatedMeanE50Rec);
+  TH2D * hResstartTruncatedMeanEsRec[]={0x0, hResstartTruncatedMeanE10Rec, hResstartTruncatedMeanE20Rec, hResstartTruncatedMeanE30Rec, hResstartTruncatedMeanE40Rec, hResstartTruncatedMeanE50Rec};
 
   const TString varlastEbase="lastE";
   const TString varstartEbase="startE";
+  const TString varstartTruncatedMeanEbase="startTruncatedMeanE";
   const TString xtitlastEbase="end #it{E}";
   const TString xtitstartEbase="start #it{E}";
+  const TString xtitstartTruncatedMeanEbase="Truncated Mean (40-95%) of start #it{E} with Nodes 2 to 2 +";
   for(unsigned int ii=0; ii<6; ii++){
     const TString varlastE = varlastEbase+Form("%d",ii);
     const TString varstartE = varstartEbase+Form("%d",ii);
@@ -217,12 +233,26 @@ void drawTracking(TList *lout, const TString pretag, const TString ESCcut="")
     getHist(varlastE, xtitlastE+" (MeV/cm)", ytitN, tree, hlastEs[ii]);
     getHist(varstartE, xtitstartE+" (MeV/cm)", ytitN, tree, hstartEs[ii]);
 
-    const TString varResE = Form("(%s/%s)-1 : ", varPrec.Data(), varPtrue.Data())+varstartE;
-    getHist(varResE, xtitstartE+" (MeV/cm)", ytitRes, tree, hResEsRec[ii]);
+    const TString varResstartE = Form("(%s/%s)-1 : ", varPrec.Data(), varPtrue.Data())+varstartE;
+    getHist(varResstartE, xtitstartE+" (MeV/cm)", ytitRes, tree, hResstartEsRec[ii]);
 
-    TH1D * hResERecpdf = 0x0;
-    TH1D * hResEReccdf = 0x0;
-    TH2D * hResERecNor = style::NormalHist(hResEsRec[ii], hResERecpdf, hResEReccdf, 0, true); lout->Add(hResERecNor); lout->Add(hResERecpdf); lout->Add(hResEReccdf);
+    TH1D * hResstartERecpdf = 0x0;
+    TH1D * hResstartEReccdf = 0x0;
+    TH2D * hResstartERecNor = style::NormalHist(hResstartEsRec[ii], hResstartERecpdf, hResstartEReccdf, 0, true); lout->Add(hResstartERecNor); lout->Add(hResstartERecpdf); lout->Add(hResstartEReccdf);
+
+    if(ii){
+      const TString varstartTruncatedMeanE = varstartTruncatedMeanEbase+Form("%d",ii*10);
+      const TString xtitstartTruncatedMeanE = xtitstartTruncatedMeanEbase+Form(" %d",ii*10);
+
+      getHist(varstartTruncatedMeanE, xtitstartTruncatedMeanE+" (MeV/cm)", ytitN, tree, hstartTruncatedMeanEs[ii]);
+
+      const TString varResstartTruncatedMeanE = Form("(%s/%s)-1 : ", varPrec.Data(), varPtrue.Data())+varstartTruncatedMeanE;
+      getHist(varResstartTruncatedMeanE, xtitstartTruncatedMeanE+" (MeV/cm)", ytitRes, tree, hResstartTruncatedMeanEsRec[ii]);
+
+      TH1D * hResstartTruncatedMeanERecpdf = 0x0;
+      TH1D * hResstartTruncatedMeanEReccdf = 0x0;
+      TH2D * hResstartTruncatedMeanERecNor = style::NormalHist(hResstartTruncatedMeanEsRec[ii], hResstartTruncatedMeanERecpdf, hResstartTruncatedMeanEReccdf, 0, true); lout->Add(hResstartTruncatedMeanERecNor); lout->Add(hResstartTruncatedMeanERecpdf); lout->Add(hResstartTruncatedMeanEReccdf);
+    }
   }
 
 }
@@ -260,9 +290,11 @@ int main(int argc, char* argv[])
   const TString chi2cut = "&& (chi2/ndof<15)";
   const TString esc2cut = "&& (startE2>10)";
   const TString esc3cut = "&& (startE3>7)";
+  const TString tme10cut = "&& (startTruncatedMeanE10>6)";
   drawTracking(lout, tag+"0000raw");
   drawTracking(lout, tag+"0001CHIcut",   chi2cut);
   drawTracking(lout, tag+"0002ESC2",     esc2cut);
+  drawTracking(lout, tag+"0004TME10",    tme10cut);
   drawTracking(lout, tag+"0012CHIESC2",  chi2cut+esc2cut);
   drawTracking(lout, tag+"0123CHIESC23", chi2cut+esc2cut+esc3cut);
 
