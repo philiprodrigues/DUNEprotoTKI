@@ -138,8 +138,8 @@ void drawHist(TList *lout, const TString outdir, const TString tag, const bool k
     const bool k2d = htmp;
     gStyle->SetOptTitle(1);
     if(k2d){
-      gStyle->SetOptStat(0);
-      //gStyle->SetOptStat("enou");
+      //gStyle->SetOptStat(0);
+      gStyle->SetOptStat("eou");
     }
     else{
       gStyle->SetOptStat("eoum");
@@ -168,7 +168,7 @@ void drawHist(TList *lout, const TString outdir, const TString tag, const bool k
     }
     else{
       if(tag.Contains("profileX")){
-        hh->SetMaximum(0.25);
+        hh->SetMaximum(0.1);
         dopt = "hist";
       }
       else if(tag.Contains("pdf") || tag.Contains("cdf")){

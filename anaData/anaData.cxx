@@ -17,20 +17,116 @@
 #include "AnaUtils.h"
 #include "TreeIO.h"
 
+#include <algorithm>    // std::sort
+#include <vector>       // std::vector
+
 using namespace AnaFunctions;
 using namespace AnaUtils;
 using namespace TreeIO;
 
-int getdEdx(const vector<double> arraydEdx, vector<double> &startE, vector<double> &endE)
+double getTruncatedMean(vector<double> array, const int nsample)
+{
+  const double fracTrun = 0.6;
+  const double nterm = nsample*fracTrun;
+  //either nsample<0, or total nterm is too small
+
+  std::sort(array.begin(), array.begin()+nsample);
+
+  double sum =0.0;
+
+  for(unsigned int ii=0; ii< nterm; ii++){
+    sum += array[ii];
+  }
+  return sum / (nterm+1E-10);
+}
+
+void getdEdx(const vector<double> arraydEdx, vector<double> &startE, vector<double> &endE)
 {
   const unsigned int ncls = arraydEdx.size();
-  for(unsigned int kk=0; kk<ncls; kk++){
+
+  if(ncls<3){
+    return;
+  }
+
+  //start from [2] because [0] and [1] in both start and last are weird
+  for(unsigned int kk=2; kk<ncls; kk++){
     startE.push_back(arraydEdx[kk]);
 
     const double endpe = arraydEdx[ncls-1-kk];
     endE.push_back(endpe);
   }
-  return ncls;
+}
+
+bool cutBeamdEdx(const double varSignal)
+{
+  vector<double> startE, lastE;
+  getdEdx( *reco_beam_calibrated_dEdX, startE, lastE);
+  nBeamdEdxCls = startE.size();
+  hnBeamdEdxCls->Fill(nBeamdEdxCls);
+  if(nBeamdEdxCls<6){
+    return false;
+  }
+
+  //no bragg peak
+  beamStartE0 = startE[0];
+  beamStartE1 = startE[1];
+  beamStartE2 = startE[2];
+  beamStartE3 = startE[3];
+  beamStartE4 = startE[4];
+  beamStartE5 = startE[5];
+  
+  beamTMeanStart = getTruncatedMean(startE, nBeamdEdxCls-6);
+  
+  hSignalVsStartE0->Fill(beamStartE0, varSignal);
+  hSignalVsStartE1->Fill(beamStartE1, varSignal);
+  hSignalVsStartE2->Fill(beamStartE2, varSignal);
+  hSignalVsStartE3->Fill(beamStartE3, varSignal);
+  hSignalVsStartE4->Fill(beamStartE4, varSignal);
+  hSignalVsStartE5->Fill(beamStartE5, varSignal);
+  
+  hSignalVsTMeanStart->Fill(beamTMeanStart, varSignal);
+  
+  //has Bragg Peak
+  beamLastE0 = lastE[0];
+  beamLastE1 = lastE[1];
+  beamLastE2 = lastE[2];
+  beamLastE3 = lastE[3];
+  beamLastE4 = lastE[4];
+  beamLastE5 = lastE[5];
+  
+  beamTMeanLast = getTruncatedMean(lastE, 6);
+  
+  hSignalVsLastE0->Fill(beamLastE0, varSignal);
+  hSignalVsLastE1->Fill(beamLastE1, varSignal);
+  hSignalVsLastE2->Fill(beamLastE2, varSignal);
+  hSignalVsLastE3->Fill(beamLastE3, varSignal);
+  hSignalVsLastE4->Fill(beamLastE4, varSignal);
+  hSignalVsLastE5->Fill(beamLastE5, varSignal);
+  
+  //both need to tune for different energy
+  //it is so clean that no need to cut on last since there is no Bragg peak form proton any more
+  if(beamTMeanStart>2.8){
+    return false;
+  }
+  
+  hSignalVsTMeanLast->Fill(beamTMeanLast, varSignal);
+  
+  hSigAfterVsStartE0->Fill(beamStartE0, varSignal);
+  hSigAfterVsStartE1->Fill(beamStartE1, varSignal);
+  hSigAfterVsStartE2->Fill(beamStartE2, varSignal);
+  
+  hSigAfterVsLastE0->Fill(beamLastE0, varSignal);
+  hSigAfterVsLastE1->Fill(beamLastE1, varSignal);
+  hSigAfterVsLastE2->Fill(beamLastE2, varSignal);
+  
+  hSigAfterVsStartE3->Fill(beamStartE3, varSignal);
+  hSigAfterVsLastE3->Fill(beamLastE3, varSignal);
+  hSigAfterVsStartE4->Fill(beamStartE4, varSignal);
+  hSigAfterVsLastE4->Fill(beamLastE4, varSignal);
+  hSigAfterVsStartE5->Fill(beamStartE5, varSignal);
+  hSigAfterVsLastE5->Fill(beamLastE5, varSignal);
+  
+  return true;
 }
 
 vector<TLorentzVector> getFSTruth(const bool kPiZero, const vector<int> * pdg, const vector<double> * px, const vector<double> * py, const vector<double> * pz, TH1I * htype, int &nproton, int &nneutron, int &nPiZero, int & ngamma, double & maxgammaEnergy, int & protonIdx, int & piplusIdx, bool & kSignal)
@@ -233,12 +329,29 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     int  protonIdx = -999, piplusIdx = -999;
     bool tmpkSig = false;
     vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, true_beam_daughter_PDG, true_beam_daughter_startPx, true_beam_daughter_startPy, true_beam_daughter_startPz, 0x0, nproton, nneutron, nPiZero, ngamma, maxgammaEnergy, protonIdx, piplusIdx, tmpkSig);
-    kSignal = tmpkSig && (true_beam_PDG==211);
+
+    finPimomentum = vecPiP[0].P();
+    finProtonmomentum = vecPiP[1].P();
+    fin2Pmom = vecPiP[2].P();
+
+    //with phase space cut
+    kSignal = (true_beam_PDG==211) &&  tmpkSig && (finProtonmomentum>0.45 && fin2Pmom<0.45);
+    if(!kPiZero){
+      kSignal = kSignal && (finPimomentum>0.15);
+    }
 
     //const bool varTrueBeam = (true_beam_PDG==211);
     const bool varSignal = kSignal;
     //===========================================================
-   
+    //1. Beam dEdx cut
+    hBeamLen->Fill(reco_beam_len);
+    hSignalVsLen->Fill(reco_beam_len, varSignal);
+  
+    if(!cutBeamdEdx(varSignal)){
+      continue;
+    }
+    //-> now signal purity 167/5274 = 3.2%, 2627 pi+ beam, 1947 e+
+
     /*
     //0. true beam particle //only for cross checking previous study
     if(true_beam_PDG != 211 && true_beam_PDG != -13){
@@ -248,99 +361,37 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
 
     //0. primary beam type 
     hRecoBeamType->Fill(reco_beam_type);
+    //no effect, shadowed by TMeanStart cut
+    /*
     if(reco_beam_type!=13){//13: Pandora "track like"
       continue;
     }
+    */
 
-    //1. beam position MC cut
+    //1. beam position MC cut, need MC truth, how is it possible in analysis?
     const bool kBeamPosPass = GetBeamPosPass();
     hBeamPosPass->Fill(kBeamPosPass);
     if(!kBeamPosPass){
       continue;
     }
+    //-> now signal purity 138/3537 = 3.9%, 2283 pi+ bea, 801 e+ beam
 
     //2. APA3 
     hBeamEndZ->Fill(reco_beam_endZ);
+    hBeamEndZPass->Fill(!(reco_beam_endZ>=226));
+
     if(reco_beam_endZ>=226){
       hBeamEndZPass->Fill(false);
       continue;
     }
-    hBeamEndZPass->Fill(true);
-
-    //3. Beam dEdx cut
-    vector<double> startE, endE;
-    nBeamdEdxCls = getdEdx( *reco_beam_calibrated_dEdX, startE, endE);
-    if(nBeamdEdxCls<6){
-      continue;
-    }
-
-    beamStartE0 = startE[0];
-    beamStartE1 = startE[1];
-    beamStartE2 = startE[2];
-    beamStartE3 = startE[3];
-    beamStartE4 = startE[4];
-    beamStartE5 = startE[5];
-    beamLastE0 = endE[0];
-    beamLastE1 = endE[1];
-    beamLastE2 = endE[2];
-    beamLastE3 = endE[3];
-    beamLastE4 = endE[4];
-    beamLastE5 = endE[5];
-
-    hSignalVsStartE0->Fill(beamStartE0, varSignal);
-    hSignalVsStartE1->Fill(beamStartE1, varSignal);
-    hSignalVsStartE2->Fill(beamStartE2, varSignal);
-
-    hSignalVsLastE0->Fill(beamLastE0, varSignal);
-    hSignalVsLastE1->Fill(beamLastE1, varSignal);
-    hSignalVsLastE2->Fill(beamLastE2, varSignal);
-
-    hSignalVsStartE3->Fill(beamStartE3, varSignal);
-    hSignalVsLastE3->Fill(beamLastE3, varSignal);
-
-    hSignalVsStartE4->Fill(beamStartE4, varSignal);
-    hSignalVsLastE4->Fill(beamLastE4, varSignal);
-
-    hSignalVsStartE5->Fill(beamStartE5, varSignal);
-    hSignalVsLastE5->Fill(beamLastE5, varSignal);
-  
-    //both need to tune for different energy
-    if(beamStartE5>3 || beamStartE4>3){//entrance dEdx at 1 GeV
-      continue;
-    }
-    if(beamLastE5>10 || beamLastE4>10){//Bragg peak
-      continue;
-    }
-
-    hSigAfterVsStartE0->Fill(beamStartE0, varSignal);
-    hSigAfterVsStartE1->Fill(beamStartE1, varSignal);
-    hSigAfterVsStartE2->Fill(beamStartE2, varSignal);
-
-    hSigAfterVsLastE0->Fill(beamLastE0, varSignal);
-    hSigAfterVsLastE1->Fill(beamLastE1, varSignal);
-    hSigAfterVsLastE2->Fill(beamLastE2, varSignal);
-
-    hSigAfterVsStartE3->Fill(beamStartE3, varSignal);
-    hSigAfterVsLastE3->Fill(beamLastE3, varSignal);
-    hSigAfterVsStartE4->Fill(beamStartE4, varSignal);
-    hSigAfterVsLastE4->Fill(beamLastE4, varSignal);
-    hSigAfterVsStartE5->Fill(beamStartE5, varSignal);
-    hSigAfterVsLastE5->Fill(beamLastE5, varSignal);
-
-    //============== Benchmark after ALL cuts !!! =========================
-    //benchmark
-
-    hTruthBeamType->Fill(TruthBeamType);
-    hTruthSignal->Fill(kSignal);
+    //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
    
-    //======================= NO cuts below ========================
     //9. n track daughter
     nTrack = getNTrack(reco_daughter_allTrack_ID);
     hBeamNTrack->Fill(nTrack);
     hSignalVsBeamNTrack->Fill(nTrack, varSignal);
-    hSigAfterVsBeamNTrack->Fill(nTrack, varSignal);
-    /*
     if(kPiZero){
+      //the purity profile looks weird for pizeor signal
       if(nTrack!=1){
         continue;
       }
@@ -350,12 +401,18 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
         continue;
       }
     }
-    */
+    //-> now pi+p signal purity 78/940=8.3%, 611 pi+ beam, 270 e+ beam
+
+    //============== Benchmark after ALL cuts !!! =========================
+    //benchmark
+
+    hTruthBeamType->Fill(TruthBeamType);
+    hTruthSignal->Fill(kSignal);
+   
+    //======================= NO cuts below ========================
 
     //--- to test
     //Fill kSignal vs variable; the reason for kSignal but not kBeam is the signal is interacting pion, not all pions. Directly choose matrix to optimize for it
-    hBeamLen->Fill(reco_beam_len);
-    hSignalVsLen->Fill(reco_beam_len, varSignal);
     hSigAfterVsLen->Fill(reco_beam_len, varSignal);
 
     //============= done loop
