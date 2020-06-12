@@ -489,56 +489,6 @@ void IniTruthHist(TList * lout, const TString tag)
    hpn = new TH1D("pn","", sizeof(Hbin)/sizeof(double)-1, Hbin); lout->Add(hpn);
 }
 
-bool manual_beamPos_mc(const double beam_startX, const double beam_startY, const double beam_startZ, const double beam_dirX, const double beam_dirY,   const double beam_dirZ, const double true_dirX,   const double true_dirY, const double true_dirZ,   const double true_startX, const double true_startY, const double true_startZ) 
-{
-  //https://github.com/calcuttj/PionStudies/blob/master/rDataFrame/eventSelection.h
-
-  //For MC from Owen Goodwins studies
-  const double xlow = -3.,  xhigh = 7.,  ylow = -8.,  yhigh = 7.;
-  const double zlow = 27.5,  zhigh = 32.5,  coslow = 0.93;
-
-  const double projectX = (true_startX + -1*true_startZ*(true_dirX/true_dirZ) );
-  const double projectY = (true_startY + -1*true_startZ*(true_dirY/true_dirZ) );
-  const double cos = true_dirX*beam_dirX + true_dirY*beam_dirY + true_dirZ*beam_dirZ;
-
-  if ( (beam_startX - projectX) < xlow )
-    return false;
-  
-  if ( (beam_startX - projectX) > xhigh )
-    return false;
-
-  if ( (beam_startY - projectY) < ylow )
-    return false;
-
-  if ( (beam_startY - projectY) > yhigh )
-    return false;
-  
-  if (beam_startZ < zlow || zhigh < beam_startZ)
-    return false;
-  
-  if ( cos < coslow)
-    return false;
-
-  return true;
-}
-
-bool GetBeamPosPass()
-{
-  //https://github.com/calcuttj/PionStudies/blob/master/rDataFrame/eventSelection.C
-  /*
-.Define("passBeamCut", manual_beamPos_mc, 
-            {"reco_beam_startX", "reco_beam_startY", "reco_beam_startZ",
-             "reco_beam_trackDirX", "reco_beam_trackDirY", "reco_beam_trackDirZ",
-             "true_beam_startDirX", "true_beam_startDirY", "true_beam_startDirZ",
-             "true_beam_startX", "true_beam_startY", "true_beam_startZ"})
-   */
-
-  return manual_beamPos_mc(reco_beam_startX, reco_beam_startY, reco_beam_startZ,
-                           reco_beam_trackDirX, reco_beam_trackDirY, reco_beam_trackDirZ,
-                           true_beam_startDirX, true_beam_startDirY, true_beam_startDirZ,
-                           true_beam_startX, true_beam_startY, true_beam_startZ);
-}
-
 }
 
 #endif

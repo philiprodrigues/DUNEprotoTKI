@@ -24,43 +24,61 @@ using namespace AnaFunctions;
 using namespace AnaUtils;
 using namespace TreeIO;
 
-double getTruncatedMean(vector<double> array, const int nsample)
+
+bool manual_beamPos_mc(const double beam_startX, const double beam_startY, const double beam_startZ, const double beam_dirX, const double beam_dirY,   const double beam_dirZ, const double true_dirX,   const double true_dirY, const double true_dirZ,   const double true_startX, const double true_startY, const double true_startZ) 
 {
-  const double fracTrun = 0.6;
-  const double nterm = nsample*fracTrun;
-  //either nsample<0, or total nterm is too small
+  //https://github.com/calcuttj/PionStudies/blob/master/rDataFrame/eventSelection.h
 
-  std::sort(array.begin(), array.begin()+nsample);
+  //For MC from Owen Goodwins studies
+  const double xlow = -3.,  xhigh = 7.,  ylow = -8.,  yhigh = 7.;
+  const double zlow = 27.5,  zhigh = 32.5,  coslow = 0.93;
 
-  double sum =0.0;
+  const double projectX = (true_startX + -1*true_startZ*(true_dirX/true_dirZ) );
+  const double projectY = (true_startY + -1*true_startZ*(true_dirY/true_dirZ) );
+  const double cos = true_dirX*beam_dirX + true_dirY*beam_dirY + true_dirZ*beam_dirZ;
 
-  for(unsigned int ii=0; ii< nterm; ii++){
-    sum += array[ii];
-  }
-  return sum / (nterm+1E-10);
+  if ( (beam_startX - projectX) < xlow )
+    return false;
+  
+  if ( (beam_startX - projectX) > xhigh )
+    return false;
+
+  if ( (beam_startY - projectY) < ylow )
+    return false;
+
+  if ( (beam_startY - projectY) > yhigh )
+    return false;
+  
+  if (beam_startZ < zlow || zhigh < beam_startZ)
+    return false;
+  
+  if ( cos < coslow)
+    return false;
+
+  return true;
 }
 
-void getdEdx(const vector<double> arraydEdx, vector<double> &startE, vector<double> &endE)
+bool getBeamPosPass()
 {
-  const unsigned int ncls = arraydEdx.size();
+  //https://github.com/calcuttj/PionStudies/blob/master/rDataFrame/eventSelection.C
+  /*
+.Define("passBeamCut", manual_beamPos_mc, 
+            {"reco_beam_startX", "reco_beam_startY", "reco_beam_startZ",
+             "reco_beam_trackDirX", "reco_beam_trackDirY", "reco_beam_trackDirZ",
+             "true_beam_startDirX", "true_beam_startDirY", "true_beam_startDirZ",
+             "true_beam_startX", "true_beam_startY", "true_beam_startZ"})
+   */
 
-  if(ncls<3){
-    return;
-  }
-
-  //start from [2] because [0] and [1] in both start and last are weird
-  for(unsigned int kk=2; kk<ncls; kk++){
-    startE.push_back(arraydEdx[kk]);
-
-    const double endpe = arraydEdx[ncls-1-kk];
-    endE.push_back(endpe);
-  }
+  return manual_beamPos_mc(reco_beam_startX, reco_beam_startY, reco_beam_startZ,
+                           reco_beam_trackDirX, reco_beam_trackDirY, reco_beam_trackDirZ,
+                           true_beam_startDirX, true_beam_startDirY, true_beam_startDirZ,
+                           true_beam_startX, true_beam_startY, true_beam_startZ);
 }
 
 bool cutBeamdEdx(const double varSignal)
 {
   vector<double> startE, lastE;
-  getdEdx( *reco_beam_calibrated_dEdX, startE, lastE);
+  GetdEdx( *reco_beam_calibrated_dEdX, startE, lastE, 2);
   nBeamdEdxCls = startE.size();
   hnBeamdEdxCls->Fill(nBeamdEdxCls);
   if(nBeamdEdxCls<6){
@@ -75,7 +93,7 @@ bool cutBeamdEdx(const double varSignal)
   beamStartE4 = startE[4];
   beamStartE5 = startE[5];
   
-  beamTMeanStart = getTruncatedMean(startE, nBeamdEdxCls-6);
+  beamTMeanStart = GetTruncatedMean(startE, nBeamdEdxCls-6);
   
   hSignalVsStartE0->Fill(beamStartE0, varSignal);
   hSignalVsStartE1->Fill(beamStartE1, varSignal);
@@ -94,7 +112,7 @@ bool cutBeamdEdx(const double varSignal)
   beamLastE4 = lastE[4];
   beamLastE5 = lastE[5];
   
-  beamTMeanLast = getTruncatedMean(lastE, 6);
+  beamTMeanLast = GetTruncatedMean(lastE, 6);
   
   hSignalVsLastE0->Fill(beamLastE0, varSignal);
   hSignalVsLastE1->Fill(beamLastE1, varSignal);
@@ -154,7 +172,7 @@ vector<TLorentzVector> getFSTruth(const bool kPiZero, const vector<int> * pdg, c
   vector<int> bufferType;
 
   for(int ii=0; ii<np; ii++){
-    const int itype = getParticleType((*pdg)[ii]);
+    const int itype = GetParticleType((*pdg)[ii]);
     const TVector3 tmpp( (*px)[ii], (*py)[ii], (*pz)[ii] );
 
     if(itype==gkPiPlus){
@@ -287,7 +305,7 @@ double getRecFromTruth(const int targetid, const vector<int> * reco_daughter_PFP
           printf("reco_daughter_allTrack_calibrated_dEdX_SCE null!\n"); exit(1);
         }
 
-        getdEdx( (*reco_daughter_allTrack_calibrated_dEdX_SCE)[ii], startE, endE);
+        GetdEdx( (*reco_daughter_allTrack_calibrated_dEdX_SCE)[ii], startE, endE, 0);
         //printf("==================================\n");
       }
     }
@@ -325,7 +343,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
    
     //===========================================================
     //calculate before any cuts! Only filled after ALL cuts!
-    const int TruthBeamType = getParticleType(true_beam_PDG);
+    const int TruthBeamType = GetParticleType(true_beam_PDG);
     int  protonIdx = -999, piplusIdx = -999;
     bool tmpkSig = false;
     vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, true_beam_daughter_PDG, true_beam_daughter_startPx, true_beam_daughter_startPy, true_beam_daughter_startPz, 0x0, nproton, nneutron, nPiZero, ngamma, maxgammaEnergy, protonIdx, piplusIdx, tmpkSig);
@@ -369,7 +387,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     */
 
     //1. beam position MC cut, need MC truth, how is it possible in analysis?
-    const bool kBeamPosPass = GetBeamPosPass();
+    const bool kBeamPosPass = getBeamPosPass();
     hBeamPosPass->Fill(kBeamPosPass);
     if(!kBeamPosPass){
       continue;
@@ -422,8 +440,8 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
 
   cout<<"All entries "<<ientry<<endl;
 
-  getProfileX(lout);
-  drawHist(lout, "output", tag, true);
+  GetProfileX(lout);
+  DrawHist(lout, "output", tag, true);
 }
 
 void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
@@ -456,7 +474,7 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
    
     //===========================================================
 
-    const int beamtype = getParticleType(true_beam_PDG);
+    const int beamtype = GetParticleType(true_beam_PDG);
     hbeamType->Fill(beamtype);
 
     if(beamtype!=gkPiPlus){
@@ -549,7 +567,7 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
 
   cout<<"All entries "<<ientry<<endl;
 
-  drawHist(lout, "output", tag);
+  DrawHist(lout, "output", tag);
 }
 
 int main(int argc, char * argv[])

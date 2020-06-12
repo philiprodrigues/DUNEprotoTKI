@@ -43,7 +43,7 @@ enum{
 };
 
 
-int getParticleType(const int pdg)
+int GetParticleType(const int pdg)
 {
   int type = -999;
   if(pdg==2212){
@@ -96,7 +96,8 @@ int getParticleType(const int pdg)
   return type;
 }
 
-void getProfileX(TList *lout)
+
+void GetProfileX(TList *lout)
 {
   const int nhist = lout->GetSize();//the size will increase
   for(int ii=0; ii<nhist; ii++){
@@ -121,7 +122,7 @@ void getProfileX(TList *lout)
   }
 }
 
-void drawHist(TList *lout, const TString outdir, const TString tag, const bool kfast=false)
+void DrawHist(TList *lout, const TString outdir, const TString tag, const bool kfast=false)
 {
   TCanvas * c1 = new TCanvas("c1"+tag, "", 1200, 800);
   style::PadSetup(c1);
@@ -187,6 +188,40 @@ void drawHist(TList *lout, const TString outdir, const TString tag, const bool k
 
 }
 
+double GetTruncatedMean(vector<double> array, const int nsample)
+{
+  const double fracTrun = 0.6;
+  const double nterm = nsample*fracTrun;
+  //either nsample<0, or total nterm is too small
+
+  std::sort(array.begin(), array.begin()+nsample);
+
+  double sum =0.0;
+
+  for(unsigned int ii=0; ii< nterm; ii++){
+    sum += array[ii];
+  }
+  return sum / (nterm+1E-10);
+}
+
+}
+
+
+void GetdEdx(const vector<double> arraydEdx, vector<double> &startE, vector<double> &endE, const unsigned int padding=0)
+{
+  const unsigned int ncls = arraydEdx.size();
+
+  if(ncls<=padding){
+    return;
+  }
+
+  //start from [2] because [0] and [1] in both start and last are weird
+  for(unsigned int kk=padding; kk<ncls; kk++){
+    startE.push_back(arraydEdx[kk]);
+
+    const double endpe = arraydEdx[ncls-1-kk];
+    endE.push_back(endpe);
+  }
 }
 
 
