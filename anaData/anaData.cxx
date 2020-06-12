@@ -15,14 +15,14 @@
 #include "style.h"
 #include "AnaFunctions.h"
 #include "AnaUtils.h"
-#include "TreeIO.h"
+#include "AnaIO.h"
 
 #include <algorithm>    // std::sort
 #include <vector>       // std::vector
 
 using namespace AnaFunctions;
 using namespace AnaUtils;
-using namespace TreeIO;
+//using namespace AnaIO;
 
 
 bool manual_beamPos_mc(const double beam_startX, const double beam_startY, const double beam_startZ, const double beam_dirX, const double beam_dirY,   const double beam_dirZ, const double true_dirX,   const double true_dirY, const double true_dirZ,   const double true_startX, const double true_startY, const double true_startZ) 
@@ -69,103 +69,103 @@ bool getBeamPosPass()
              "true_beam_startX", "true_beam_startY", "true_beam_startZ"})
    */
 
-  return manual_beamPos_mc(reco_beam_startX, reco_beam_startY, reco_beam_startZ,
-                           reco_beam_trackDirX, reco_beam_trackDirY, reco_beam_trackDirZ,
-                           true_beam_startDirX, true_beam_startDirY, true_beam_startDirZ,
-                           true_beam_startX, true_beam_startY, true_beam_startZ);
+  return manual_beamPos_mc(AnaIO::reco_beam_startX, AnaIO::reco_beam_startY, AnaIO::reco_beam_startZ,
+                           AnaIO::reco_beam_trackDirX, AnaIO::reco_beam_trackDirY, AnaIO::reco_beam_trackDirZ,
+                           AnaIO::true_beam_startDirX, AnaIO::true_beam_startDirY, AnaIO::true_beam_startDirZ,
+                           AnaIO::true_beam_startX, AnaIO::true_beam_startY, AnaIO::true_beam_startZ);
 }
 
 bool cutBeamdEdx(const double varSignal)
 {
   vector<double> startE, lastE;
-  GetdEdx( *reco_beam_calibrated_dEdX, startE, lastE, 2);
-  nBeamdEdxCls = startE.size();
-  hnBeamdEdxCls->Fill(nBeamdEdxCls);
-  if(nBeamdEdxCls<6){
+  GetdEdx( *AnaIO::reco_beam_calibrated_dEdX, startE, lastE, 2);
+  AnaIO::nBeamdEdxCls = startE.size();
+  AnaIO::hnBeamdEdxCls->Fill(AnaIO::nBeamdEdxCls);
+  if(AnaIO::nBeamdEdxCls<6){
     return false;
   }
 
   //no bragg peak
-  beamStartE0 = startE[0];
-  beamStartE1 = startE[1];
-  beamStartE2 = startE[2];
-  beamStartE3 = startE[3];
-  beamStartE4 = startE[4];
-  beamStartE5 = startE[5];
+  AnaIO::beamStartE0 = startE[0];
+  AnaIO::beamStartE1 = startE[1];
+  AnaIO::beamStartE2 = startE[2];
+  AnaIO::beamStartE3 = startE[3];
+  AnaIO::beamStartE4 = startE[4];
+  AnaIO::beamStartE5 = startE[5];
   
-  beamTMeanStart = GetTruncatedMean(startE, nBeamdEdxCls-6);
+  AnaIO::beamTMeanStart = GetTruncatedMean(startE, AnaIO::nBeamdEdxCls-6);
   
-  hSignalVsStartE0->Fill(beamStartE0, varSignal);
-  hSignalVsStartE1->Fill(beamStartE1, varSignal);
-  hSignalVsStartE2->Fill(beamStartE2, varSignal);
-  hSignalVsStartE3->Fill(beamStartE3, varSignal);
-  hSignalVsStartE4->Fill(beamStartE4, varSignal);
-  hSignalVsStartE5->Fill(beamStartE5, varSignal);
+  AnaIO::hSignalVsStartE0->Fill(AnaIO::beamStartE0, varSignal);
+  AnaIO::hSignalVsStartE1->Fill(AnaIO::beamStartE1, varSignal);
+  AnaIO::hSignalVsStartE2->Fill(AnaIO::beamStartE2, varSignal);
+  AnaIO::hSignalVsStartE3->Fill(AnaIO::beamStartE3, varSignal);
+  AnaIO::hSignalVsStartE4->Fill(AnaIO::beamStartE4, varSignal);
+  AnaIO::hSignalVsStartE5->Fill(AnaIO::beamStartE5, varSignal);
   
-  hSignalVsTMeanStart->Fill(beamTMeanStart, varSignal);
+  AnaIO::hSignalVsTMeanStart->Fill(AnaIO::beamTMeanStart, varSignal);
   
   //has Bragg Peak
-  beamLastE0 = lastE[0];
-  beamLastE1 = lastE[1];
-  beamLastE2 = lastE[2];
-  beamLastE3 = lastE[3];
-  beamLastE4 = lastE[4];
-  beamLastE5 = lastE[5];
+  AnaIO::beamLastE0 = lastE[0];
+  AnaIO::beamLastE1 = lastE[1];
+  AnaIO::beamLastE2 = lastE[2];
+  AnaIO::beamLastE3 = lastE[3];
+  AnaIO::beamLastE4 = lastE[4];
+  AnaIO::beamLastE5 = lastE[5];
   
-  beamTMeanLast = GetTruncatedMean(lastE, 6);
+  AnaIO::beamTMeanLast = GetTruncatedMean(lastE, 6);
   
-  hSignalVsLastE0->Fill(beamLastE0, varSignal);
-  hSignalVsLastE1->Fill(beamLastE1, varSignal);
-  hSignalVsLastE2->Fill(beamLastE2, varSignal);
-  hSignalVsLastE3->Fill(beamLastE3, varSignal);
-  hSignalVsLastE4->Fill(beamLastE4, varSignal);
-  hSignalVsLastE5->Fill(beamLastE5, varSignal);
+  AnaIO::hSignalVsLastE0->Fill(AnaIO::beamLastE0, varSignal);
+  AnaIO::hSignalVsLastE1->Fill(AnaIO::beamLastE1, varSignal);
+  AnaIO::hSignalVsLastE2->Fill(AnaIO::beamLastE2, varSignal);
+  AnaIO::hSignalVsLastE3->Fill(AnaIO::beamLastE3, varSignal);
+  AnaIO::hSignalVsLastE4->Fill(AnaIO::beamLastE4, varSignal);
+  AnaIO::hSignalVsLastE5->Fill(AnaIO::beamLastE5, varSignal);
   
   //both need to tune for different energy
   //it is so clean that no need to cut on last since there is no Bragg peak form proton any more
-  if(beamTMeanStart>2.8){
+  if(AnaIO::beamTMeanStart>2.8){
     return false;
   }
   
-  hSignalVsTMeanLast->Fill(beamTMeanLast, varSignal);
+  AnaIO::hSignalVsTMeanLast->Fill(AnaIO::beamTMeanLast, varSignal);
   
-  hSigAfterVsStartE0->Fill(beamStartE0, varSignal);
-  hSigAfterVsStartE1->Fill(beamStartE1, varSignal);
-  hSigAfterVsStartE2->Fill(beamStartE2, varSignal);
+  AnaIO::hSigAfterVsStartE0->Fill(AnaIO::beamStartE0, varSignal);
+  AnaIO::hSigAfterVsStartE1->Fill(AnaIO::beamStartE1, varSignal);
+  AnaIO::hSigAfterVsStartE2->Fill(AnaIO::beamStartE2, varSignal);
   
-  hSigAfterVsLastE0->Fill(beamLastE0, varSignal);
-  hSigAfterVsLastE1->Fill(beamLastE1, varSignal);
-  hSigAfterVsLastE2->Fill(beamLastE2, varSignal);
+  AnaIO::hSigAfterVsLastE0->Fill(AnaIO::beamLastE0, varSignal);
+  AnaIO::hSigAfterVsLastE1->Fill(AnaIO::beamLastE1, varSignal);
+  AnaIO::hSigAfterVsLastE2->Fill(AnaIO::beamLastE2, varSignal);
   
-  hSigAfterVsStartE3->Fill(beamStartE3, varSignal);
-  hSigAfterVsLastE3->Fill(beamLastE3, varSignal);
-  hSigAfterVsStartE4->Fill(beamStartE4, varSignal);
-  hSigAfterVsLastE4->Fill(beamLastE4, varSignal);
-  hSigAfterVsStartE5->Fill(beamStartE5, varSignal);
-  hSigAfterVsLastE5->Fill(beamLastE5, varSignal);
+  AnaIO::hSigAfterVsStartE3->Fill(AnaIO::beamStartE3, varSignal);
+  AnaIO::hSigAfterVsLastE3->Fill(AnaIO::beamLastE3, varSignal);
+  AnaIO::hSigAfterVsStartE4->Fill(AnaIO::beamStartE4, varSignal);
+  AnaIO::hSigAfterVsLastE4->Fill(AnaIO::beamLastE4, varSignal);
+  AnaIO::hSigAfterVsStartE5->Fill(AnaIO::beamStartE5, varSignal);
+  AnaIO::hSigAfterVsLastE5->Fill(AnaIO::beamLastE5, varSignal);
   
   return true;
 }
 
-vector<TLorentzVector> getFSTruth(const bool kPiZero, TH1I * htype, int & protonIdx, int & piplusIdx, bool & tmpksig)
+vector<TLorentzVector> getFSTruth(const bool kPiZero, int & protonIdx, int & piplusIdx, bool & tmpksig)
 {
   //if kPiZero false, return 1piplus (1st and 2nd protons)
   //if kPiZero true, return (1st PiZero) (1st and 2nd protons)
   //only use kPiZero in the end at filling
 
-  const vector<int> * pdg = true_beam_daughter_PDG;
-  const vector<double> * px = true_beam_daughter_startPx;
-  const vector<double> * py = true_beam_daughter_startPy;
-  const vector<double> * pz = true_beam_daughter_startPz;
-
+  const vector<int> * pdg = AnaIO::true_beam_daughter_PDG;
+  const vector<double> * px = AnaIO::true_beam_daughter_startPx;
+  const vector<double> * py = AnaIO::true_beam_daughter_startPy;
+  const vector<double> * pz = AnaIO::true_beam_daughter_startPz;
+  TH1I * htype = AnaIO::hselectedDaughterType;
   //===
 
   const int np = pdg->size();
-  nproton = 0;
-  nneutron = 0;
+  AnaIO::nproton = 0;
+  AnaIO::nneutron = 0;
   int npiplus = 0;
-  nPiZero = 0;
-  ngamma = 0;
+  AnaIO::nPiZero = 0;
+  AnaIO::ngamma = 0;
   int npartialBkg = 0;
   TLorentzVector pPiplus, pPiZero, pProton, p2Proton;
 
@@ -190,23 +190,23 @@ vector<TLorentzVector> getFSTruth(const bool kPiZero, TH1I * htype, int & proton
     }
     else if(itype==gkProton){
       //ii is the location in the original vector
-      protonIndices[nproton]=ii;
+      protonIndices[AnaIO::nproton]=ii;
 
-      protonmom[nproton] = tmpp.Mag();
+      protonmom[AnaIO::nproton] = tmpp.Mag();
       bufferProtonmom.push_back(tmpp);
-      nproton++;
+      AnaIO::nproton++;
     }
     else if(itype==gkPiZero){
-      PiZeromom[nPiZero] = tmpp.Mag();
+      PiZeromom[AnaIO::nPiZero] = tmpp.Mag();
       bufferPiZeromom.push_back(tmpp);
-      nPiZero++;
+      AnaIO::nPiZero++;
     }
     else if(itype==gkNeutron){
-      nneutron++;
+      AnaIO::nneutron++;
     }
     else if(itype==gkGamma){
-      gammamom[ngamma] = tmpp.Mag();
-      ngamma++;
+      gammamom[AnaIO::ngamma] = tmpp.Mag();
+      AnaIO::ngamma++;
     }
     else if(itype==gkPiMinus||itype==gkKaon){
       npartialBkg++;
@@ -217,38 +217,38 @@ vector<TLorentzVector> getFSTruth(const bool kPiZero, TH1I * htype, int & proton
 
   //proton=======================
   int leadingProtonID = 0, subldProtonID = -999;
-  if(nproton>1){
-    int protonsortid[nproton];
-    TMath::Sort(nproton, protonmom, protonsortid);
+  if(AnaIO::nproton>1){
+    int protonsortid[AnaIO::nproton];
+    TMath::Sort(AnaIO::nproton, protonmom, protonsortid);
     leadingProtonID = protonsortid[0];
     subldProtonID = protonsortid[1];
     //printf("test %d %f %d %f\n", leadingProtonID, protonmom[leadingProtonID], subldProtonID, protonmom[subldProtonID]);
   }
-  if(nproton>0){
+  if(AnaIO::nproton>0){
     pProton.SetVectM(bufferProtonmom[leadingProtonID], ProtonMass());
     protonIdx = protonIndices[leadingProtonID];
   }
-  if(nproton>1){
+  if(AnaIO::nproton>1){
     p2Proton.SetVectM(bufferProtonmom[subldProtonID], ProtonMass());
   }
   //PiZero==============================
   int leadingPiZeroID = 0;
-  if(nPiZero>1){
-    int PiZerosortid[nPiZero];
-    TMath::Sort(nPiZero, PiZeromom, PiZerosortid);
+  if(AnaIO::nPiZero>1){
+    int PiZerosortid[AnaIO::nPiZero];
+    TMath::Sort(AnaIO::nPiZero, PiZeromom, PiZerosortid);
     leadingPiZeroID = PiZerosortid[0];
   }
-  if(nPiZero>0){
+  if(AnaIO::nPiZero>0){
     pPiZero.SetVectM(bufferPiZeromom[leadingPiZeroID], PiZeroMass());
   }
   //gamma====================================
   int leadinggammaID = 0;
-  if(ngamma>1){
-    int gammasortid[ngamma];
-    TMath::Sort(ngamma, gammamom, gammasortid);
+  if(AnaIO::ngamma>1){
+    int gammasortid[AnaIO::ngamma];
+    TMath::Sort(AnaIO::ngamma, gammamom, gammasortid);
     leadinggammaID = gammasortid[0];
   }
-  maxgammaEnergy = gammamom[leadinggammaID];
+  AnaIO::maxgammaEnergy = gammamom[leadinggammaID];
   //==========================================
 
   //fill vec regardless of tmpksig
@@ -263,14 +263,14 @@ vector<TLorentzVector> getFSTruth(const bool kPiZero, TH1I * htype, int & proton
 
   //Now need kPiZero
   tmpksig = false;
-  if(nproton>=1 && npartialBkg ==0){
+  if(AnaIO::nproton>=1 && npartialBkg ==0){
     if(kPiZero){
-      if(nPiZero>0 && npiplus==0){
+      if(AnaIO::nPiZero>0 && npiplus==0){
         tmpksig = true;
       }
     }
     else{//PiPlus
-      if(npiplus==1 && nPiZero==0){
+      if(npiplus==1 && AnaIO::nPiZero==0){
         tmpksig = true;
       }
     }
@@ -289,8 +289,8 @@ vector<TLorentzVector> getFSTruth(const bool kPiZero, TH1I * htype, int & proton
 int getNTrack()
 {
   int ntrack = 0;
-  for(unsigned int ii=0; ii<reco_daughter_allTrack_ID->size(); ii++){
-    if((*reco_daughter_allTrack_ID)[ii] != -1) {
+  for(unsigned int ii=0; ii<AnaIO::reco_daughter_allTrack_ID->size(); ii++){
+    if((*AnaIO::reco_daughter_allTrack_ID)[ii] != -1) {
       ntrack++;
     }
   }
@@ -303,9 +303,9 @@ double getRecFromTruth(const int targetid, const vector<double> * mombyrange)
 
   double rpm = -999;
   int counter = 0;
-  for(unsigned int ii = 0; ii < reco_daughter_PFP_true_byHits_ID->size(); ii++){
-    if((*reco_daughter_PFP_true_byHits_ID)[ii] == targetid) {
-      if((*reco_daughter_allTrack_ID)[ii] != -1) {
+  for(unsigned int ii = 0; ii < AnaIO::reco_daughter_PFP_true_byHits_ID->size(); ii++){
+    if((*AnaIO::reco_daughter_PFP_true_byHits_ID)[ii] == targetid) {
+      if((*AnaIO::reco_daughter_allTrack_ID)[ii] != -1) {
 
         if(counter){
           printf("rpm already set!! %f %f %d\n", rpm, (*mombyrange)[ii], counter); //exit(1);
@@ -313,39 +313,39 @@ double getRecFromTruth(const int targetid, const vector<double> * mombyrange)
 
         rpm = (*mombyrange)[ii];
 
-        chi2 = (*reco_daughter_allTrack_Chi2_proton)[ii];
-        ndof = (*reco_daughter_allTrack_Chi2_ndof)[ii];
+        AnaIO::chi2 = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
+        AnaIO::ndof = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
 
-        if(!reco_daughter_allTrack_calibrated_dEdX_SCE){
-          printf("reco_daughter_allTrack_calibrated_dEdX_SCE null!\n"); exit(1);
+        if(!AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE){
+          printf("AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE null!\n"); exit(1);
         }
 
-        GetdEdx( (*reco_daughter_allTrack_calibrated_dEdX_SCE)[ii], startE, lastE, 0);
+        GetdEdx( (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii], startE, lastE, 0);
         //printf("==================================\n");
 
-        lastTruncatedMeanE = GetTruncatedMean(lastE, 2, 11, 0.0, 1.0);
-        startTruncatedMeanE = GetTruncatedMean(startE, 2, 11, 0.4, 0.95);
+        AnaIO::lastTruncatedMeanE = GetTruncatedMean(lastE, 2, 11, 0.0, 1.0);
+        AnaIO::startTruncatedMeanE = GetTruncatedMean(startE, 2, 11, 0.4, 0.95);
 
         counter++;
       }
     }
   }
 
-  ndEdxCls = lastE.size();
-  if(ndEdxCls>=6){
-    lastE0 = lastE[0];
-    lastE1 = lastE[1];
-    lastE2 = lastE[2];
-    lastE3 = lastE[3];
-    lastE4 = lastE[4];
-    lastE5 = lastE[5];
+  AnaIO::ndEdxCls = lastE.size();
+  if(AnaIO::ndEdxCls>=6){
+    AnaIO::lastE0 = lastE[0];
+    AnaIO::lastE1 = lastE[1];
+    AnaIO::lastE2 = lastE[2];
+    AnaIO::lastE3 = lastE[3];
+    AnaIO::lastE4 = lastE[4];
+    AnaIO::lastE5 = lastE[5];
     
-    startE0 = startE[0];
-    startE1 = startE[1];
-    startE2 = startE[2];
-    startE3 = startE[3];
-    startE4 = startE[4];
-    startE5 = startE[5];
+    AnaIO::startE0 = startE[0];
+    AnaIO::startE1 = startE[1];
+    AnaIO::startE2 = startE[2];
+    AnaIO::startE3 = startE[3];
+    AnaIO::startE4 = startE[4];
+    AnaIO::startE5 = startE[5];
   }
 
   return rpm;
@@ -358,9 +358,9 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
 
   cout<<"\n\n                       Running anaRec kPiZero "<<kPiZero<<" TrackingProton "<<kTrackingProton<<endl<<endl;
 
-  TTree * tree = GetInputTree("pionana/beamana");
-  TTree * tout = GetOutputTree(lout, tag);  
-  IniRecHist(lout, tag);
+  TTree * tree = AnaIO::GetInputTree("pionana/beamana");
+  TTree * tout = AnaIO::GetOutputTree(lout, tag);  
+  AnaIO::IniRecHist(lout, tag);
 
   //==============================================================================================================
   int ientry = 0;
@@ -381,32 +381,32 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
    
     //===========================================================
     //calculate before any cuts! Only filled after ALL cuts!
-    const int TruthBeamType = GetParticleType(true_beam_PDG);
+    const int TruthBeamType = GetParticleType(AnaIO::true_beam_PDG);
     int  protonIdx = -999, piplusIdx = -999;
     bool tmpkSig = false;
-    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, 0x0, protonIdx, piplusIdx, tmpkSig);
+    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, protonIdx, piplusIdx, tmpkSig);
 
-    finPimomentum = vecPiP[0].P();
-    finProtonmomentum = vecPiP[1].P();
-    fin2Pmom = vecPiP[2].P();
+    AnaIO::finPimomentum = vecPiP[0].P();
+    AnaIO::finProtonmomentum = vecPiP[1].P();
+    AnaIO::fin2Pmom = vecPiP[2].P();
 
     //with phase space cut
-    kSignal = (true_beam_PDG==211) &&  tmpkSig && (finProtonmomentum>0.45 && fin2Pmom<0.45);
+    AnaIO::kSignal = (AnaIO::true_beam_PDG==211) &&  tmpkSig && (AnaIO::finProtonmomentum>0.45 && AnaIO::fin2Pmom<0.45);
     if(!kPiZero){
-      kSignal = kSignal && (finPimomentum>0.15);
+      AnaIO::kSignal = AnaIO::kSignal && (AnaIO::finPimomentum>0.15);
     }
 
-    //const bool varTrueBeam = (true_beam_PDG==211);
-    const bool varSignal = kSignal;
+    //const bool varTrueBeam = (AnaIO::true_beam_PDG==211);
+    const bool varSignal = AnaIO::kSignal;
     //===========================================================
     //0. true beam particle //"In data the beam Instrumentation is able to filter for these events but is not inside the MC" so read data file has this
-    if(true_beam_PDG != 211 && true_beam_PDG != -13){
+    if(AnaIO::true_beam_PDG != 211 && AnaIO::true_beam_PDG != -13){
       continue;
     }
 
     //1. Beam dEdx cut
-    hBeamLen->Fill(reco_beam_len);
-    hSignalVsLen->Fill(reco_beam_len, varSignal);
+    AnaIO::hBeamLen->Fill(AnaIO::reco_beam_len);
+    AnaIO::hSignalVsLen->Fill(AnaIO::reco_beam_len, varSignal);
   
     if(!cutBeamdEdx(varSignal)){
       continue;
@@ -416,44 +416,44 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
    
 
     //0. primary beam type 
-    hRecoBeamType->Fill(reco_beam_type);
+    AnaIO::hRecoBeamType->Fill(AnaIO::reco_beam_type);
     //no effect, shadowed by TMeanStart cut
     /*
-    if(reco_beam_type!=13){//13: Pandora "track like"
+    if(AnaIO::reco_beam_type!=13){//13: Pandora "track like"
       continue;
     }
     */
 
     //1. beam position MC cut, need MC truth, how is it possible in analysis?
     const bool kBeamPosPass = getBeamPosPass();
-    hBeamPosPass->Fill(kBeamPosPass);
+    AnaIO::hBeamPosPass->Fill(kBeamPosPass);
     if(!kBeamPosPass){
       continue;
     }
     //-> now signal purity 138/3537 = 3.9%, 2283 pi+ bea, 801 e+ beam
 
     //2. APA3 
-    hBeamEndZ->Fill(reco_beam_endZ);
-    hBeamEndZPass->Fill(!(reco_beam_endZ>=226));
+    AnaIO::hBeamEndZ->Fill(AnaIO::reco_beam_endZ);
+    AnaIO::hBeamEndZPass->Fill(!(AnaIO::reco_beam_endZ>=226));
 
-    if(reco_beam_endZ>=226){
-      hBeamEndZPass->Fill(false);
+    if(AnaIO::reco_beam_endZ>=226){
+      AnaIO::hBeamEndZPass->Fill(false);
       continue;
     }
     //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
    
     //9. n track daughter
-    nTrack = getNTrack();
-    hBeamNTrack->Fill(nTrack);
-    hSignalVsBeamNTrack->Fill(nTrack, varSignal);
+    AnaIO::nTrack = getNTrack();
+    AnaIO::hBeamNTrack->Fill(AnaIO::nTrack);
+    AnaIO::hSignalVsBeamNTrack->Fill(AnaIO::nTrack, varSignal);
     if(kPiZero){
       //the purity profile looks weird for pizeor signal
-      if(nTrack!=1){
+      if(AnaIO::nTrack!=1){
         continue;
       }
     }
     else{
-      if(nTrack!=2){
+      if(AnaIO::nTrack!=2){
         continue;
       }
     }
@@ -462,14 +462,14 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     //============== Benchmark after ALL cuts !!! =========================
     //benchmark
 
-    hTruthBeamType->Fill(TruthBeamType);
-    hTruthSignal->Fill(kSignal);
+    AnaIO::hTruthBeamType->Fill(TruthBeamType);
+    AnaIO::hTruthSignal->Fill(AnaIO::kSignal);
    
     //======================= NO cuts below ========================
 
     //--- to test
     //Fill kSignal vs variable; the reason for kSignal but not kBeam is the signal is interacting pion, not all pions. Directly choose matrix to optimize for it
-    hSigAfterVsLen->Fill(reco_beam_len, varSignal);
+    AnaIO::hSigAfterVsLen->Fill(AnaIO::reco_beam_len, varSignal);
 
     //============= done loop
     
@@ -489,9 +489,9 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
 
   cout<<"\n\n                       Running anaTruth kPiZero "<<kPiZero<<" TrackingProton "<<kTrackingProton<<endl<<endl;
 
-  TTree * tree = GetInputTree("pionana/beamana");
-  TTree * tout = GetOutputTree(lout, tag);
-  IniTruthHist(lout, tag);
+  TTree * tree = AnaIO::GetInputTree("pionana/beamana");
+  TTree * tout = AnaIO::GetOutputTree(lout, tag);
+  AnaIO::IniTruthHist(lout, tag);
 
   //==============================================================================================================
   int ientry = 0;
@@ -512,51 +512,51 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
    
     //===========================================================
 
-    const int beamtype = GetParticleType(true_beam_PDG);
-    hbeamType->Fill(beamtype);
+    const int beamtype = GetParticleType(AnaIO::true_beam_PDG);
+    AnaIO::hbeamType->Fill(beamtype);
 
     if(beamtype!=gkPiPlus){
       continue;
     }
 
-    const int nd = true_beam_daughter_PDG->size();
-    hndaughter->Fill(nd);
+    const int nd = AnaIO::true_beam_daughter_PDG->size();
+    AnaIO::hndaughter->Fill(nd);
     if(nd==0){
       continue;
     }
 
-    const TLorentzVector iniPiPlus(true_beam_endPx, true_beam_endPy, true_beam_endPz, PionMass());
+    const TLorentzVector iniPiPlus(AnaIO::true_beam_endPx, AnaIO::true_beam_endPy, AnaIO::true_beam_endPz, PionMass());
 
-    iniPimomentum = iniPiPlus.P();
-    iniPitheta = iniPiPlus.Theta()*TMath::RadToDeg();
+    AnaIO::iniPimomentum = iniPiPlus.P();
+    AnaIO::iniPitheta = iniPiPlus.Theta()*TMath::RadToDeg();
 
     int  protonIdx = -999, piplusIdx = -999;
-    kSignal = false;
-    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, hselectedDaughterType, protonIdx, piplusIdx, kSignal);
-    hnexcl->Fill(kSignal);
+    AnaIO::kSignal = false;
+    vector<TLorentzVector> vecPiP = getFSTruth(kPiZero, protonIdx, piplusIdx, AnaIO::kSignal);
+    AnaIO::hnexcl->Fill(AnaIO::kSignal);
 
-    finPimomentum = vecPiP[0].P();
-    finProtonmomentum = vecPiP[1].P();
-    fin2Pmom = vecPiP[2].P();
+    AnaIO::finPimomentum = vecPiP[0].P();
+    AnaIO::finProtonmomentum = vecPiP[1].P();
+    AnaIO::fin2Pmom = vecPiP[2].P();
 
      //signal truth
-    if(kSignal){
-      hnproton->Fill(nproton);
-      hnneutron->Fill(nneutron);
-      hnPiZero->Fill(nPiZero);
+    if(AnaIO::kSignal){
+      AnaIO::hnproton->Fill(AnaIO::nproton);
+      AnaIO::hnneutron->Fill(AnaIO::nneutron);
+      AnaIO::hnPiZero->Fill(AnaIO::nPiZero);
       
       //re-calculate final pi p theta w.r.t. iniPi
       const int targetA = 40;
       const int targetZ = 18;
-      getCommonTKI(targetA, targetZ, &iniPiPlus, &(vecPiP[0]), &(vecPiP[1]), dalphat, dphit, dpt, pn, finPitheta, finProtontheta);
+      getCommonTKI(targetA, targetZ, &iniPiPlus, &(vecPiP[0]), &(vecPiP[1]), AnaIO::dalphat, AnaIO::dphit, AnaIO::dpt, AnaIO::pn, AnaIO::finPitheta, AnaIO::finProtontheta);
       
-      hmomIniPi->Fill(iniPimomentum);
-      hmomFinPi->Fill(finPimomentum);
-      hmomFinProton->Fill(finProtonmomentum);
-      hdalphat->Fill(dalphat);
-      hdphit->Fill(dphit);
-      hdpt->Fill(dpt);
-      hpn->Fill(pn);
+      AnaIO::hmomIniPi->Fill(AnaIO::iniPimomentum);
+      AnaIO::hmomFinPi->Fill(AnaIO::finPimomentum);
+      AnaIO::hmomFinProton->Fill(AnaIO::finProtonmomentum);
+      AnaIO::hdalphat->Fill(AnaIO::dalphat);
+      AnaIO::hdphit->Fill(AnaIO::dphit);
+      AnaIO::hdpt->Fill(AnaIO::dpt);
+      AnaIO::hpn->Fill(AnaIO::pn);
     }
 
     vector<double>* mombyrange = 0x0;
@@ -564,21 +564,21 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
     double * recmomentum = 0x0;
 
     if(kTrackingProton){
-      mombyrange = reco_daughter_allTrack_momByRange_proton;
+      mombyrange = AnaIO::reco_daughter_allTrack_momByRange_proton;
       kDoTracking = (protonIdx>=0);
-      recmomentum = &recProtonmomentum;
+      recmomentum = &AnaIO::recProtonmomentum;
     }
     else{
-      mombyrange = reco_daughter_allTrack_momByRange_muon;
+      mombyrange = AnaIO::reco_daughter_allTrack_momByRange_muon;
       kDoTracking = (piplusIdx>=0);
-      recmomentum = &recPiPlusmomentum;
+      recmomentum = &AnaIO::recPiPlusmomentum;
     }
 
-    hksignp->Fill(kDoTracking, kSignal);
+    AnaIO::hksignp->Fill(kDoTracking, AnaIO::kSignal);
  
     //has true proton
     if(kDoTracking){
-      const int targetIdx = (*true_beam_daughter_ID)[protonIdx];
+      const int targetIdx = (*AnaIO::true_beam_daughter_ID)[protonIdx];
       (*recmomentum) = getRecFromTruth(targetIdx, mombyrange);
       tout->Fill();
     }
