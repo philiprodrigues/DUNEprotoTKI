@@ -369,8 +369,15 @@ est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -
     double recp        = -999;
     const double startE2 = dedxarray[2];
     const double startE3 = dedxarray[3];
+
+    const double chi2 = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
+    const double ndof = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
+    const double Chi2NDF = chi2/(ndof+1E-10);
+
     //all signal protons have nhit below 260
     //all signal protons have startE3 > 9
+    //with Chi2NDF cut  44/191 = 23% purity; without 46/197 = 23% purity, slightly higher efficiency
+    //test if(startE2>10 && nhits<260 && startE3>9 && Chi2NDF<50){
     if(startE2>10 && nhits<260 && startE3>9){
       recp = (*AnaIO::reco_daughter_allTrack_momByRange_proton)[ii];
       nproton++;
@@ -388,10 +395,6 @@ est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -
     if(michelScore>0.5){
       nmichel++;
     }
-
-    const double chi2 = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
-    const double ndof = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
-    const double Chi2NDF = chi2/(ndof+1E-10);
 
     int pdg = -999;
     double truemomentum = -999;
@@ -594,13 +597,18 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
 
     /*
       PiPlus: ngamma = 0, nproton=1 -> 75/218=34% in signal sample; 63/467 = 13% purity, 63/218 = 29% efficiency, p*e = 63*63/218/467 = 3.9%
+      PiPlus: ngamma = 0, nproton=1,  noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 61/380 = 16% 
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 44/191 = 23% purity, e*p = 44.*44./191./218. = 4.6%
+  (*) PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9                is proton, no pion-analysis pre-cuts! -> 46/197 = 23% purity, slightly higher efficiency
+
       PiZero: ngamma = 2, nmichel=0, nproton=1 -> 32/260=12% in signal sample; 27/68 = 40% purity, 27/260 = 10% efficiency, p*e = 27*27/68/260 = 4.1%
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1 -> ; 19/40 = 48% purity
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 is proton -> 18/37=49% purity
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton -> 18/32=56% purity, p*e = 18.*18./32./260. = 3.9%
       PiZero: ngamma = 2, nmichel=0, nproton=1,           noly nhit<260 and startE3>9 is proton -> 21/47=45% purity -> so it is important to have ntrack=1
 
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton, no pion-analysis pre-cuts! -> 20/36=56% purity, eff*purity = 20.*20./36./260. = 4.3%
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 18/34 = 53% purity
+  (*) PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton, no pion-analysis pre-cuts! -> 20/36=56% purity, eff*purity = 20.*20./36./260. = 4.3%
      */
 
     if(!kPiZero){
@@ -613,6 +621,9 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
         continue;
       }
       */
+      if(AnaIO::nTrack!=2){
+        continue;
+      }
     }
     else{
       if(cutngamma!=2){
