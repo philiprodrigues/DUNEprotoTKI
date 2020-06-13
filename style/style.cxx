@@ -231,7 +231,8 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
         gStyle->SetStatColor(0);
         gStyle->SetStatStyle(0);
         gStyle->SetStatY(0.9);
-        gStyle->SetOptTitle(1);
+        //gStyle->SetOptTitle(1);
+        //gPad->SetTicks(1,1);
 
         hsum->UseCurrentStyle();
         hsum->SetLineColor(kBlack);
@@ -240,6 +241,7 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
         //need to draw hsum first to show Stat box, THStack won't do thta
         hsum->Draw("hist text");
         hstk->Draw("hist same");
+        hsum->Draw("axis same");//get the ticks
       }
       else{
         hstk->Draw("hist");
