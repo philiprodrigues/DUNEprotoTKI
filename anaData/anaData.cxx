@@ -550,29 +550,32 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
         continue;
       }
       
-      //x. primary beam type 
-      AnaIO::hRecoBeamType->Fill(AnaIO::reco_beam_type);
-      //no effect, shadowed by TMeanStart cut
-      //    if(AnaIO::reco_beam_type!=13){//13: Pandora "track like"
-      //      continue;
-      //    }
-      
-      //1. beam position MC cut, need MC truth, how is it possible in analysis?
-      const bool kBeamPosPass = getBeamPosPass();
-      AnaIO::hBeamPosPass->Fill(kBeamPosPass);
-      if(!kBeamPosPass){
-        continue;
+      //without 20 sig in 36 events; with 18/32, both 56% purity -> same purity, without this has higher efficiency
+      if(0){
+        //x. primary beam type 
+        AnaIO::hRecoBeamType->Fill(AnaIO::reco_beam_type);
+        //no effect, shadowed by TMeanStart cut
+        //    if(AnaIO::reco_beam_type!=13){//13: Pandora "track like"
+        //      continue;
+        //    }
+        
+        //1. beam position MC cut, need MC truth, how is it possible in analysis?
+        const bool kBeamPosPass = getBeamPosPass();
+        AnaIO::hBeamPosPass->Fill(kBeamPosPass);
+        if(!kBeamPosPass){
+          continue;
+        }
+        //-> now signal purity 138/3537 = 3.9%, 2283 pi+ bea, 801 e+ beam
+        
+        //2. APA3 
+        AnaIO::hBeamEndZ->Fill(AnaIO::reco_beam_endZ);
+        AnaIO::hBeamEndZPass->Fill(!(AnaIO::reco_beam_endZ>=226));
+        if(AnaIO::reco_beam_endZ>=226){
+          AnaIO::hBeamEndZPass->Fill(false);
+          continue;
+        }
+        //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
       }
-      //-> now signal purity 138/3537 = 3.9%, 2283 pi+ bea, 801 e+ beam
-      
-      //2. APA3 
-      AnaIO::hBeamEndZ->Fill(AnaIO::reco_beam_endZ);
-      AnaIO::hBeamEndZPass->Fill(!(AnaIO::reco_beam_endZ>=226));
-      if(AnaIO::reco_beam_endZ>=226){
-        AnaIO::hBeamEndZPass->Fill(false);
-        continue;
-      }
-      //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
     }
 
     //3. n track daughter
@@ -591,6 +594,8 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 is proton -> 18/37=49% purity
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton -> 18/32=56% purity, p*e = 18.*18./32./260. = 3.9%
       PiZero: ngamma = 2, nmichel=0, nproton=1,           noly nhit<260 and startE3>9 is proton -> 21/47=45% purity -> so it is important to have ntrack=1
+
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton, no pion-analysis pre-cuts! -> 20/36=56% purity, eff*purity = 20.*20./36./260. = 4.3%
      */
 
     if(!kPiZero){
@@ -613,6 +618,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
         continue;
       }
 
+      //with this 56% purity, without 45%
       if(AnaIO::nTrack!=1){
         continue;
       }
