@@ -517,11 +517,11 @@ void IniRecHist(TList * lout, const TString tag)
   hCutemScore     = new TH2D("c003CutemScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutemScore);
   hCutmichelScore = new TH2D("c004CutmichelScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutmichelScore);
   hCutnHits       = new TH2D("c005CutnHitsSTK"+tag,"", 20, 0, 400, 10, -0.5, 9.5); lout->Add(hCutnHits);
-  hCutChi2NDF     = new TH2D("c006CutChi2NDFSTK"+tag,"", 20, 0, 100, 10, -0.5, 9.5); lout->Add(hCutChi2NDF);
-  hCutstartE2     = new TH2D("c007CutstartE2STK"+tag,"", 20, 0, 20, 10, -0.5, 9.5); lout->Add(hCutstartE2);
-  hCutstartE3     = new TH2D("c008CutstartE3STK"+tag,"", 20, 0, 20, 10, -0.5, 9.5); lout->Add(hCutstartE3);
-  hCutlastE2      = new TH2D("c009CutlastE2STK"+tag,"", 20, 0, 20, 10, -0.5, 9.5); lout->Add(hCutlastE2);
-  hCutlastE3      = new TH2D("c010CutlastE3STK"+tag,"", 20, 0, 20, 10, -0.5, 9.5); lout->Add(hCutlastE3);
+  hCutChi2NDF     = new TH2D("c006CutChi2NDFSTK"+tag,"", 30, 0, 500, 10, -0.5, 9.5); lout->Add(hCutChi2NDF);
+  hCutstartE2     = new TH2D("c007CutstartE2STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE2);
+  hCutstartE3     = new TH2D("c008CutstartE3STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE3);
+  hCutlastE2      = new TH2D("c009CutlastE2STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutlastE2);
+  hCutlastE3      = new TH2D("c010CutlastE3STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutlastE3);
 
 }
 

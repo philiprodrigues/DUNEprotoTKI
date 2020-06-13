@@ -502,7 +502,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
         continue;
       }
       
-      //without 20 sig in 36 events; with 18/32, both 56% purity -> same purity, without this has higher efficiency
+      //for pi+ it is worse to include this pion-ana-cut (e*p: 6.7->6.3%), for pi0 it is the same e*p, better purity, worse efficiency.
       if(0){//====================================================== switch off pion analysis cuts
         //x. primary beam type 
         AnaIO::hRecoBeamType->Fill(AnaIO::reco_beam_type);
@@ -569,6 +569,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<60 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 44/138 = 32%
 
       PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=16 instead of 3)is proton, no pion-analysis pre-cuts! -> 40/127 = 32%, e*p = 5.8%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, HAS pion-analysis pre-cuts! -> 39/111 = 35%, e*p = 6.3%
       (*) PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 44/132 = 33%, e*p = 6.7%
 
 
@@ -591,6 +592,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and chi2<30 ( NdEdx>=6 instead of 3 but no startE2,E3 at all) is proton, no pion-analysis pre-cuts! -> 20/33=61%
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and chi2<35 ( NdEdx>=6 instead of 3 but no startE2,E3 at all) is proton, no pion-analysis pre-cuts! -> 20/34=59%
 
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=6 instead of 3 ) is proton, HAS pion-analysis pre-cuts! -> 21/32=66%, e*p= 5.3%
       (*) PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=6 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 22/35=63%, e*p = 5.3%
 
      */
