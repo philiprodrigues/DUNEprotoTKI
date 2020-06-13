@@ -169,7 +169,8 @@ void DrawHist(TList *lout, const TString outdir, const TString tag, const bool k
     }
     else{
       if(tag.Contains("profileX")){
-        hh->SetMaximum(0.1);
+        //hh->SetMaximum(0.1);
+        hh->SetMaximum(0.3);
         dopt = "hist";
       }
       else if(tag.Contains("pdf") || tag.Contains("cdf")){

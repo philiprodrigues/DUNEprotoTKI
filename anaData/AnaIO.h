@@ -74,12 +74,19 @@ namespace AnaIO
   vector<int>* true_beam_daughter_ID = 0x0;
   vector<int>* reco_daughter_PFP_true_byHits_ID = 0x0;
   vector<int>* reco_daughter_allTrack_ID = 0x0;
+
   vector<double>* reco_daughter_allTrack_momByRange_proton = 0x0;
   vector<double>* reco_daughter_allTrack_momByRange_muon = 0x0;
   vector<vector<double> >* reco_daughter_allTrack_calibrated_dEdX_SCE = 0x0;
 
   vector<double>* reco_daughter_allTrack_Chi2_proton = 0x0;
   vector<int>* reco_daughter_allTrack_Chi2_ndof = 0x0;
+
+  vector<int>     *reco_daughter_PFP_ID =0x0;
+  vector<int>     *reco_daughter_PFP_nHits =0x0;
+  vector<double>  *reco_daughter_PFP_trackScore =0x0;
+  vector<double>  *reco_daughter_PFP_emScore =0x0;
+  vector<double>  *reco_daughter_PFP_michelScore =0x0;
 
   double true_beam_endPx = -999;
   double true_beam_endPy = -999;
@@ -181,13 +188,26 @@ namespace AnaIO
  TH1D * hBeamEndZ = 0x0;
  TH1I * hBeamEndZPass = 0x0;
 
- TH1I * hBeamNTrack = 0x0;
+ TH2I * hBeamNTrack = 0x0;
  TH2D * hSignalVsBeamNTrack = 0x0;
 
  //--- to test
  TH1D * hBeamLen = 0x0;
  TH2D * hSignalVsLen = 0x0;
  TH2D * hSigAfterVsLen = 0x0;
+
+ //--- resolution
+ TH2D * hProtonMomentumRes = 0x0;
+ TH1I * hProtonnHits = 0x0;
+ TH1D * hProtontrackScore = 0x0;
+ TH1D * hProtonemScore = 0x0;
+ TH1D * hProtonmichelScore = 0x0;
+
+ TH2D * hPiPlusMomentumRes = 0x0;
+ TH1I * hPiPlusnHits = 0x0;
+ TH1D * hPiPlustrackScore = 0x0;
+ TH1D * hPiPlusemScore = 0x0;
+ TH1D * hPiPlusmichelScore = 0x0;
 
 //==============================================================================
 //==============================================================================
@@ -354,11 +374,18 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
   tree->SetBranchAddress("true_beam_daughter_ID", &true_beam_daughter_ID);
   tree->SetBranchAddress("reco_daughter_PFP_true_byHits_ID", &reco_daughter_PFP_true_byHits_ID);
   tree->SetBranchAddress("reco_daughter_allTrack_ID", &reco_daughter_allTrack_ID);
+
   tree->SetBranchAddress("reco_daughter_allTrack_momByRange_proton", &reco_daughter_allTrack_momByRange_proton);
   tree->SetBranchAddress("reco_daughter_allTrack_momByRange_muon", &reco_daughter_allTrack_momByRange_muon);
   tree->SetBranchAddress("reco_daughter_allTrack_calibrated_dEdX_SCE", &reco_daughter_allTrack_calibrated_dEdX_SCE);
   tree->SetBranchAddress("reco_daughter_allTrack_Chi2_proton", &reco_daughter_allTrack_Chi2_proton);
   tree->SetBranchAddress("reco_daughter_allTrack_Chi2_ndof", &reco_daughter_allTrack_Chi2_ndof);
+
+  tree->SetBranchAddress("reco_daughter_PFP_ID", &reco_daughter_PFP_ID);
+  tree->SetBranchAddress("reco_daughter_PFP_nHits", &reco_daughter_PFP_nHits);
+  tree->SetBranchAddress("reco_daughter_PFP_trackScore", &reco_daughter_PFP_trackScore);
+  tree->SetBranchAddress("reco_daughter_PFP_emScore", &reco_daughter_PFP_emScore);
+  tree->SetBranchAddress("reco_daughter_PFP_michelScore", &reco_daughter_PFP_michelScore);
 
   tree->SetBranchAddress("true_beam_endPx", &true_beam_endPx);
   tree->SetBranchAddress("true_beam_endPy", &true_beam_endPy);
@@ -462,7 +489,7 @@ void IniRecHist(TList * lout, const TString tag)
  const int nBeamNTrack = 10;
   const double BeamNTrackmin = -0.5;
   const double BeamNTrackmax = 9.5;
-  hBeamNTrack = new TH1I("h6BeamNTrack"+tag,"", nBeamNTrack, BeamNTrackmin, BeamNTrackmax); lout->Add(hBeamNTrack);
+  hBeamNTrack = new TH2I("h6BeamNTrack"+tag,"", nBeamNTrack, BeamNTrackmin, BeamNTrackmax, 5, -0.5, 4.5); lout->Add(hBeamNTrack);
   hSignalVsBeamNTrack = new TH2D("p6SignalVsBeanNTrack"+tag,"", nBeamNTrack, BeamNTrackmin, BeamNTrackmax, nPass, Passmin, Passmax); lout->Add(hSignalVsBeamNTrack);
 
   //--- to test
@@ -472,6 +499,18 @@ void IniRecHist(TList * lout, const TString tag)
   hBeamLen = new TH1D("h9BeamLen"+tag,"",nlen, lenmin, lenmax); lout->Add(hBeamLen);
   hSignalVsLen = new TH2D("p9SignalVsLen"+tag,"", nlen, lenmin, lenmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLen);
   hSigAfterVsLen = new TH2D("p9SigAfterVsLen"+tag,"", nlen, lenmin, lenmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLen);
+
+  //--- resolution
+  hProtonMomentumRes = new TH2D("b0ProtonMomentumRes"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hProtonMomentumRes);
+  hProtonnHits = new TH1I("b1ProtonnHits"+tag,"", 20, -0.5, 399.5); lout->Add(hProtonnHits);
+  hProtontrackScore = new TH1D("b1ProtontrackScore"+tag,"", 20, 0, 1); lout->Add(hProtontrackScore);
+  hProtonemScore = new TH1D("b1ProtonemScore"+tag,"", 20, 0, 1); lout->Add(hProtonemScore);
+  hProtonmichelScore = new TH1D("b1ProtonmichelScore"+tag,"", 20, 0, 1); lout->Add(hProtonmichelScore);
+  hPiPlusMomentumRes = new TH2D("b0PiPlusMomentumRes"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiPlusMomentumRes);
+  hPiPlusnHits = new TH1I("b1PiPlusnHits"+tag,"", 20, -0.5, 399.5); lout->Add(hPiPlusnHits);
+  hPiPlustrackScore = new TH1D("b1PiPlustrackScore"+tag,"", 20, 0, 1); lout->Add(hPiPlustrackScore);
+  hPiPlusemScore = new TH1D("b1PiPlusemScore"+tag,"", 20, 0, 1); lout->Add(hPiPlusemScore);
+  hPiPlusmichelScore = new TH1D("b1PiPlusmichelScore"+tag,"", 20, 0, 1); lout->Add(hPiPlusmichelScore);
 }
 
 void IniTruthHist(TList * lout, const TString tag)

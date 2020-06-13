@@ -286,29 +286,160 @@ vector<TLorentzVector> getFSTruth(const bool kPiZero, int & protonIdx, int & pip
   return vec;
 }
 
-int getNTrack()
+
+int getTruthFromRec(const int recidx, int & pdg, double & momentum)
 {
-  int ntrack = 0;
-  for(unsigned int ii=0; ii<AnaIO::reco_daughter_allTrack_ID->size(); ii++){
-    if((*AnaIO::reco_daughter_allTrack_ID)[ii] != -1) {
-      ntrack++;
+  const int truthID = (*AnaIO::reco_daughter_PFP_true_byHits_ID)[recidx];
+  int trueidx = -999;
+  pdg = -999;
+  momentum = -999;
+  int counter = 0;
+  for(unsigned int ii = 0; ii<AnaIO::true_beam_daughter_ID->size(); ii++){
+    if(  (*AnaIO::true_beam_daughter_ID)[ii] == truthID ){
+      if(counter){
+        printf("getTruthFromRec truthID found again %d %d\n", recidx, truthID); exit(1);
+      }
+      trueidx = ii;
+      counter++;
     }
   }
-  return ntrack;
+
+  if(trueidx>=0){
+    pdg = (*AnaIO::true_beam_daughter_PDG)[trueidx];
+
+    const TVector3 vec((*AnaIO::true_beam_daughter_startPx)[trueidx], (*AnaIO::true_beam_daughter_startPy)[trueidx], (*AnaIO::true_beam_daughter_startPz)[trueidx]);
+    momentum = vec.Mag();
+  }
+
+  return trueidx;
 }
 
-double getRecFromTruth(const int targetid, const vector<double> * mombyrange)
+int getNTrack(int & nproton, int & ngamma, int & nmichel, const bool kprint=false, const bool ksig=false)
+{
+  /*
+root [11] beamana->Scan("reco_daughter_PFP_ID:reco_daughter_PFP_true_byHits_ID:reco_daughter_allTrack_ID:reco_daughter_allShower_ID:true_beam_daughter_ID:true_beam_daughter_reco_byHits_PFP_ID:true_beam_daughter_reco_byHits_allTrack_ID:true_beam_daughter_reco_byHits_allShower_ID")
+***********************************************************************************************************************
+*    Row   * Instance * reco_daug * reco_daug * reco_daug * reco_daug * true_beam * true_beam * true_beam * true_beam *
+***********************************************************************************************************************
+*       13 *        0 *        86 *     40841 *        86 *        86 *     40800 *           *           *           *
+*       13 *        1 *       226 *     40855 *       225 *       225 *     40841 *           *           *           *
+
+So
+(reco_daughter_PFP_ID = reco_daughter_allTrack_ID = reco_daughter_allShower_ID)
+                             !=
+ (reco_daughter_PFP_true_byHits_ID = true_beam_daughter_ID)
+
+All 
+true_beam_daughter_reco_byHits_PFP_ID:
+true_beam_daughter_reco_byHits_allTrack_ID:
+true_beam_daughter_reco_byHits_allShower_ID
+not set
+   */
+
+  const int recsize = AnaIO::reco_daughter_PFP_ID->size();
+  const int mbr     = AnaIO::reco_daughter_allTrack_momByRange_proton->size();
+  if(recsize!=mbr){
+    printf("recsize != mbr %d %d\n", recsize, mbr); exit(1); 
+  }
+
+  /*
+est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -397725.603302 nhits 7 trackScore 0.016739 emScore 0.983240 michelScore 0.289565 sum 1.289545
+   */
+  nproton = 0;
+  ngamma = 0;
+  nmichel = 0;
+  int ntracks = 0;
+ 
+  for(int ii=0; ii<recsize; ii++){
+
+    const vector<double>  dedxarray = (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii];
+    const int dedxsize = dedxarray.size();
+     if(dedxsize<3){
+      //do not count it as track
+      continue;
+    }
+
+     const int nhits          = (*AnaIO::reco_daughter_PFP_nHits)[ii];
+    /*//they are indeed different: 236 80
+    if(nhits != dedxsize){
+      printf("nhits!=dedx size %d %d\n", nhits, dedxsize); exit(1);
+    }
+    */
+
+    double recp        = -999;
+    const double startE2 = dedxarray[2];
+    const double startE3 = dedxarray[3];
+    //all signal protons have nhit below 260
+    //all signal protons have startE3 > 9
+    if(startE2>10 && nhits<260 && startE3>9){
+      recp = (*AnaIO::reco_daughter_allTrack_momByRange_proton)[ii];
+      nproton++;
+    }
+  
+    const double trackScore  = (*AnaIO::reco_daughter_PFP_trackScore)[ii];
+    if(trackScore>0.5){
+      ntracks++;
+    }
+    const double emScore     = (*AnaIO::reco_daughter_PFP_emScore)[ii];
+    if(emScore>0.5){
+      ngamma++;
+    }
+    const double michelScore = (*AnaIO::reco_daughter_PFP_michelScore)[ii];
+    if(michelScore>0.5){
+      nmichel++;
+    }
+
+    int pdg = -999;
+    double truemomentum = -999;
+    const int trueID = getTruthFromRec(ii, pdg, truemomentum);
+
+    if(kprint){
+      printf("test ksig %d rec %d/%d trueID %d pdg %d truemomentum %f recp %f resolution %f startE2 %f startE3 %f nhits %d trackScore %f emScore %f michelScore %f sum %f\n", ksig, ii, recsize, trueID, pdg, truemomentum, recp, recp/truemomentum-1, startE2, startE3,  nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore);
+
+      if(recp!=-999){
+        if(pdg==2212 && trueID>=0){
+          AnaIO::hProtonnHits->Fill(nhits);
+          AnaIO::hProtontrackScore->Fill(trackScore);
+          AnaIO::hProtonemScore->Fill(emScore);
+          AnaIO::hProtonmichelScore->Fill(michelScore);
+          AnaIO::hProtonMomentumRes->Fill(truemomentum, recp/truemomentum-1);
+        }
+      }
+      else{
+        if(pdg==211 && trueID>=0){
+          AnaIO::hPiPlusnHits->Fill(nhits);
+          AnaIO::hPiPlustrackScore->Fill(trackScore);
+          AnaIO::hPiPlusemScore->Fill(emScore);
+          AnaIO::hPiPlusmichelScore->Fill(michelScore);
+          //AnaIO::hPiPlusMomentumRes->Fill(truemomentum, recp/truemomentum-1);
+        }
+      }
+    }
+    
+  }
+
+  if(kprint){
+    printf("\n\n");
+  }
+
+  return ntracks;
+}
+
+double getRecFromTruth(const int truthID, const vector<double> * mombyrange)
 {
   vector<double> lastE, startE;
+
+  static int ievent = 0;
+  ievent++;
 
   double rpm = -999;
   int counter = 0;
   for(unsigned int ii = 0; ii < AnaIO::reco_daughter_PFP_true_byHits_ID->size(); ii++){
-    if((*AnaIO::reco_daughter_PFP_true_byHits_ID)[ii] == targetid) {
+    if((*AnaIO::reco_daughter_PFP_true_byHits_ID)[ii] == truthID) {
       if((*AnaIO::reco_daughter_allTrack_ID)[ii] != -1) {
 
         if(counter){
-          printf("rpm already set!! %f %f %d\n", rpm, (*mombyrange)[ii], counter); //exit(1);
+          printf("rpm already set!! %f %f %d %d\n", rpm, (*mombyrange)[ii], counter, ievent); //exit(1);
         }
 
         rpm = (*mombyrange)[ii];
@@ -395,6 +526,8 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     AnaIO::finProtonmomentum = vecPiP[1].P();
     AnaIO::fin2Pmom = vecPiP[2].P();
 
+    //no phase space cut
+    AnaIO::kSignal = (AnaIO::true_beam_PDG==211) &&  tmpkSig; 
     //with phase space cut
     AnaIO::kSignal = (AnaIO::true_beam_PDG==211) &&  tmpkSig && (AnaIO::finProtonmomentum>0.45 && AnaIO::fin2Pmom<0.45);
     if(!kPiZero){
@@ -403,66 +536,124 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
 
     //const bool varTrueBeam = (AnaIO::true_beam_PDG==211);
     const bool varSignal = AnaIO::kSignal;
-    //===========================================================
-    //0. true beam particle //"In data the beam Instrumentation is able to filter for these events but is not inside the MC" so read data file has this
-    if(AnaIO::true_beam_PDG != 211 && AnaIO::true_beam_PDG != -13){
-      continue;
+
+    //for to see within signal
+    if(0){
+      if(!AnaIO::kSignal){
+        continue;
+      }
+    }
+    else{
+      //===========================================================
+      //0. true beam particle //"In data the beam Instrumentation is able to filter for these events but is not inside the MC" so read data file has this
+      if(AnaIO::true_beam_PDG != 211 && AnaIO::true_beam_PDG != -13){
+        continue;
+      }
+      
+      //x. primary beam type 
+      AnaIO::hRecoBeamType->Fill(AnaIO::reco_beam_type);
+      //no effect, shadowed by TMeanStart cut
+      //    if(AnaIO::reco_beam_type!=13){//13: Pandora "track like"
+      //      continue;
+      //    }
+      
+      //1. beam position MC cut, need MC truth, how is it possible in analysis?
+      const bool kBeamPosPass = getBeamPosPass();
+      AnaIO::hBeamPosPass->Fill(kBeamPosPass);
+      if(!kBeamPosPass){
+        continue;
+      }
+      //-> now signal purity 138/3537 = 3.9%, 2283 pi+ bea, 801 e+ beam
+      
+      //2. APA3 
+      AnaIO::hBeamEndZ->Fill(AnaIO::reco_beam_endZ);
+      AnaIO::hBeamEndZPass->Fill(!(AnaIO::reco_beam_endZ>=226));
+      if(AnaIO::reco_beam_endZ>=226){
+        AnaIO::hBeamEndZPass->Fill(false);
+        continue;
+      }
+      //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
     }
 
-    //1. Beam dEdx cut
-    AnaIO::hBeamLen->Fill(AnaIO::reco_beam_len);
-    AnaIO::hSignalVsLen->Fill(AnaIO::reco_beam_len, varSignal);
-  
-    if(!cutBeamdEdx(varSignal)){
-      continue;
-    }
-    //-> now signal purity 167/5274 = 3.2%, 2627 pi+ beam, 1947 e+
+    //3. n track daughter
+    int cutnproton = 0;
+    int cutngamma = 0;
+    int cutnmichel = 0;
+    AnaIO::nTrack = getNTrack(cutnproton, cutngamma, cutnmichel);
 
-   
-
-    //0. primary beam type 
-    AnaIO::hRecoBeamType->Fill(AnaIO::reco_beam_type);
-    //no effect, shadowed by TMeanStart cut
-    /*
-    if(AnaIO::reco_beam_type!=13){//13: Pandora "track like"
-      continue;
-    }
-    */
-
-    //1. beam position MC cut, need MC truth, how is it possible in analysis?
-    const bool kBeamPosPass = getBeamPosPass();
-    AnaIO::hBeamPosPass->Fill(kBeamPosPass);
-    if(!kBeamPosPass){
-      continue;
-    }
-    //-> now signal purity 138/3537 = 3.9%, 2283 pi+ bea, 801 e+ beam
-
-    //2. APA3 
-    AnaIO::hBeamEndZ->Fill(AnaIO::reco_beam_endZ);
-    AnaIO::hBeamEndZPass->Fill(!(AnaIO::reco_beam_endZ>=226));
-
-    if(AnaIO::reco_beam_endZ>=226){
-      AnaIO::hBeamEndZPass->Fill(false);
-      continue;
-    }
-    //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
-   
-    //9. n track daughter
-    AnaIO::nTrack = getNTrack();
-    AnaIO::hBeamNTrack->Fill(AnaIO::nTrack);
+    AnaIO::hBeamNTrack->Fill(AnaIO::nTrack, cutnproton);
     AnaIO::hSignalVsBeamNTrack->Fill(AnaIO::nTrack, varSignal);
+
+    /*
+      PiPlus: ngamma = 0, nproton=1 -> 75/218=34% in signal sample; 63/467 = 13% purity, 63/218 = 29% efficiency, p*e = 63*63/218/467 = 3.9%
+      PiZero: ngamma = 2, nmichel=0, nproton=1 -> 32/260=12% in signal sample; 27/68 = 40% purity, 27/260 = 10% efficiency, p*e = 27*27/68/260 = 4.1%
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1 -> ; 19/40 = 48% purity
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 is proton -> 18/37=49% purity
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton -> 18/32=56% purity, p*e = 18.*18./32./260. = 3.9%
+      PiZero: ngamma = 2, nmichel=0, nproton=1,           noly nhit<260 and startE3>9 is proton -> 21/47=45% purity -> so it is important to have ntrack=1
+     */
+
+    if(!kPiZero){
+      if(cutngamma>0){
+        continue;
+      }
+      //not found in signal, need Michel to tell 2-proton events from p-pi
+      /*
+      if(cutnmichel!=1){
+        continue;
+      }
+      */
+    }
+    else{
+      if(cutngamma!=2){
+        continue;
+      }
+
+      if(cutnmichel>0){
+        continue;
+      }
+
+      if(AnaIO::nTrack!=1){
+        continue;
+      }
+    }
+
+    if(cutnproton!=1){
+      continue;
+    }
+
+    //just for printing
+    getNTrack(cutnproton, cutngamma, cutnmichel, true, varSignal);
+
+    //nTrack has Michel object
+    /*
     if(kPiZero){
       //the purity profile looks weird for pizeor signal
+      //4/260 events signal efficiency
       if(AnaIO::nTrack!=1){
         continue;
       }
     }
     else{
+      // 50/218 events signal efficiency
       if(AnaIO::nTrack!=2){
         continue;
       }
     }
+    */
     //-> now pi+p signal purity 78/940=8.3%, 611 pi+ beam, 270 e+ beam
+
+    /*   
+    //x. Beam dEdx cut shadowed by beam filtering
+    AnaIO::hBeamLen->Fill(AnaIO::reco_beam_len);
+    AnaIO::hSignalVsLen->Fill(AnaIO::reco_beam_len, varSignal);
+    if(!cutBeamdEdx(varSignal)){
+      continue;
+    }
+    */
+    //-> now signal purity 167/5274 = 3.2%, 2627 pi+ beam, 1947 e+
+
+   
 
     //============== Benchmark after ALL cuts !!! =========================
     //benchmark
@@ -583,8 +774,8 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
  
     //has true proton
     if(kDoTracking){
-      const int targetIdx = (*AnaIO::true_beam_daughter_ID)[protonIdx];
-      (*recmomentum) = getRecFromTruth(targetIdx, mombyrange);
+      const int truthID = (*AnaIO::true_beam_daughter_ID)[protonIdx];
+      (*recmomentum) = getRecFromTruth(truthID, mombyrange);
       tout->Fill();
     }
   }
