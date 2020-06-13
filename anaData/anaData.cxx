@@ -430,7 +430,8 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
   TTree * tout = AnaIO::GetOutputTree(lout, tag);  
   AnaIO::IniRecHist(lout, tag);
 
-  //==============================================================================================================
+  //____________________________________________________________________________________________________
+
   int ientry = 0;
   while(tree->GetEntry(ientry)){
     if(ientry%100000==0){
@@ -447,27 +448,27 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     //do it before the loop continues for any reason
     ientry++;
    
-    //===========================================================
+    //____________________________________________________________________________________________________
+
     //calculate before any cuts! Only filled after ALL cuts!
     const int TruthBeamType = GetParticleType(AnaIO::true_beam_PDG);
    
     setFullSignal(kPiZero);
 
     //for to see within signal
-    if(0){
+    if(0){//====================================================== switch between signal sample and full sample
       if(!AnaIO::kSignal){
         continue;
       }
     }
     else{
-      //===========================================================
       //0. true beam particle //"In data the beam Instrumentation is able to filter for these events but is not inside the MC" so read data file has this
       if(AnaIO::true_beam_PDG != 211 && AnaIO::true_beam_PDG != -13){
         continue;
       }
       
       //without 20 sig in 36 events; with 18/32, both 56% purity -> same purity, without this has higher efficiency
-      if(0){
+      if(0){//====================================================== switch off pion analysis cuts
         //x. primary beam type 
         AnaIO::hRecoBeamType->Fill(AnaIO::reco_beam_type);
         //no effect, shadowed by TMeanStart cut
@@ -491,8 +492,8 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
           continue;
         }
         //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
-      }
-    }
+      }//====================================================== switch off pion analysis cuts
+    }//====================================================== switch between signal sample and full sample
 
     //3. n track daughter
     int cutnproton = 0;
@@ -520,38 +521,40 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
   (*) PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton, no pion-analysis pre-cuts! -> 20/36=56% purity, eff*purity = 20.*20./36./260. = 4.3%
      */
 
-    if(!kPiZero){
-      if(cutngamma>0){
+    if(0){//====================================================== switch of doing selection cuts
+      if(!kPiZero){
+        if(cutngamma>0){
+          continue;
+        }
+        //not found in signal, need Michel to tell 2-proton events from p-pi
+        /*
+          if(cutnmichel!=1){
+          continue;
+          }
+        */
+        if(AnaIO::nTrack!=2){
+          continue;
+        }
+      }
+      else{
+        if(cutngamma!=2){
+          continue;
+        }
+        
+        if(cutnmichel>0){
+          continue;
+        }
+        
+        //with this 56% purity, without 45%
+        if(AnaIO::nTrack!=1){
+          continue;
+        }
+      }
+      
+      if(cutnproton!=1){
         continue;
       }
-      //not found in signal, need Michel to tell 2-proton events from p-pi
-      /*
-      if(cutnmichel!=1){
-        continue;
-      }
-      */
-      if(AnaIO::nTrack!=2){
-        continue;
-      }
-    }
-    else{
-      if(cutngamma!=2){
-        continue;
-      }
-
-      if(cutnmichel>0){
-        continue;
-      }
-
-      //with this 56% purity, without 45%
-      if(AnaIO::nTrack!=1){
-        continue;
-      }
-    }
-
-    if(cutnproton!=1){
-      continue;
-    }
+    }//====================================================== switch of doing selection cuts
 
     //just for printing
     getNTrack(AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, true, false);
@@ -564,6 +567,8 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       continue;
     }
     */
+
+    //____________________________________________________________________________________________________
 
     //============== Benchmark after ALL cuts !!! =========================
     //benchmark
