@@ -210,7 +210,7 @@ int getTruthFromRec(const int recidx, int & pdg, double & momentum)
   return trueidx;
 }
 
-int getNTrack(const bool kpi0, const bool ksig, int & nproton, int & ngamma, int & nmichel, const bool kprint=false, const bool kfill=false, const bool kdebug = false)
+int getNTrack(const bool kpi0, const bool ksig, int & nproton, int & ngamma, int & nmichel, const bool kprint=false, const bool kfill=false, const int kdebug = 0)
 {
   /*
 root [11] beamana->Scan("reco_daughter_PFP_ID:reco_daughter_PFP_true_byHits_ID:reco_daughter_allTrack_ID:reco_daughter_allShower_ID:true_beam_daughter_ID:true_beam_daughter_reco_byHits_PFP_ID:true_beam_daughter_reco_byHits_allTrack_ID:true_beam_daughter_reco_byHits_allShower_ID")
@@ -368,7 +368,10 @@ not set
         AnaIO::hPiMomentumRes->Fill(truemomentum, recp/truemomentum-1);
       }
 
-      if(!kdebug || isSelProton){
+      if(!kdebug || 
+         (kdebug==1 && isSelProton) ||
+         (kdebug==2 && !isSelProton)
+         ){
       AnaIO::hCutstartE2->Fill(startE2, fillstktype);
       AnaIO::hCutstartE3->Fill(startE3, fillstktype);
       AnaIO::hCutlastE2->Fill(lastE2, fillstktype);
@@ -537,8 +540,8 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     int cutngamma = 0;
     int cutnmichel = 0;
 
-    AnaIO::nTrack = getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, false, true, false);
-    //AnaIO::nTrack = getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, false, false, false);
+    AnaIO::nTrack = getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, false, true, 0);
+    //AnaIO::nTrack = getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, false, false, 0);
 
     AnaIO::hBeamNTrack->Fill(AnaIO::nTrack, cutnproton);
     AnaIO::hSignalVsBeamNTrack->Fill(AnaIO::nTrack, AnaIO::kSignal);
@@ -636,9 +639,10 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     }//====================================================== switch of doing selection cuts
 
     //just for printing
-    getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, true, false, false);
+    getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, true, false, 0);
     //debug mode: major background is -999 shower mocking protons, no efficient cut variables found
-    //getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, true, true, true);
+    //getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, true, true, 1);//debug proton candidate
+    //getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, true, true, 2);//debug non-proton candidate
 
      /*   
     //x. Beam dEdx cut shadowed by beam filtering
