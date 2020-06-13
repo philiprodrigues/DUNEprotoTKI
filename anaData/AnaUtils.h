@@ -1,6 +1,7 @@
 #ifndef _ANAUTILS_H_
 #define _ANAUTILS_H_
 
+#include "AnaIO.h"
 
 using namespace std;
 
@@ -158,6 +159,131 @@ void GetdEdx(const vector<double> arraydEdx, vector<double> &startE, vector<doub
   }
 }
 
+
+bool Manual_beamPos_mc(const double beam_startX, const double beam_startY, const double beam_startZ, const double beam_dirX, const double beam_dirY,   const double beam_dirZ, const double true_dirX,   const double true_dirY, const double true_dirZ,   const double true_startX, const double true_startY, const double true_startZ) 
+{
+  //https://github.com/calcuttj/PionStudies/blob/master/rDataFrame/eventSelection.h
+
+  //For MC from Owen Goodwins studies
+  const double xlow = -3.,  xhigh = 7.,  ylow = -8.,  yhigh = 7.;
+  const double zlow = 27.5,  zhigh = 32.5,  coslow = 0.93;
+
+  const double projectX = (true_startX + -1*true_startZ*(true_dirX/true_dirZ) );
+  const double projectY = (true_startY + -1*true_startZ*(true_dirY/true_dirZ) );
+  const double cos = true_dirX*beam_dirX + true_dirY*beam_dirY + true_dirZ*beam_dirZ;
+
+  if ( (beam_startX - projectX) < xlow )
+    return false;
+  
+  if ( (beam_startX - projectX) > xhigh )
+    return false;
+
+  if ( (beam_startY - projectY) < ylow )
+    return false;
+
+  if ( (beam_startY - projectY) > yhigh )
+    return false;
+  
+  if (beam_startZ < zlow || zhigh < beam_startZ)
+    return false;
+  
+  if ( cos < coslow)
+    return false;
+
+  return true;
+}
+
+bool GetBeamPosPass()
+{
+  //https://github.com/calcuttj/PionStudies/blob/master/rDataFrame/eventSelection.C
+  /*
+.Define("passBeamCut", manual_beamPos_mc, 
+            {"reco_beam_startX", "reco_beam_startY", "reco_beam_startZ",
+             "reco_beam_trackDirX", "reco_beam_trackDirY", "reco_beam_trackDirZ",
+             "true_beam_startDirX", "true_beam_startDirY", "true_beam_startDirZ",
+             "true_beam_startX", "true_beam_startY", "true_beam_startZ"})
+   */
+
+  return Manual_beamPos_mc(AnaIO::reco_beam_startX, AnaIO::reco_beam_startY, AnaIO::reco_beam_startZ,
+                           AnaIO::reco_beam_trackDirX, AnaIO::reco_beam_trackDirY, AnaIO::reco_beam_trackDirZ,
+                           AnaIO::true_beam_startDirX, AnaIO::true_beam_startDirY, AnaIO::true_beam_startDirZ,
+                           AnaIO::true_beam_startX, AnaIO::true_beam_startY, AnaIO::true_beam_startZ);
+}
+
+
+bool CutBeamdEdx(const double varSignal)
+{
+  vector<double> startE, lastE;
+  GetdEdx( *AnaIO::reco_beam_calibrated_dEdX, startE, lastE, 2);
+  AnaIO::nBeamdEdxCls = startE.size();
+  AnaIO::hnBeamdEdxCls->Fill(AnaIO::nBeamdEdxCls);
+  if(AnaIO::nBeamdEdxCls<6){
+    return false;
+  }
+
+  //no bragg peak
+  AnaIO::beamStartE0 = startE[0];
+  AnaIO::beamStartE1 = startE[1];
+  AnaIO::beamStartE2 = startE[2];
+  AnaIO::beamStartE3 = startE[3];
+  AnaIO::beamStartE4 = startE[4];
+  AnaIO::beamStartE5 = startE[5];
+  
+  AnaIO::beamTMeanStart = GetTruncatedMean(startE, AnaIO::nBeamdEdxCls-6);
+  
+  AnaIO::hSignalVsStartE0->Fill(AnaIO::beamStartE0, varSignal);
+  AnaIO::hSignalVsStartE1->Fill(AnaIO::beamStartE1, varSignal);
+  AnaIO::hSignalVsStartE2->Fill(AnaIO::beamStartE2, varSignal);
+  AnaIO::hSignalVsStartE3->Fill(AnaIO::beamStartE3, varSignal);
+  AnaIO::hSignalVsStartE4->Fill(AnaIO::beamStartE4, varSignal);
+  AnaIO::hSignalVsStartE5->Fill(AnaIO::beamStartE5, varSignal);
+  
+  AnaIO::hSignalVsTMeanStart->Fill(AnaIO::beamTMeanStart, varSignal);
+  
+  //has Bragg Peak
+  AnaIO::beamLastE0 = lastE[0];
+  AnaIO::beamLastE1 = lastE[1];
+  AnaIO::beamLastE2 = lastE[2];
+  AnaIO::beamLastE3 = lastE[3];
+  AnaIO::beamLastE4 = lastE[4];
+  AnaIO::beamLastE5 = lastE[5];
+  
+  AnaIO::beamTMeanLast = GetTruncatedMean(lastE, 6);
+  
+  AnaIO::hSignalVsLastE0->Fill(AnaIO::beamLastE0, varSignal);
+  AnaIO::hSignalVsLastE1->Fill(AnaIO::beamLastE1, varSignal);
+  AnaIO::hSignalVsLastE2->Fill(AnaIO::beamLastE2, varSignal);
+  AnaIO::hSignalVsLastE3->Fill(AnaIO::beamLastE3, varSignal);
+  AnaIO::hSignalVsLastE4->Fill(AnaIO::beamLastE4, varSignal);
+  AnaIO::hSignalVsLastE5->Fill(AnaIO::beamLastE5, varSignal);
+  
+  //both need to tune for different energy
+  //it is so clean that no need to cut on last since there is no Bragg peak form proton any more
+  if(AnaIO::beamTMeanStart>2.8){
+    return false;
+  }
+  
+  AnaIO::hSignalVsTMeanLast->Fill(AnaIO::beamTMeanLast, varSignal);
+  
+  AnaIO::hSigAfterVsStartE0->Fill(AnaIO::beamStartE0, varSignal);
+  AnaIO::hSigAfterVsStartE1->Fill(AnaIO::beamStartE1, varSignal);
+  AnaIO::hSigAfterVsStartE2->Fill(AnaIO::beamStartE2, varSignal);
+  
+  AnaIO::hSigAfterVsLastE0->Fill(AnaIO::beamLastE0, varSignal);
+  AnaIO::hSigAfterVsLastE1->Fill(AnaIO::beamLastE1, varSignal);
+  AnaIO::hSigAfterVsLastE2->Fill(AnaIO::beamLastE2, varSignal);
+  
+  AnaIO::hSigAfterVsStartE3->Fill(AnaIO::beamStartE3, varSignal);
+  AnaIO::hSigAfterVsLastE3->Fill(AnaIO::beamLastE3, varSignal);
+  AnaIO::hSigAfterVsStartE4->Fill(AnaIO::beamStartE4, varSignal);
+  AnaIO::hSigAfterVsLastE4->Fill(AnaIO::beamLastE4, varSignal);
+  AnaIO::hSigAfterVsStartE5->Fill(AnaIO::beamStartE5, varSignal);
+  AnaIO::hSigAfterVsLastE5->Fill(AnaIO::beamLastE5, varSignal);
+  
+  return true;
+}
+
+//=== end
 }
 
 
