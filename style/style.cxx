@@ -51,6 +51,8 @@ THStack * style::NormalizeStack(THStack * hstk)
     hout->Add(htmp);
  }
 
+  delete hsum;
+
   return hout;
 }
 
@@ -70,12 +72,11 @@ THStack * style::ConvertToStack(const TH2D * hh)
   double newintegral = 0;
   THStack * stk = new THStack(tag+"_stack", tag);
 
-  const int col[]={1011, 1008, kGray, 1009, 1002, 1003, kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
+  const int col[]={1011, 1008, kYellow, 1009, 1002, 1003, kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
   const int ncol = sizeof(col)/sizeof(int);
   if(ncol<ny){
     printf("style::ConvertToStack not enough color %d %d\n", ncol, ny); exit(1);
   }
-
 
   for(int iy = 1; iy<=ny; iy++){
 
@@ -138,7 +139,7 @@ void style::Process2DHist(TList *lout)
 
       if(tag.Contains(gTagSTK)){
         THStack * stk = ConvertToStack(htmp); lout->Add(stk);
-        THStack * sfrac = NormalizeStack(stk); lout->Add(sfrac);
+        THStack * snor = NormalizeStack(stk); lout->Add(snor);
       }
     }
   }

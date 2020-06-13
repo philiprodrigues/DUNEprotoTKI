@@ -210,7 +210,7 @@ int getTruthFromRec(const int recidx, int & pdg, double & momentum)
   return trueidx;
 }
 
-int getNTrack(const bool ksig, int & nproton, int & ngamma, int & nmichel, const bool kprint=false, const bool kfill=false)
+int getNTrack(const bool kpi0, const bool ksig, int & nproton, int & ngamma, int & nmichel, const bool kprint=false, const bool kfill=false)
 {
   /*
 root [11] beamana->Scan("reco_daughter_PFP_ID:reco_daughter_PFP_true_byHits_ID:reco_daughter_allTrack_ID:reco_daughter_allShower_ID:true_beam_daughter_ID:true_beam_daughter_reco_byHits_PFP_ID:true_beam_daughter_reco_byHits_allTrack_ID:true_beam_daughter_reco_byHits_allShower_ID")
@@ -248,12 +248,16 @@ not set
  
   for(int ii=0; ii<recsize; ii++){
 
+    //---> need to be done before any counting!!!
     const vector<double>  dedxarray = (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii];
     const int NdEdx = dedxarray.size();
-    if(NdEdx<4){//need E[3], at least 4 cls
+    const int ndedxcut = kpi0 ? 6 : 16; //need E[3], at least 4 cls
+    printf("check cut kpi0 %d ndedxcut %d\n", kpi0, ndedxcut);
+    if(NdEdx<ndedxcut){
       //do not count it as anything
       continue;
     }
+    //<--- need to be done before any counting!!!
 
     //track and em scores at 0.5 look reasonable as baseline (after 0.5 the proton fraction look flat)
     //michel is not found (all below 0.5, those above 0.5 are shower and other_type)
@@ -279,6 +283,7 @@ not set
     */
 
     //========== proton tagging now!
+  
     const double startE2 = dedxarray[2];
     const double startE3 = dedxarray[3];
     const double lastE2 = dedxarray[NdEdx-1-2];
@@ -506,7 +511,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     int cutngamma = 0;
     int cutnmichel = 0;
 
-    AnaIO::nTrack = getNTrack(AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, false, true);
+    AnaIO::nTrack = getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, false, true);
 
     AnaIO::hBeamNTrack->Fill(AnaIO::nTrack, cutnproton);
     AnaIO::hSignalVsBeamNTrack->Fill(AnaIO::nTrack, AnaIO::kSignal);
@@ -515,7 +520,24 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       PiPlus: ngamma = 0, nproton=1 -> 75/218=34% in signal sample; 63/467 = 13% purity, 63/218 = 29% efficiency, p*e = 63*63/218/467 = 3.9%
       PiPlus: ngamma = 0, nproton=1,  noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 61/380 = 16% 
       PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 44/191 = 23% purity, e*p = 44.*44./191./218. = 4.6%
-  (*) PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9                is proton, no pion-analysis pre-cuts! -> 46/197 = 23% purity, slightly higher efficiency
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9                is proton, no pion-analysis pre-cuts! -> 46/197 = 23% purity, slightly higher efficiency
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=4 instead of 3) is proton, no pion-analysis pre-cuts! -> 49/199 = 25%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=5 instead of 3) is proton, no pion-analysis pre-cuts! -> 48/201 = 24%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=6 instead of 3) is proton, no pion-analysis pre-cuts! -> 50/202 = 25%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=7 instead of 3) is proton, no pion-analysis pre-cuts! -> 50/200 = 25%, e*p = 5.7%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=8 instead of 3) is proton, no pion-analysis pre-cuts! -> 50/194 = 26%, e*p = 5.9%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=9 instead of 3) is proton, no pion-analysis pre-cuts! -> 47/176 = 27%, e*p = 5.8%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=10 instead of 3)is proton, no pion-analysis pre-cuts! -> 46/168 = 27%, e*p = 5.8%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=13 instead of 3)is proton, no pion-analysis pre-cuts! -> 43/159 = 27%, e*p = 5.3%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=14 instead of 3)is proton, no pion-analysis pre-cuts! -> 42/149 = 28%, e*p = 5.4%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=15 instead of 3)is proton, no pion-analysis pre-cuts! -> 40/135 = 30%, e*p = 5.4%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=17 instead of 3)is proton, no pion-analysis pre-cuts! -> 39/126 = 31%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=20 instead of 3)is proton, no pion-analysis pre-cuts! -> 34/114 = 30%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=25 instead of 3)is proton, no pion-analysis pre-cuts! -> 25/82 = 30%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=30 instead of 3)is proton, no pion-analysis pre-cuts! -> 22/71 = 31%
+
+      (*) PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=16 instead of 3)is proton, no pion-analysis pre-cuts! -> 40/127 = 32%, e*p = 5.8%
+
 
       PiZero: ngamma = 2, nmichel=0, nproton=1 -> 32/260=12% in signal sample; 27/68 = 40% purity, 27/260 = 10% efficiency, p*e = 27*27/68/260 = 4.1%
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1 -> ; 19/40 = 48% purity
@@ -524,7 +546,16 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       PiZero: ngamma = 2, nmichel=0, nproton=1,           noly nhit<260 and startE3>9 is proton -> 21/47=45% purity -> so it is important to have ntrack=1
 
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 18/34 = 53% purity
-  (*) PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton, no pion-analysis pre-cuts! -> 20/36=56% purity, eff*purity = 20.*20./36./260. = 4.3%
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton, no pion-analysis pre-cuts! -> 20/36=56% purity, eff*purity = 20.*20./36./260. = 4.3%
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=4 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 19/33=58%
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=5 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 21/34=62%
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=7 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 20/33=61%
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=8 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 19/31=61%, e*p = 4.5%
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=10 instead of 3 )is proton, no pion-analysis pre-cuts! -> 13/20=65%, e*p = 3.3%
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=20 instead of 3 )is proton, no pion-analysis pre-cuts! -> 9/10=90%,  e*p = 3.1%
+
+      (*) PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=6 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 22/35=63%, e*p = 5.3%
+
      */
 
     if(1){//====================================================== switch of doing selection cuts
@@ -563,7 +594,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     }//====================================================== switch of doing selection cuts
 
     //just for printing
-    getNTrack(AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, true, false);
+    getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, true, false);
 
      /*   
     //x. Beam dEdx cut shadowed by beam filtering
