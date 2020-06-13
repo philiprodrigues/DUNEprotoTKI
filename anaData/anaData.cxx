@@ -239,12 +239,12 @@ not set
   }
 
   /*
-est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -397725.603302 nhits 7 trackScore 0.016739 emScore 0.983240 michelScore 0.289565 sum 1.289545
-   */
-  nproton = 0;
+    est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -397725.603302 nhits 7 trackScore 0.016739 emScore 0.983240 michelScore 0.289565 sum 1.289545
+  */
+  int ntracks = 0;
   ngamma = 0;
   nmichel = 0;
-  int ntracks = 0;
+  nproton = 0;
  
   for(int ii=0; ii<recsize; ii++){
 
@@ -255,17 +255,34 @@ est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -
       continue;
     }
 
-    const double startE2 = dedxarray[2];
-    const double startE3 = dedxarray[3];
-    const double lastE2 = dedxarray[NdEdx-1-2];
-    const double lastE3 = dedxarray[NdEdx-1-3];
-    
+    //track and em scores at 0.5 look reasonable as baseline (after 0.5 the proton fraction look flat)
+    //michel is not found (all below 0.5, those above 0.5 are shower and other_type)
+    const double trackScore  = (*AnaIO::reco_daughter_PFP_trackScore)[ii];
+    if(trackScore>0.5){
+      ntracks++;
+    }
+    const double emScore     = (*AnaIO::reco_daughter_PFP_emScore)[ii];
+    if(emScore>0.5){
+      ngamma++;
+    }
+    const double michelScore = (*AnaIO::reco_daughter_PFP_michelScore)[ii];
+    if(michelScore>0.5){
+      nmichel++;
+    }
+
+    //nhit 260 is just clean-up
     const int nhits          = (*AnaIO::reco_daughter_PFP_nHits)[ii];
     /*//they are indeed different: 236 80
     if(nhits != NdEdx){
       printf("nhits!=dedx size %d %d\n", nhits, NdEdx); exit(1);
     }
     */
+
+    //========== proton tagging now!
+    const double startE2 = dedxarray[2];
+    const double startE3 = dedxarray[3];
+    const double lastE2 = dedxarray[NdEdx-1-2];
+    const double lastE3 = dedxarray[NdEdx-1-3];
 
     const double chi2 = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
     const double ndof = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
@@ -279,26 +296,15 @@ est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -
     //test if(startE2>10 && nhits<260 && startE3>9 && Chi2NDF<50){
     if(startE2>10 && nhits<260 && startE3>9){
       isSelProton = true;
-      recp = (*AnaIO::reco_daughter_allTrack_momByRange_proton)[ii];
       nproton++;
+
+      recp = (*AnaIO::reco_daughter_allTrack_momByRange_proton)[ii];
     }
     else{
       //temporary pi+ momentum
       recp = (*AnaIO::reco_daughter_allTrack_momByRange_muon)[ii];
     }
-  
-    const double trackScore  = (*AnaIO::reco_daughter_PFP_trackScore)[ii];
-    if(trackScore>0.5){
-      ntracks++;
-    }
-    const double emScore     = (*AnaIO::reco_daughter_PFP_emScore)[ii];
-    if(emScore>0.5){
-      ngamma++;
-    }
-    const double michelScore = (*AnaIO::reco_daughter_PFP_michelScore)[ii];
-    if(michelScore>0.5){
-      nmichel++;
-    }
+    //========== proton tagging done!
 
     int pdg = -999;
     double truemomentum = -999;
@@ -521,12 +527,16 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
   (*) PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton, no pion-analysis pre-cuts! -> 20/36=56% purity, eff*purity = 20.*20./36./260. = 4.3%
      */
 
-    if(0){//====================================================== switch of doing selection cuts
+    if(1){//====================================================== switch of doing selection cuts
+      if(cutnproton!=1){
+        continue;
+      }
+      
       if(!kPiZero){
         if(cutngamma>0){
           continue;
         }
-        //not found in signal, need Michel to tell 2-proton events from p-pi
+        //not found in signal, need Michel to tell 2-proton events from p-pi; ignore michel count for the momentum, things will change after implementing it.
         /*
           if(cutnmichel!=1){
           continue;
@@ -549,10 +559,6 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
         if(AnaIO::nTrack!=1){
           continue;
         }
-      }
-      
-      if(cutnproton!=1){
-        continue;
       }
     }//====================================================== switch of doing selection cuts
 
