@@ -824,6 +824,9 @@ int main(int argc, char * argv[])
     return 0;
   }
   const bool kTruth = atoi(argv[3]);
+  if(!kTruth&&!kProton){
+    return 0;
+  }
 
   TString tag = (kPiZero?"MPiZero":"1PiPlus");
   tag+=(kProton?"_TrackingProton":"_TrackingPiPlus");
