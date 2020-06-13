@@ -186,8 +186,6 @@ int getTruthFromRec(const int recidx, int & pdg, double & momentum)
 {
   const int truthID = (*AnaIO::reco_daughter_PFP_true_byHits_ID)[recidx];
   int trueidx = -999;
-  pdg = -999;
-  momentum = -999;
   int counter = 0;
   for(unsigned int ii = 0; ii<AnaIO::true_beam_daughter_ID->size(); ii++){
     if(  (*AnaIO::true_beam_daughter_ID)[ii] == truthID ){
@@ -198,6 +196,9 @@ int getTruthFromRec(const int recidx, int & pdg, double & momentum)
       counter++;
     }
   }
+
+  pdg = -999;
+  momentum = -999;
 
   if(trueidx>=0){
     pdg = (*AnaIO::true_beam_daughter_PDG)[trueidx];
@@ -261,6 +262,7 @@ est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -
     }
     */
 
+     bool isSelProton = false;
     double recp        = -999;
     const double startE2 = dedxarray[2];
     const double startE3 = dedxarray[3];
@@ -274,8 +276,13 @@ est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -
     //with Chi2NDF cut  44/191 = 23% purity; without 46/197 = 23% purity, slightly higher efficiency
     //test if(startE2>10 && nhits<260 && startE3>9 && Chi2NDF<50){
     if(startE2>10 && nhits<260 && startE3>9){
+      isSelProton = true;
       recp = (*AnaIO::reco_daughter_allTrack_momByRange_proton)[ii];
       nproton++;
+    }
+    else{
+      //temporary pi+ momentum
+      recp = (*AnaIO::reco_daughter_allTrack_momByRange_muon)[ii];
     }
   
     const double trackScore  = (*AnaIO::reco_daughter_PFP_trackScore)[ii];
@@ -293,30 +300,42 @@ est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -
 
     int pdg = -999;
     double truemomentum = -999;
-    const int trueID = getTruthFromRec(ii, pdg, truemomentum);
+    const int trueidx = getTruthFromRec(ii, pdg, truemomentum);
+
+    int fillstktype = -999;
+    if(pdg==2212){//proton
+      fillstktype = 0;
+    }
+    else if(pdg==211){//pi+
+      fillstktype = 1;
+    }
+    else if(pdg==22){//gamma
+      fillstktype = 2;
+    }
+    else if(pdg==-999){//shower no true
+      fillstktype = 3;
+    }
+    else{//all others
+      fillstktype = 4;
+    }
 
     if(kprint){
-      printf("test ksig %d rec %d/%d trueID %d pdg %d truemomentum %f recp %f resolution %f startE2 %f startE3 %f nhits %d trackScore %f emScore %f michelScore %f sum %f chi2 %f ndof %f chi2/ndof %f\n", ksig, ii, recsize, trueID, pdg, truemomentum, recp, recp/truemomentum-1, startE2, startE3,  nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore, chi2, ndof, Chi2NDF);
+      printf("test ksig %d rec %d/%d trueidx %d pdg %d truemomentum %f recp %f resolution %f startE2 %f startE3 %f nhits %d trackScore %f emScore %f michelScore %f sum %f chi2 %f ndof %f chi2/ndof %f\n", ksig, ii, recsize, trueidx, pdg, truemomentum, recp, recp/truemomentum-1, startE2, startE3,  nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore, chi2, ndof, Chi2NDF);
     }
 
     if(kfill){
-      if(pdg==2212 && trueID>=0){
-        AnaIO::hProtonnHits->Fill(nhits);
-        AnaIO::hProtontrackScore->Fill(trackScore);
-        AnaIO::hProtonemScore->Fill(emScore);
-        AnaIO::hProtonmichelScore->Fill(michelScore);
-        AnaIO::hProtonChi2NDF->Fill(Chi2NDF);
+      if(pdg==2212 && isSelProton){
         AnaIO::hProtonMomentumRes->Fill(truemomentum, recp/truemomentum-1);
       }
-      
-      if(pdg==211 && trueID>=0){
-        AnaIO::hPiPlusnHits->Fill(nhits);
-        AnaIO::hPiPlustrackScore->Fill(trackScore);
-        AnaIO::hPiPlusemScore->Fill(emScore);
-        AnaIO::hPiPlusmichelScore->Fill(michelScore);
-        AnaIO::hPiPlusChi2NDF->Fill(Chi2NDF);
-        //AnaIO::hPiPlusMomentumRes->Fill(truemomentum, recp/truemomentum-1);
+      else if(pdg==211 && !isSelProton){
+        AnaIO::hPiMomentumRes->Fill(truemomentum, recp/truemomentum-1);
       }
+
+      AnaIO::hCutnHits->Fill(nhits, fillstktype);
+      AnaIO::hCuttrackScore->Fill(trackScore, fillstktype);
+      AnaIO::hCutemScore->Fill(emScore, fillstktype);
+      AnaIO::hCutmichelScore->Fill(michelScore, fillstktype);
+      AnaIO::hCutChi2NDF->Fill(Chi2NDF, fillstktype);
     }
     
   }

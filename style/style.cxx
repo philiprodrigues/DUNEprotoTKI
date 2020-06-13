@@ -34,6 +34,53 @@ const TString gTagEFF="EFF";
 const TString gTagNOH="NOH";
 const TString gTagSTK="STK";
 
+THStack * style::ConvertToStack(const TH2D * hh)
+{
+  const TString tag = hh->GetName();
+  const TString tit = hh->GetTitle();
+
+  const int nx = hh->GetNbinsX();
+  const double xmin = hh->GetXaxis()->GetBinLowEdge(1);
+  const double xmax = hh->GetXaxis()->GetBinUpEdge(nx);
+
+  const int ny = hh->GetNbinsY();
+
+  const double oldintegral = hh->Integral(0, 10000, 1, ny);
+
+  double newintegral = 0;
+  THStack * stk = new THStack(tag+"_stack", tit);
+
+  const int col[]={kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
+  const int ncol = sizeof(col)/sizeof(int);
+  if(ncol<ny){
+    printf("style::ConvertToStack not enough color %d %d\n", ncol, ny); exit(1);
+  }
+
+
+  for(int iy = 1; iy<=ny; iy++){
+
+    TH1D * htmp = new TH1D(Form("%sy%d", tag.Data(), iy), tit.Data(), nx, xmin, xmax);
+    for(int ix=0; ix<=nx+1; ix++){
+      const double ientry = hh->GetBinContent(ix, iy);
+      newintegral += ientry;
+
+      htmp->SetBinContent(ix, ientry);
+    }
+
+    ResetStyle(htmp);
+    htmp->SetFillColor(col[iy-1]);
+    htmp->SetMarkerSize(2);
+    stk->Add(htmp);
+
+  }
+
+  if(oldintegral!=newintegral){
+    printf("style::ConvertToStack integral not matched! old %f new %f\n", oldintegral, newintegral); exit(1);
+  }
+
+  return stk;
+}
+
 void style::Process2DHist(TList *lout)
 {
   const int nhist = lout->GetSize();//the size will increase
@@ -68,6 +115,10 @@ void style::Process2DHist(TList *lout)
         lout->Add(hcdf);
         lout->Add(hnor); 
       }
+
+      if(tag.Contains(gTagSTK)){
+        THStack * stk = ConvertToStack(htmp); lout->Add(stk);
+      }
     }
   }
 }
@@ -80,54 +131,81 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
   gPad->SetRightMargin(0.03);
 
   for(int ii=0; ii<lout->GetSize(); ii++){
+    const TString tag = lout->At(ii)->GetName();
+    
+    printf("Trying printing %s\n", tag.Data());
+
     TH1 * hh = dynamic_cast<TH1*> (lout->At(ii));
-    if(!hh){
+    THStack * hstk = dynamic_cast<THStack *>(lout->At(ii));
+    if(!hh && !hstk){
       continue;
     }
 
-    TH2 * htmp = dynamic_cast<TH2 *>(hh);
-    const bool k2d = htmp;
+    TH2 * h2d = 0x0;
+    if(hh){
+      h2d = dynamic_cast<TH2 *>(hh);
+    }
+
+    //===================
+
+    printf("Printing %s k2d %d kstk %d\n", tag.Data(), h2d!=0x0, hstk!=0x0);
+
     gStyle->SetOptTitle(1);
-    if(k2d){
-      //gStyle->SetOptStat(0);
-      gStyle->SetOptStat("eou");
-    }
-    else{
-      gStyle->SetOptStat("eoum");
-      gStyle->SetStatColor(0);
-      gStyle->SetStatStyle(0);
-      gStyle->SetStatY(0.9);
-    }
 
-    const TString tag = hh->GetName();
-    cout<<"Printing "<<tag<<endl;
-
-    style::ResetStyle(hh);
-    hh->UseCurrentStyle();//can't go after setmarkersize
-    hh->SetMaximum(hh->GetBinContent(hh->GetMaximumBin())*1.3);
-    hh->SetMinimum(0);
-    hh->UseCurrentStyle();
-    hh->SetMarkerSize(3);
     TString dopt="text hist";
-    if(k2d){
-      if(tag.Contains(gTagPRF)){
-        dopt = "box";
+   
+    if(hh){
+      if(h2d){
+        style::ResetStyle(h2d);
+
+        //gStyle->SetOptStat(0);
+        gStyle->SetOptStat("eou");
+
+        if(tag.Contains(gTagPRF)){
+          dopt = "box";
+        }
+        else if(tag.Contains(gTagNOH)){
+          dopt = "colz";
+        }
       }
-      else if(tag.Contains(gTagNOH)){
-        dopt = "colz";
+      else{
+        style::ResetStyle(hh);
+
+        gStyle->SetOptStat("eoum");
+        gStyle->SetStatColor(0);
+        gStyle->SetStatStyle(0);
+        gStyle->SetStatY(0.9);
+
+        if(tag.Contains(gTagPRF)){
+          //hh->SetMaximum(0.1);
+          //hh->SetMaximum(0.3);
+          dopt = "hist";
+        }
+        else if(tag.Contains(gTagNOH)){
+          dopt = "hist";
+        }
       }
+
+      hh->UseCurrentStyle();//can't go after setmarkersize
+      hh->SetMaximum(hh->GetBinContent(hh->GetMaximumBin())*1.3);
+      hh->SetMinimum(0);
+      hh->SetMarkerSize(3);
+
+      hh->Draw(dopt);
     }
-    else{
-      if(tag.Contains(gTagPRF)){
-        //hh->SetMaximum(0.1);
-        //hh->SetMaximum(0.3);
-        dopt = "hist";
-      }
-      else if(tag.Contains(gTagNOH)){
-        dopt = "hist";
-      }
+    else{//hstk
+      style::ResetStyle(hstk);
+   
+      hstk->SetMinimum(0);
+      hstk->Draw("");
+
+      TH1D * hsum = GetStackedSum(hstk); lout->Add(hsum);
+      hstk->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.1);
+      ResetStyle(hsum);
+      hsum->SetLineColor(kBlack);
+      hsum->SetMarkerSize(2);
+      hsum->Draw("hist text same");
     }
-    hh->Draw(dopt);
 
     c1->Print(outdir+"/"+tag+".png");
 

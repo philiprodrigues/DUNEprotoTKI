@@ -198,18 +198,14 @@ namespace AnaIO
 
  //--- resolution
  TH2D * hProtonMomentumRes = 0x0;
- TH1I * hProtonnHits = 0x0;
- TH1D * hProtontrackScore = 0x0;
- TH1D * hProtonemScore = 0x0;
- TH1D * hProtonmichelScore = 0x0;
- TH1D * hProtonChi2NDF = 0x0;
+ TH2D * hPiMomentumRes = 0x0;
 
- TH2D * hPiPlusMomentumRes = 0x0;
- TH1I * hPiPlusnHits = 0x0;
- TH1D * hPiPlustrackScore = 0x0;
- TH1D * hPiPlusemScore = 0x0;
- TH1D * hPiPlusmichelScore = 0x0;
- TH1D * hPiPlusChi2NDF = 0x0;
+ TH2D * hCutnHits = 0x0;
+ TH2D * hCuttrackScore = 0x0;
+ TH2D * hCutemScore = 0x0;
+ TH2D * hCutmichelScore = 0x0;
+ TH2D * hCutChi2NDF = 0x0;
+
 //==============================================================================
 //==============================================================================
 
@@ -508,17 +504,15 @@ void IniRecHist(TList * lout, const TString tag)
 
   //--- resolution
   hProtonMomentumRes = new TH2D("b0ProtonMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hProtonMomentumRes);
-  hProtonnHits = new TH1I("b0ProtonnHitsNOH"+tag,"", 20, -0.5, 399.5); lout->Add(hProtonnHits);
-  hProtontrackScore = new TH1D("b0ProtontrackScoreNOH"+tag,"", 20, 0, 1); lout->Add(hProtontrackScore);
-  hProtonemScore = new TH1D("b0ProtonemScoreNOH"+tag,"", 20, 0, 1); lout->Add(hProtonemScore);
-  hProtonmichelScore = new TH1D("b0ProtonmichelScoreNOH"+tag,"", 20, 0, 1); lout->Add(hProtonmichelScore);
-  hProtonChi2NDF = new TH1D("b0ProtonChi2NDFNOH"+tag,"", 20, 0, 100); lout->Add(hProtonChi2NDF);
-  hPiPlusMomentumRes = new TH2D("b1PiMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiPlusMomentumRes);
-  hPiPlusnHits = new TH1I("b1PinHitsNOH"+tag,"", 20, -0.5, 399.5); lout->Add(hPiPlusnHits);
-  hPiPlustrackScore = new TH1D("b1PitrackScoreNOH"+tag,"", 20, 0, 1); lout->Add(hPiPlustrackScore);
-  hPiPlusemScore = new TH1D("b1PiemScoreNOH"+tag,"", 20, 0, 1); lout->Add(hPiPlusemScore);
-  hPiPlusmichelScore = new TH1D("b1PimichelScoreNOH"+tag,"", 20, 0, 1); lout->Add(hPiPlusmichelScore);
-  hPiPlusChi2NDF = new TH1D("b1PiChi2NDFNOH"+tag,"", 20, 0, 100); lout->Add(hPiPlusChi2NDF);
+  hPiMomentumRes = new TH2D("b1PiMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiMomentumRes);
+
+  //--- cut variables
+  hCutnHits = new TH2D("c0CutnHitsSTK"+tag,"", 20, -0.5, 399.5, 10, -0.5, 9.5); lout->Add(hCutnHits);
+  hCuttrackScore = new TH2D("c0CuttrackScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCuttrackScore);
+  hCutemScore = new TH2D("c0CutemScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutemScore);
+  hCutmichelScore = new TH2D("c0CutmichelScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutmichelScore);
+  hCutChi2NDF = new TH2D("c0CutChi2NDFSTK"+tag,"", 20, 0, 100, 10, -0.5, 9.5); lout->Add(hCutChi2NDF);
+
 }
 
 void IniTruthHist(TList * lout, const TString tag)
