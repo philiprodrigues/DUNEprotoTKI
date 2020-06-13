@@ -87,6 +87,7 @@ using namespace std;
 class style
 {
  public:
+  static THStack * NormalizeStack(THStack * hstk);
   static THStack * ConvertToStack(const TH2D * hh);
   static void Process2DHist(TList *lout);
   static void DrawHist(TList *lout, const TString outdir, const TString tag, const bool kfast=false);

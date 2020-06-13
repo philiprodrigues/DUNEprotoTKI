@@ -34,6 +34,26 @@ const TString gTagEFF="EFF";
 const TString gTagNOH="NOH";
 const TString gTagSTK="STK";
 
+THStack * style::NormalizeStack(THStack * hstk)
+{
+  const TString tag = hstk->GetName();
+  THStack * hout = new THStack(tag+"_normalized", tag);
+
+  const TH1D * hsum = GetStackedSum(hstk); 
+
+  const TList * ll = hstk->GetHists();
+  for(int ii=0; ii<ll->GetEntries(); ii++){
+    const TH1D * hold=(TH1D*) ll->At(ii);
+    TH1D * htmp=(TH1D*)hold->Clone(Form("%scopy", hold->GetName()));
+
+    htmp->Sumw2();
+    htmp->Divide(hsum);
+    hout->Add(htmp);
+ }
+
+  return hout;
+}
+
 THStack * style::ConvertToStack(const TH2D * hh)
 {
   const TString tag = hh->GetName();
@@ -48,9 +68,9 @@ THStack * style::ConvertToStack(const TH2D * hh)
   const double oldintegral = hh->Integral(0, 10000, 1, ny);
 
   double newintegral = 0;
-  THStack * stk = new THStack(tag+"_stack", tit);
+  THStack * stk = new THStack(tag+"_stack", tag);
 
-  const int col[]={kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
+  const int col[]={1011, 1008, kGray, 1009, 1002, 1003, kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
   const int ncol = sizeof(col)/sizeof(int);
   if(ncol<ny){
     printf("style::ConvertToStack not enough color %d %d\n", ncol, ny); exit(1);
@@ -118,6 +138,7 @@ void style::Process2DHist(TList *lout)
 
       if(tag.Contains(gTagSTK)){
         THStack * stk = ConvertToStack(htmp); lout->Add(stk);
+        THStack * sfrac = NormalizeStack(stk); lout->Add(sfrac);
       }
     }
   }
@@ -197,14 +218,18 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
       style::ResetStyle(hstk);
    
       hstk->SetMinimum(0);
-      hstk->Draw("");
 
-      TH1D * hsum = GetStackedSum(hstk); lout->Add(hsum);
+      TH1D * hsum = GetStackedSum(hstk); //lout->Add(hsum);
       hstk->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.1);
-      ResetStyle(hsum);
-      hsum->SetLineColor(kBlack);
-      hsum->SetMarkerSize(2);
-      hsum->Draw("hist text same");
+
+      hstk->Draw("hist");
+
+      if(!tag.Contains("_normalized")){
+        ResetStyle(hsum);
+        hsum->SetLineColor(kBlack);
+        hsum->SetMarkerSize(2);
+        hsum->Draw("hist text same");
+      }
     }
 
     c1->Print(outdir+"/"+tag+".png");

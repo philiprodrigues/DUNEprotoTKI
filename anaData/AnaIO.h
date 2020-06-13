@@ -201,6 +201,11 @@ namespace AnaIO
  TH2D * hPiMomentumRes = 0x0;
 
  TH2D * hCutnHits = 0x0;
+ TH2D * hCutNdEdx = 0x0;
+ TH2D * hCutstartE2 = 0x0;
+ TH2D * hCutstartE3 = 0x0;
+ TH2D * hCutlastE2 = 0x0;
+ TH2D * hCutlastE3 = 0x0;
  TH2D * hCuttrackScore = 0x0;
  TH2D * hCutemScore = 0x0;
  TH2D * hCutmichelScore = 0x0;
@@ -507,12 +512,16 @@ void IniRecHist(TList * lout, const TString tag)
   hPiMomentumRes = new TH2D("b1PiMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiMomentumRes);
 
   //--- cut variables
-  hCutnHits = new TH2D("c0CutnHitsSTK"+tag,"", 20, -0.5, 399.5, 10, -0.5, 9.5); lout->Add(hCutnHits);
-  hCuttrackScore = new TH2D("c0CuttrackScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCuttrackScore);
-  hCutemScore = new TH2D("c0CutemScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutemScore);
-  hCutmichelScore = new TH2D("c0CutmichelScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutmichelScore);
-  hCutChi2NDF = new TH2D("c0CutChi2NDFSTK"+tag,"", 20, 0, 100, 10, -0.5, 9.5); lout->Add(hCutChi2NDF);
-
+  hCutNdEdx       = new TH2D("c00CutNdEdxSTK"+tag,"", 20, 0, 100, 10, -0.5, 9.5); lout->Add(hCutNdEdx);
+  hCutstartE2     = new TH2D("c01CutstartE2STK"+tag,"", 20, 0, 20, 10, -0.5, 9.5); lout->Add(hCutstartE2);
+  hCutstartE3     = new TH2D("c02CutstartE3STK"+tag,"", 20, 0, 20, 10, -0.5, 9.5); lout->Add(hCutstartE3);
+  hCutlastE2      = new TH2D("c03CutlastE2STK"+tag,"", 20, 0, 20, 10, -0.5, 9.5); lout->Add(hCutlastE2);
+  hCutlastE3      = new TH2D("c04CutlastE3STK"+tag,"", 20, 0, 20, 10, -0.5, 9.5); lout->Add(hCutlastE3);
+  hCutChi2NDF     = new TH2D("c05CutChi2NDFSTK"+tag,"", 20, 0, 100, 10, -0.5, 9.5); lout->Add(hCutChi2NDF);
+  hCutnHits       = new TH2D("c06CutnHitsSTK"+tag,"", 20, 0, 400, 10, -0.5, 9.5); lout->Add(hCutnHits);
+  hCuttrackScore  = new TH2D("c07CuttrackScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCuttrackScore);
+  hCutemScore     = new TH2D("c08CutemScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutemScore);
+  hCutmichelScore = new TH2D("c09CutmichelScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutmichelScore);
 }
 
 void IniTruthHist(TList * lout, const TString tag)

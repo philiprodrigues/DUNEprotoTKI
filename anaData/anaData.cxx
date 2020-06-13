@@ -249,28 +249,30 @@ est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -
   for(int ii=0; ii<recsize; ii++){
 
     const vector<double>  dedxarray = (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii];
-    const int dedxsize = dedxarray.size();
-     if(dedxsize<3){
-      //do not count it as track
+    const int NdEdx = dedxarray.size();
+    if(NdEdx<4){//need E[3], at least 4 cls
+      //do not count it as anything
       continue;
     }
 
-     const int nhits          = (*AnaIO::reco_daughter_PFP_nHits)[ii];
-    /*//they are indeed different: 236 80
-    if(nhits != dedxsize){
-      printf("nhits!=dedx size %d %d\n", nhits, dedxsize); exit(1);
-    }
-    */
-
-     bool isSelProton = false;
-    double recp        = -999;
     const double startE2 = dedxarray[2];
     const double startE3 = dedxarray[3];
+    const double lastE2 = dedxarray[NdEdx-1-2];
+    const double lastE3 = dedxarray[NdEdx-1-3];
+    
+    const int nhits          = (*AnaIO::reco_daughter_PFP_nHits)[ii];
+    /*//they are indeed different: 236 80
+    if(nhits != NdEdx){
+      printf("nhits!=dedx size %d %d\n", nhits, NdEdx); exit(1);
+    }
+    */
 
     const double chi2 = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
     const double ndof = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
     const double Chi2NDF = chi2/(ndof+1E-10);
 
+    bool isSelProton = false;
+    double recp        = -999;
     //all signal protons have nhit below 260
     //all signal protons have startE3 > 9
     //with Chi2NDF cut  44/191 = 23% purity; without 46/197 = 23% purity, slightly higher efficiency
@@ -331,11 +333,17 @@ est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -
         AnaIO::hPiMomentumRes->Fill(truemomentum, recp/truemomentum-1);
       }
 
+      AnaIO::hCutNdEdx->Fill(NdEdx, fillstktype);
+      AnaIO::hCutstartE2->Fill(startE2, fillstktype);
+      AnaIO::hCutstartE3->Fill(startE3, fillstktype);
+      AnaIO::hCutlastE2->Fill(lastE2, fillstktype);
+      AnaIO::hCutlastE3->Fill(lastE3, fillstktype);
+
       AnaIO::hCutnHits->Fill(nhits, fillstktype);
+      AnaIO::hCutChi2NDF->Fill(Chi2NDF, fillstktype);
       AnaIO::hCuttrackScore->Fill(trackScore, fillstktype);
       AnaIO::hCutemScore->Fill(emScore, fillstktype);
       AnaIO::hCutmichelScore->Fill(michelScore, fillstktype);
-      AnaIO::hCutChi2NDF->Fill(Chi2NDF, fillstktype);
     }
     
   }
