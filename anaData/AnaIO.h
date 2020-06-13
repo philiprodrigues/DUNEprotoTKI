@@ -202,13 +202,14 @@ namespace AnaIO
  TH1D * hProtontrackScore = 0x0;
  TH1D * hProtonemScore = 0x0;
  TH1D * hProtonmichelScore = 0x0;
+ TH1D * hProtonChi2NDF = 0x0;
 
  TH2D * hPiPlusMomentumRes = 0x0;
  TH1I * hPiPlusnHits = 0x0;
  TH1D * hPiPlustrackScore = 0x0;
  TH1D * hPiPlusemScore = 0x0;
  TH1D * hPiPlusmichelScore = 0x0;
-
+ TH1D * hPiPlusChi2NDF = 0x0;
 //==============================================================================
 //==============================================================================
 
@@ -506,11 +507,13 @@ void IniRecHist(TList * lout, const TString tag)
   hProtontrackScore = new TH1D("b1ProtontrackScore"+tag,"", 20, 0, 1); lout->Add(hProtontrackScore);
   hProtonemScore = new TH1D("b1ProtonemScore"+tag,"", 20, 0, 1); lout->Add(hProtonemScore);
   hProtonmichelScore = new TH1D("b1ProtonmichelScore"+tag,"", 20, 0, 1); lout->Add(hProtonmichelScore);
+  hProtonChi2NDF = new TH1D("b1ProtonChi2NDF"+tag,"", 20, 0, 100); lout->Add(hProtonChi2NDF);
   hPiPlusMomentumRes = new TH2D("b0PiPlusMomentumRes"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiPlusMomentumRes);
   hPiPlusnHits = new TH1I("b1PiPlusnHits"+tag,"", 20, -0.5, 399.5); lout->Add(hPiPlusnHits);
   hPiPlustrackScore = new TH1D("b1PiPlustrackScore"+tag,"", 20, 0, 1); lout->Add(hPiPlustrackScore);
   hPiPlusemScore = new TH1D("b1PiPlusemScore"+tag,"", 20, 0, 1); lout->Add(hPiPlusemScore);
   hPiPlusmichelScore = new TH1D("b1PiPlusmichelScore"+tag,"", 20, 0, 1); lout->Add(hPiPlusmichelScore);
+  hPiPlusChi2NDF = new TH1D("b1PiPlusChi2NDF"+tag,"", 20, 0, 100); lout->Add(hPiPlusChi2NDF);
 }
 
 void IniTruthHist(TList * lout, const TString tag)

@@ -389,28 +389,33 @@ est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -
       nmichel++;
     }
 
+    const double chi2 = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
+    const double ndof = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
+    const double Chi2NDF = chi2/(ndof+1E-10);
+
     int pdg = -999;
     double truemomentum = -999;
     const int trueID = getTruthFromRec(ii, pdg, truemomentum);
 
     if(kprint){
-      printf("test ksig %d rec %d/%d trueID %d pdg %d truemomentum %f recp %f resolution %f startE2 %f startE3 %f nhits %d trackScore %f emScore %f michelScore %f sum %f\n", ksig, ii, recsize, trueID, pdg, truemomentum, recp, recp/truemomentum-1, startE2, startE3,  nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore);
+      printf("test ksig %d rec %d/%d trueID %d pdg %d truemomentum %f recp %f resolution %f startE2 %f startE3 %f nhits %d trackScore %f emScore %f michelScore %f sum %f chi2 %f ndof %f chi2/ndof %f\n", ksig, ii, recsize, trueID, pdg, truemomentum, recp, recp/truemomentum-1, startE2, startE3,  nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore, chi2, ndof, Chi2NDF);
 
-      if(recp!=-999){
+      if(!ksig){
         if(pdg==2212 && trueID>=0){
           AnaIO::hProtonnHits->Fill(nhits);
           AnaIO::hProtontrackScore->Fill(trackScore);
           AnaIO::hProtonemScore->Fill(emScore);
           AnaIO::hProtonmichelScore->Fill(michelScore);
+          AnaIO::hProtonChi2NDF->Fill(Chi2NDF);
           AnaIO::hProtonMomentumRes->Fill(truemomentum, recp/truemomentum-1);
         }
-      }
-      else{
+
         if(pdg==211 && trueID>=0){
           AnaIO::hPiPlusnHits->Fill(nhits);
           AnaIO::hPiPlustrackScore->Fill(trackScore);
           AnaIO::hPiPlusemScore->Fill(emScore);
           AnaIO::hPiPlusmichelScore->Fill(michelScore);
+          AnaIO::hPiPlusChi2NDF->Fill(Chi2NDF);
           //AnaIO::hPiPlusMomentumRes->Fill(truemomentum, recp/truemomentum-1);
         }
       }
