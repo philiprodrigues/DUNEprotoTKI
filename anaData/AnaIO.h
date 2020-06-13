@@ -442,6 +442,8 @@ void IniRecHist(TList * lout, const TString tag)
   hTruthSignal = new TH1I("a1TruthSignal"+tag,  "",  nPass, Passmin, Passmax); lout->Add(hTruthSignal);
 
   //--- established
+  //over shadowed by beam pre-filtering
+  /*
   hnBeamdEdxCls = new TH1I("c1nBeamdEdxCls"+tag,"", 20, -0.5, 19.5); lout->Add(hnBeamdEdxCls);
 
   const int nE = 30;
@@ -449,71 +451,74 @@ void IniRecHist(TList * lout, const TString tag)
   const double lastEmax = 30;
   const double startEmax = 10;
 
-  hSignalVsTMeanStart = new TH2D("c1SignalVsTMeanStart"+tag,"",nE*5, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsTMeanStart);
+  hSignalVsTMeanStart = new TH2D("c1SignalVsTMeanStartNOHPRFPUR"+tag,"",nE*5, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsTMeanStart);
 
-  hSignalVsStartE0 = new TH2D("z1SignalVsStartE0"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE0);
-  hSignalVsStartE1 = new TH2D("z1SignalVsStartE1"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE1);
-  hSignalVsStartE2 = new TH2D("z1SignalVsStartE2"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE2);
-  hSignalVsStartE3 = new TH2D("z1SignalVsStartE3"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE3);
-  hSignalVsStartE4 = new TH2D("z1SignalVsStartE4"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE4);
-  hSignalVsStartE5 = new TH2D("z1SignalVsStartE5"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE5);
-  hSignalVsLastE0 = new TH2D("z1SignalVsLastE0"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE0);
-  hSignalVsLastE1 = new TH2D("z1SignalVsLastE1"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE1);
-  hSignalVsLastE2 = new TH2D("z1SignalVsLastE2"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE2);
-  hSignalVsLastE3 = new TH2D("z1SignalVsLastE3"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE3);
-  hSignalVsLastE4 = new TH2D("z1SignalVsLastE4"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE4);
-  hSignalVsLastE5 = new TH2D("z1SignalVsLastE5"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE5);
+  hSignalVsStartE0 = new TH2D("z1SignalVsStartE0NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE0);
+  hSignalVsStartE1 = new TH2D("z1SignalVsStartE1NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE1);
+  hSignalVsStartE2 = new TH2D("z1SignalVsStartE2NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE2);
+  hSignalVsStartE3 = new TH2D("z1SignalVsStartE3NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE3);
+  hSignalVsStartE4 = new TH2D("z1SignalVsStartE4NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE4);
+  hSignalVsStartE5 = new TH2D("z1SignalVsStartE5NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsStartE5);
+  hSignalVsLastE0 = new TH2D("z1SignalVsLastE0NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE0);
+  hSignalVsLastE1 = new TH2D("z1SignalVsLastE1NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE1);
+  hSignalVsLastE2 = new TH2D("z1SignalVsLastE2NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE2);
+  hSignalVsLastE3 = new TH2D("z1SignalVsLastE3NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE3);
+  hSignalVsLastE4 = new TH2D("z1SignalVsLastE4NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE4);
+  hSignalVsLastE5 = new TH2D("z1SignalVsLastE5NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLastE5);
 
-  hSignalVsTMeanLast = new TH2D("z2SignalVsTMeanLast"+tag,"",nE*5, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsTMeanLast);
-  hSigAfterVsStartE0 = new TH2D("z2SigAfterVsStartE0"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE0);
-  hSigAfterVsStartE1 = new TH2D("z2SigAfterVsStartE1"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE1);
-  hSigAfterVsStartE2 = new TH2D("z2SigAfterVsStartE2"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE2);
-  hSigAfterVsStartE3 = new TH2D("z2SigAfterVsStartE3"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE3);
-  hSigAfterVsStartE4 = new TH2D("z2SigAfterVsStartE4"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE4);
-  hSigAfterVsStartE5 = new TH2D("z2SigAfterVsStartE5"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE5);
-  hSigAfterVsLastE0 = new TH2D("z2SigAfterVsLastE0"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE0);
-  hSigAfterVsLastE1 = new TH2D("z2SigAfterVsLastE1"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE1);
-  hSigAfterVsLastE2 = new TH2D("z2SigAfterVsLastE2"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE2);
-  hSigAfterVsLastE3 = new TH2D("z2SigAfterVsLastE3"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE3);
-  hSigAfterVsLastE4 = new TH2D("z2SigAfterVsLastE4"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE4);
-  hSigAfterVsLastE5 = new TH2D("z2SigAfterVsLastE5"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE5);
-
+  hSignalVsTMeanLast = new TH2D("z2SignalVsTMeanLastNOHPRFPUR"+tag,"",nE*5, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSignalVsTMeanLast);
+  hSigAfterVsStartE0 = new TH2D("z2SigAfterVsStartE0NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE0);
+  hSigAfterVsStartE1 = new TH2D("z2SigAfterVsStartE1NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE1);
+  hSigAfterVsStartE2 = new TH2D("z2SigAfterVsStartE2NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE2);
+  hSigAfterVsStartE3 = new TH2D("z2SigAfterVsStartE3NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE3);
+  hSigAfterVsStartE4 = new TH2D("z2SigAfterVsStartE4NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE4);
+  hSigAfterVsStartE5 = new TH2D("z2SigAfterVsStartE5NOHPRFPUR"+tag,"", nE, Emin, startEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsStartE5);
+  hSigAfterVsLastE0 = new TH2D("z2SigAfterVsLastE0NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE0);
+  hSigAfterVsLastE1 = new TH2D("z2SigAfterVsLastE1NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE1);
+  hSigAfterVsLastE2 = new TH2D("z2SigAfterVsLastE2NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE2);
+  hSigAfterVsLastE3 = new TH2D("z2SigAfterVsLastE3NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE3);
+  hSigAfterVsLastE4 = new TH2D("z2SigAfterVsLastE4NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE4);
+  hSigAfterVsLastE5 = new TH2D("z2SigAfterVsLastE5NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE5);
+  */
  
   //--- to move above
-   hRecoBeamType = new TH1I("h0RecoBeamType"+tag,  "", 30, -4.5, 25.5); lout->Add(hRecoBeamType);
+  hRecoBeamType = new TH1I("h0RecoBeamType"+tag,  "", 30, -4.5, 25.5); lout->Add(hRecoBeamType);
 
   hBeamPosPass = new TH1I("h1BeamPosPass"+tag, "", 4, -0.5, 3.5); lout->Add(hBeamPosPass);
 
   hBeamEndZ = new TH1D("h2BeamEndZ"+tag,"",50, 0, 500); lout->Add(hBeamEndZ);
   hBeamEndZPass = new TH1I("h2BeamEndZPass"+tag,"",4, -0.5, 3.5); lout->Add(hBeamEndZPass);
 
- const int nBeamNTrack = 10;
+  const int nBeamNTrack = 10;
   const double BeamNTrackmin = -0.5;
   const double BeamNTrackmax = 9.5;
   hBeamNTrack = new TH2I("h6BeamNTrack"+tag,"", nBeamNTrack, BeamNTrackmin, BeamNTrackmax, 5, -0.5, 4.5); lout->Add(hBeamNTrack);
-  hSignalVsBeamNTrack = new TH2D("p6SignalVsBeanNTrack"+tag,"", nBeamNTrack, BeamNTrackmin, BeamNTrackmax, nPass, Passmin, Passmax); lout->Add(hSignalVsBeamNTrack);
+  hSignalVsBeamNTrack = new TH2D("p6SignalVsBeanNTrackNOHPRFPUR"+tag,"", nBeamNTrack, BeamNTrackmin, BeamNTrackmax, nPass, Passmin, Passmax); lout->Add(hSignalVsBeamNTrack);
 
   //--- to test
+  //sensitive to pi+ beam, but not to signal -> sensitive to pi+ beam non-signal, i.e. non-interacting
+  /*
   const int nlen = 10;
   const double lenmin = 0;
   const double lenmax = 250;
   hBeamLen = new TH1D("h9BeamLen"+tag,"",nlen, lenmin, lenmax); lout->Add(hBeamLen);
-  hSignalVsLen = new TH2D("p9SignalVsLen"+tag,"", nlen, lenmin, lenmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLen);
-  hSigAfterVsLen = new TH2D("p9SigAfterVsLen"+tag,"", nlen, lenmin, lenmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLen);
+  hSignalVsLen = new TH2D("p9SignalVsLenNOHPRFPUR"+tag,"", nlen, lenmin, lenmax, nPass, Passmin, Passmax); lout->Add(hSignalVsLen);
+  hSigAfterVsLen = new TH2D("p9SigAfterVsLenNOHPRFPUR"+tag,"", nlen, lenmin, lenmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLen);
+  */
 
   //--- resolution
-  hProtonMomentumRes = new TH2D("b0ProtonMomentumRes"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hProtonMomentumRes);
-  hProtonnHits = new TH1I("b1ProtonnHits"+tag,"", 20, -0.5, 399.5); lout->Add(hProtonnHits);
-  hProtontrackScore = new TH1D("b1ProtontrackScore"+tag,"", 20, 0, 1); lout->Add(hProtontrackScore);
-  hProtonemScore = new TH1D("b1ProtonemScore"+tag,"", 20, 0, 1); lout->Add(hProtonemScore);
-  hProtonmichelScore = new TH1D("b1ProtonmichelScore"+tag,"", 20, 0, 1); lout->Add(hProtonmichelScore);
-  hProtonChi2NDF = new TH1D("b1ProtonChi2NDF"+tag,"", 20, 0, 100); lout->Add(hProtonChi2NDF);
-  hPiPlusMomentumRes = new TH2D("b0PiPlusMomentumRes"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiPlusMomentumRes);
-  hPiPlusnHits = new TH1I("b1PiPlusnHits"+tag,"", 20, -0.5, 399.5); lout->Add(hPiPlusnHits);
-  hPiPlustrackScore = new TH1D("b1PiPlustrackScore"+tag,"", 20, 0, 1); lout->Add(hPiPlustrackScore);
-  hPiPlusemScore = new TH1D("b1PiPlusemScore"+tag,"", 20, 0, 1); lout->Add(hPiPlusemScore);
-  hPiPlusmichelScore = new TH1D("b1PiPlusmichelScore"+tag,"", 20, 0, 1); lout->Add(hPiPlusmichelScore);
-  hPiPlusChi2NDF = new TH1D("b1PiPlusChi2NDF"+tag,"", 20, 0, 100); lout->Add(hPiPlusChi2NDF);
+  hProtonMomentumRes = new TH2D("b0ProtonMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hProtonMomentumRes);
+  hProtonnHits = new TH1I("b0ProtonnHitsNOH"+tag,"", 20, -0.5, 399.5); lout->Add(hProtonnHits);
+  hProtontrackScore = new TH1D("b0ProtontrackScoreNOH"+tag,"", 20, 0, 1); lout->Add(hProtontrackScore);
+  hProtonemScore = new TH1D("b0ProtonemScoreNOH"+tag,"", 20, 0, 1); lout->Add(hProtonemScore);
+  hProtonmichelScore = new TH1D("b0ProtonmichelScoreNOH"+tag,"", 20, 0, 1); lout->Add(hProtonmichelScore);
+  hProtonChi2NDF = new TH1D("b0ProtonChi2NDFNOH"+tag,"", 20, 0, 100); lout->Add(hProtonChi2NDF);
+  hPiPlusMomentumRes = new TH2D("b1PiMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiPlusMomentumRes);
+  hPiPlusnHits = new TH1I("b1PinHitsNOH"+tag,"", 20, -0.5, 399.5); lout->Add(hPiPlusnHits);
+  hPiPlustrackScore = new TH1D("b1PitrackScoreNOH"+tag,"", 20, 0, 1); lout->Add(hPiPlustrackScore);
+  hPiPlusemScore = new TH1D("b1PiemScoreNOH"+tag,"", 20, 0, 1); lout->Add(hPiPlusemScore);
+  hPiPlusmichelScore = new TH1D("b1PimichelScoreNOH"+tag,"", 20, 0, 1); lout->Add(hPiPlusmichelScore);
+  hPiPlusChi2NDF = new TH1D("b1PiChi2NDFNOH"+tag,"", 20, 0, 100); lout->Add(hPiPlusChi2NDF);
 }
 
 void IniTruthHist(TList * lout, const TString tag)

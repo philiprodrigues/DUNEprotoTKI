@@ -28,6 +28,117 @@ Double_t style::fgkTickLength = 0.02;
 #define EPSILON 1E-12
 #endif
 
+const TString gTagPRF="PRF";
+const TString gTagPUR="PUR";
+const TString gTagEFF="EFF";
+const TString gTagNOH="NOH";
+const TString gTagSTK="STK";
+
+void style::Process2DHist(TList *lout)
+{
+  const int nhist = lout->GetSize();//the size will increase
+  for(int ii=0; ii<nhist; ii++){
+    TH2D * htmp = dynamic_cast<TH2D *>( lout->At(ii) );
+    if(htmp){
+      const TString tag = htmp->GetName();
+
+      if(tag.Contains(gTagPRF)){
+        TH1D * hpro = htmp->ProfileX(Form("%s_profileX", htmp->GetName())); lout->Add(hpro);
+        if(tag.Contains(gTagPUR)){
+          hpro->SetYTitle("Purity");
+        }
+        else if(tag.Contains(gTagEFF)){
+          hpro->SetYTitle("Efficiency");
+        }
+
+        hpro->SetTitle(tag);
+      }
+
+      if(tag.Contains(gTagNOH)){
+        TH1D * hpdf = 0x0;
+        TH1D * hcdf = 0x0;
+        const double thres = 5;
+        TH2D * hnor = NormalHist(htmp, hpdf, hcdf, thres, true);
+        hpdf->SetYTitle("p.d.f.");
+        hcdf->SetYTitle("c.d.f.");
+        hpdf->SetTitle(tag);
+        hcdf->SetTitle(tag);
+        hnor->SetTitle(tag);
+        lout->Add(hpdf);
+        lout->Add(hcdf);
+        lout->Add(hnor); 
+      }
+    }
+  }
+}
+
+void style::DrawHist(TList *lout, const TString outdir, const TString tag, const bool kfast)
+{
+  TCanvas * c1 = new TCanvas("c1"+tag, "", 1200, 800);
+  style::PadSetup(c1);
+  gPad->SetTopMargin(0.06);
+  gPad->SetRightMargin(0.03);
+
+  for(int ii=0; ii<lout->GetSize(); ii++){
+    TH1 * hh = dynamic_cast<TH1*> (lout->At(ii));
+    if(!hh){
+      continue;
+    }
+
+    TH2 * htmp = dynamic_cast<TH2 *>(hh);
+    const bool k2d = htmp;
+    gStyle->SetOptTitle(1);
+    if(k2d){
+      //gStyle->SetOptStat(0);
+      gStyle->SetOptStat("eou");
+    }
+    else{
+      gStyle->SetOptStat("eoum");
+      gStyle->SetStatColor(0);
+      gStyle->SetStatStyle(0);
+      gStyle->SetStatY(0.9);
+    }
+
+    const TString tag = hh->GetName();
+    cout<<"Printing "<<tag<<endl;
+
+    style::ResetStyle(hh);
+    hh->UseCurrentStyle();//can't go after setmarkersize
+    hh->SetMaximum(hh->GetBinContent(hh->GetMaximumBin())*1.3);
+    hh->SetMinimum(0);
+    hh->UseCurrentStyle();
+    hh->SetMarkerSize(3);
+    TString dopt="text hist";
+    if(k2d){
+      if(tag.Contains(gTagPRF)){
+        dopt = "box";
+      }
+      else if(tag.Contains(gTagNOH)){
+        dopt = "colz";
+      }
+    }
+    else{
+      if(tag.Contains(gTagPRF)){
+        //hh->SetMaximum(0.1);
+        //hh->SetMaximum(0.3);
+        dopt = "hist";
+      }
+      else if(tag.Contains(gTagNOH)){
+        dopt = "hist";
+      }
+    }
+    hh->Draw(dopt);
+
+    c1->Print(outdir+"/"+tag+".png");
+
+    if(!kfast){
+      c1->Print(outdir+"/"+tag+".pdf");
+      c1->Print(outdir+"/"+tag+".eps");
+    }
+  }
+
+}
+
 TH1D * style::GetCDF(const TH2D *hraw, const TString hname)
 {
   TH1D * hcdf = hraw->ProjectionX(hname);

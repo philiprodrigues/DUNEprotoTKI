@@ -537,7 +537,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     //no phase space cut
     AnaIO::kSignal = (AnaIO::true_beam_PDG==211) &&  tmpkSig; 
     //with phase space cut
-    AnaIO::kSignal = (AnaIO::true_beam_PDG==211) &&  tmpkSig && (AnaIO::finProtonmomentum>0.45 && AnaIO::fin2Pmom<0.45);
+    AnaIO::kSignal = AnaIO::kSignal && (AnaIO::finProtonmomentum>0.45 && AnaIO::fin2Pmom<0.45);
     if(!kPiZero){
       AnaIO::kSignal = AnaIO::kSignal && (AnaIO::finPimomentum>0.15);
     }
@@ -647,25 +647,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     //just for printing
     getNTrack(cutnproton, cutngamma, cutnmichel, true, varSignal);
 
-    //nTrack has Michel object
-    /*
-    if(kPiZero){
-      //the purity profile looks weird for pizeor signal
-      //4/260 events signal efficiency
-      if(AnaIO::nTrack!=1){
-        continue;
-      }
-    }
-    else{
-      // 50/218 events signal efficiency
-      if(AnaIO::nTrack!=2){
-        continue;
-      }
-    }
-    */
-    //-> now pi+p signal purity 78/940=8.3%, 611 pi+ beam, 270 e+ beam
-
-    /*   
+     /*   
     //x. Beam dEdx cut shadowed by beam filtering
     AnaIO::hBeamLen->Fill(AnaIO::reco_beam_len);
     AnaIO::hSignalVsLen->Fill(AnaIO::reco_beam_len, varSignal);
@@ -673,9 +655,6 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       continue;
     }
     */
-    //-> now signal purity 167/5274 = 3.2%, 2627 pi+ beam, 1947 e+
-
-   
 
     //============== Benchmark after ALL cuts !!! =========================
     //benchmark
@@ -687,7 +666,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
 
     //--- to test
     //Fill kSignal vs variable; the reason for kSignal but not kBeam is the signal is interacting pion, not all pions. Directly choose matrix to optimize for it
-    AnaIO::hSigAfterVsLen->Fill(AnaIO::reco_beam_len, varSignal);
+    //AnaIO::hSigAfterVsLen->Fill(AnaIO::reco_beam_len, varSignal);
 
     //============= done loop
     
@@ -696,8 +675,8 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
 
   cout<<"All entries "<<ientry<<endl;
 
-  GetProfileX(lout);
-  DrawHist(lout, "output", tag, true);
+  style::Process2DHist(lout);
+  style::DrawHist(lout, "output", tag, true);
 }
 
 void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
@@ -804,7 +783,7 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
 
   cout<<"All entries "<<ientry<<endl;
 
-  DrawHist(lout, "output", tag);
+  style::DrawHist(lout, "output", tag);
 }
 
 int main(int argc, char * argv[])
