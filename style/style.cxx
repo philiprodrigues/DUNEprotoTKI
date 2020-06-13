@@ -217,20 +217,34 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
     }
     else{//hstk
       style::ResetStyle(hstk);
-   
+      
       hstk->SetMinimum(0);
 
       TH1D * hsum = GetStackedSum(hstk); //lout->Add(hsum);
-      hstk->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.1);
-
-      hstk->Draw("hist");
+      hstk->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.15);
+      hsum->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.15);
 
       if(!tag.Contains("_normalized")){
         ResetStyle(hsum);
+        
+        gStyle->SetOptStat("eoum");
+        gStyle->SetStatColor(0);
+        gStyle->SetStatStyle(0);
+        gStyle->SetStatY(0.9);
+        gStyle->SetOptTitle(1);
+
+        hsum->UseCurrentStyle();
         hsum->SetLineColor(kBlack);
         hsum->SetMarkerSize(2);
-        hsum->Draw("hist text same");
+
+        //need to draw hsum first to show Stat box, THStack won't do thta
+        hsum->Draw("hist text");
+        hstk->Draw("hist same");
       }
+      else{
+        hstk->Draw("hist");
+      }
+     
     }
 
     c1->Print(outdir+"/"+tag+".png");
@@ -1092,7 +1106,9 @@ void style::GetBins(TH1D * hh, double *xb, const int noff, const int ndim)
 TH1D * style::GetStackedSum(THStack *stk, const char * name, const int col, const int lsty, const int lwid, const int fsty)
 {
   const TList * ll = stk->GetHists();
-  TH1D * hout = (TH1D*)ll->At(0)->Clone(Form("%ssum",name?name:stk->GetName()));
+  const TString tag = Form("%ssum",name?name:stk->GetName());
+  TH1D * hout = (TH1D*)ll->At(0)->Clone(tag);
+  hout->SetTitle(tag);
   hout->SetDirectory(0);
   for(Int_t ii=1; ii<ll->GetEntries(); ii++){
     hout->Add((TH1D*)ll->At(ii));
