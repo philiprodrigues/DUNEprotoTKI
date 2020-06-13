@@ -248,9 +248,33 @@ not set
  
   for(int ii=0; ii<recsize; ii++){
 
+    int pdg = -999;
+    double truemomentum = -999;
+    const int trueidx = getTruthFromRec(ii, pdg, truemomentum);
+
+    int fillstktype = -999;
+    if(pdg==2212){//proton
+      fillstktype = 0;
+    }
+    else if(pdg==211){//pi+
+      fillstktype = 1;
+    }
+    else if(pdg==22){//gamma
+      fillstktype = 2;
+    }
+    else if(pdg==-999){//shower no true
+      fillstktype = 3;
+    }
+    else{//all others
+      fillstktype = 4;
+    }
+
     //---> need to be done before any counting!!!
     const vector<double>  dedxarray = (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii];
     const int NdEdx = dedxarray.size();
+    if(kfill){
+      AnaIO::hCutNdEdx->Fill(NdEdx, fillstktype);
+    }
     const int ndedxcut = kpi0 ? 6 : 16; //need E[3], at least 4 cls
     printf("check cut kpi0 %d ndedxcut %d\n", kpi0, ndedxcut);
     if(NdEdx<ndedxcut){
@@ -310,27 +334,7 @@ not set
       recp = (*AnaIO::reco_daughter_allTrack_momByRange_muon)[ii];
     }
     //========== proton tagging done!
-
-    int pdg = -999;
-    double truemomentum = -999;
-    const int trueidx = getTruthFromRec(ii, pdg, truemomentum);
-
-    int fillstktype = -999;
-    if(pdg==2212){//proton
-      fillstktype = 0;
-    }
-    else if(pdg==211){//pi+
-      fillstktype = 1;
-    }
-    else if(pdg==22){//gamma
-      fillstktype = 2;
-    }
-    else if(pdg==-999){//shower no true
-      fillstktype = 3;
-    }
-    else{//all others
-      fillstktype = 4;
-    }
+   
 
     if(kprint){
       printf("test ksig %d rec %d/%d trueidx %d pdg %d truemomentum %f recp %f resolution %f startE2 %f startE3 %f nhits %d trackScore %f emScore %f michelScore %f sum %f chi2 %f ndof %f chi2/ndof %f\n", ksig, ii, recsize, trueidx, pdg, truemomentum, recp, recp/truemomentum-1, startE2, startE3,  nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore, chi2, ndof, Chi2NDF);
@@ -344,7 +348,6 @@ not set
         AnaIO::hPiMomentumRes->Fill(truemomentum, recp/truemomentum-1);
       }
 
-      AnaIO::hCutNdEdx->Fill(NdEdx, fillstktype);
       AnaIO::hCutstartE2->Fill(startE2, fillstktype);
       AnaIO::hCutstartE3->Fill(startE3, fillstktype);
       AnaIO::hCutlastE2->Fill(lastE2, fillstktype);
