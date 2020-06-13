@@ -1120,6 +1120,7 @@ TH1D * style::GetStackedSum(THStack *stk, const char * name, const int col, cons
   hout->SetLineStyle(lsty);
   hout->SetLineWidth(lwid);
   hout->SetFillStyle(fsty);
+  hout->SetEntries(hout->Integral(0,10000));
 
   return hout;
 }

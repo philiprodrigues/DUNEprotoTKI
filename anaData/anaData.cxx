@@ -246,6 +246,8 @@ not set
   nmichel = 0;
   nproton = 0;
  
+  static bool kShowCut = true;
+
   for(int ii=0; ii<recsize; ii++){
 
     int pdg = -999;
@@ -276,7 +278,9 @@ not set
       AnaIO::hCutNdEdx->Fill(NdEdx, fillstktype);
     }
     const int ndedxcut = kpi0 ? 6 : 16; //need E[3], at least 4 cls
-    printf("check cut kpi0 %d ndedxcut %d\n", kpi0, ndedxcut);
+    if(kShowCut){
+      printf("check cut kpi0 %d ndedxcut %d\n", kpi0, ndedxcut);
+    }
     if(NdEdx<ndedxcut){
       //do not count it as anything
       continue;
@@ -318,15 +322,31 @@ not set
     const double Chi2NDF = chi2/(ndof+1E-10);
 
     bool isSelProton = false;
-    double recp        = -999;
-    //all signal protons have nhit below 260
-    //all signal protons have startE3 > 9
-    //with Chi2NDF cut  44/191 = 23% purity; without 46/197 = 23% purity, slightly higher efficiency
-    //test if(startE2>10 && nhits<260 && startE3>9 && Chi2NDF<50){
-    if(startE2>10 && nhits<260 && startE3>9){
-      isSelProton = true;
-      nproton++;
+    const double cutNH = 260;
+    if(kpi0){
+      //all signal protons have nhit below 260
+      //all signal protons have startE3 > 9
+      //with Chi2NDF cut  44/191 = 23% purity; without 46/197 = 23% purity, slightly higher efficiency
+      //test if(startE2>10 && nhits<260 && startE3>9 && Chi2NDF<50){
+      
+      const double cutSE2 = 10;
+      const double cutSE3 = 9;
+      isSelProton = (startE2>cutSE2 && nhits<cutNH && startE3>cutSE3);
+      if(kShowCut){
+        printf("check cut kpi0 %d proton tag startE2 %.2f nhits %.0f startE3 %.2f\n", kpi0, cutSE2, cutNH, cutSE3); 
+      }
+    }
+    else{
+      const double cutCHI = 50;
+      isSelProton = (Chi2NDF<cutCHI && nhits<cutNH);
+      if(kShowCut){
+        printf("check cut kpi0 %d proton tag Chi2NDF %.2f nhits %.0f\n", kpi0, cutCHI, cutNH);
+      }
+    }
 
+    double recp        = -999;
+    if(isSelProton){
+      nproton++;
       recp = (*AnaIO::reco_daughter_allTrack_momByRange_proton)[ii];
     }
     else{
@@ -337,7 +357,7 @@ not set
    
 
     if(kprint){
-      printf("test ksig %d rec %d/%d trueidx %d pdg %d truemomentum %f recp %f resolution %f startE2 %f startE3 %f nhits %d trackScore %f emScore %f michelScore %f sum %f chi2 %f ndof %f chi2/ndof %f\n", ksig, ii, recsize, trueidx, pdg, truemomentum, recp, recp/truemomentum-1, startE2, startE3,  nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore, chi2, ndof, Chi2NDF);
+      printf("test ksig %4d rec %4d/%4d trueidx %4d pdg %4d truemomentum %10.3f recp %10.3f resolution %10.3f startE2 %10.3f startE3 %10.3f nhits %4d trackScore %10.3f emScore %10.3f michelScore %10.3f sum %10.3f chi2 %10.3f ndof %10.3f chi2/ndof %10.3f\n", ksig, ii, recsize, trueidx, pdg, truemomentum, recp, recp/truemomentum-1, startE2, startE3,  nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore, chi2, ndof, Chi2NDF);
     }
 
     if(kfill){
@@ -359,7 +379,8 @@ not set
       AnaIO::hCutemScore->Fill(emScore, fillstktype);
       AnaIO::hCutmichelScore->Fill(michelScore, fillstktype);
     }
-    
+
+    kShowCut = false;
   }
 
   if(kprint){
@@ -539,7 +560,16 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=25 instead of 3)is proton, no pion-analysis pre-cuts! -> 25/82 = 30%
       PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=30 instead of 3)is proton, no pion-analysis pre-cuts! -> 22/71 = 31%
 
-      (*) PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=16 instead of 3)is proton, no pion-analysis pre-cuts! -> 40/127 = 32%, e*p = 5.8%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<20 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 39/122 = 32%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<23 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 41/123 = 33%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<25 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 42/125 = 34%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<30 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 42/127 = 33%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<35 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 43/128 = 34%, e*p = 6.6%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<40 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 43/127 = 34%
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<60 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 44/138 = 32%
+
+      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=16 instead of 3)is proton, no pion-analysis pre-cuts! -> 40/127 = 32%, e*p = 5.8%
+      (*) PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 44/132 = 33%, e*p = 6.7%
 
 
       PiZero: ngamma = 2, nmichel=0, nproton=1 -> 32/260=12% in signal sample; 27/68 = 40% purity, 27/260 = 10% efficiency, p*e = 27*27/68/260 = 4.1%
@@ -556,6 +586,10 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=8 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 19/31=61%, e*p = 4.5%
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=10 instead of 3 )is proton, no pion-analysis pre-cuts! -> 13/20=65%, e*p = 3.3%
       PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=20 instead of 3 )is proton, no pion-analysis pre-cuts! -> 9/10=90%,  e*p = 3.1%
+
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and chi2<25 ( NdEdx>=6 instead of 3 but no startE2,E3 at all) is proton, no pion-analysis pre-cuts! -> 20/33=61%
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and chi2<30 ( NdEdx>=6 instead of 3 but no startE2,E3 at all) is proton, no pion-analysis pre-cuts! -> 20/33=61%
+      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and chi2<35 ( NdEdx>=6 instead of 3 but no startE2,E3 at all) is proton, no pion-analysis pre-cuts! -> 20/34=59%
 
       (*) PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=6 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 22/35=63%, e*p = 5.3%
 
