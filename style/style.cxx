@@ -130,13 +130,17 @@ THStack * style::ConvertToStack(const TH2D * hh)
   double newintegral = 0;
   THStack * stk = new THStack(tag+"_stack", tag);
 
-  const int col[]={1014, 1011, 1007,  kOrange, 1009, kOrange, 1003, 1008, 1002, kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
+  const int col[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
   const int ncol = sizeof(col)/sizeof(int);
   if(ncol<ny){
     printf("style::ConvertToStack not enough color %d %d\n", ncol, ny); exit(1);
   }
 
   for(int iy = 1; iy<=ny; iy++){
+    const double toty = hh->Integral(0, 100000, iy, iy);
+    if(toty<EPSILON){
+      continue;
+    }
 
     TH1D * htmp = new TH1D(Form("%sy%d", tag.Data(), iy), tit.Data(), nx, xmin, xmax);
     for(int ix=0; ix<=nx+1; ix++){
@@ -148,9 +152,9 @@ THStack * style::ConvertToStack(const TH2D * hh)
 
     ResetStyle(htmp);
     htmp->SetFillColor(col[iy-1]);
+    htmp->SetLineColor(kBlack);
     htmp->SetMarkerSize(2);
     stk->Add(htmp);
-
   }
 
   if(oldintegral!=newintegral){

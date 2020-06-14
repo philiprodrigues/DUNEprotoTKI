@@ -176,10 +176,17 @@ void setFullSignal(const bool kpi0)
   //no phase space cut
   AnaIO::kSignal = AnaIO::kSignal && (AnaIO::true_beam_PDG==211);
   //with phase space cut
-  AnaIO::kSignal = AnaIO::kSignal && (AnaIO::finProtonmomentum>0.45 && AnaIO::fin2Pmom<0.45);
-  if(!kpi0){
-    AnaIO::kSignal = AnaIO::kSignal && (AnaIO::finPimomentum>0.15);
-  }
+  //AnaIO::kSignal = AnaIO::kSignal && (AnaIO::finProtonmomentum>0.45 && AnaIO::fin2Pmom<0.45);
+  AnaIO::kSignal = AnaIO::kSignal && (AnaIO::finProtonmomentum<1 && AnaIO::finProtonmomentum>0.45 && AnaIO::fin2Pmom<0.45);
+
+  //no pi+ phase space cut
+  //if(!kpi0){
+    //AnaIO::kSignal = AnaIO::kSignal && (AnaIO::finPimomentum>0.15);
+  //}
+
+  //p_leading 0.45-1, p_sublieading < 0.45, no cut on pi+
+  //p-pi0: 242 events
+  //p-pi+: 220 events
 }
 
 int getTruthFromRec(const int recidx, int & pdg, double & momentum)
@@ -210,7 +217,7 @@ int getTruthFromRec(const int recidx, int & pdg, double & momentum)
   return trueidx;
 }
 
-int getNTrack(const bool kpi0, const bool ksig, int & nproton, int & ngamma, int & nmichel, const bool kprint=false, const bool kfill=false, const int kdebug = 0)
+int getNTrack(const bool kpi0, const bool ksig, int & nproton, int & nshower, int & nmichel, const bool kprint=false, const bool kfill=false, const int kdebug = 0)
 {
   /*
 root [11] beamana->Scan("reco_daughter_PFP_ID:reco_daughter_PFP_true_byHits_ID:reco_daughter_allTrack_ID:reco_daughter_allShower_ID:true_beam_daughter_ID:true_beam_daughter_reco_byHits_PFP_ID:true_beam_daughter_reco_byHits_allTrack_ID:true_beam_daughter_reco_byHits_allShower_ID")
@@ -242,7 +249,7 @@ not set
     est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -397725.603302 nhits 7 trackScore 0.016739 emScore 0.983240 michelScore 0.289565 sum 1.289545
   */
   int ntracks = 0;
-  ngamma = 0;
+  nshower = 0;
   nmichel = 0;
   nproton = 0;
  
@@ -259,10 +266,10 @@ not set
       fillstktype = 0;
     }
     else if(pdg==211){//pi+ put it beyond others
-      fillstktype = 4;
+      fillstktype = 1;
     }
     else if(pdg==22){//gamma
-      fillstktype = 1;
+      fillstktype = 4;
     }
     else if(pdg==-999){//shower no true
       fillstktype = 2;
@@ -295,7 +302,7 @@ not set
     }
     const double emScore     = (*AnaIO::reco_daughter_PFP_emScore)[ii];
     if(emScore>0.5){
-      ngamma++;
+      nshower++;
     }
     const double michelScore = (*AnaIO::reco_daughter_PFP_michelScore)[ii];
     if(michelScore>0.5){
@@ -393,6 +400,147 @@ not set
   }
 
   return ntracks;
+}
+
+bool cutTopology(const bool kpi0)
+{
+    /*
+      PiPlus: nshower = 0, nproton=1 -> 75/218=34% in signal sample; 63/467 = 13% purity, 63/218 = 29% efficiency, p*e = 63*63/218/467 = 3.9%
+      PiPlus: nshower = 0, nproton=1,  noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 61/380 = 16% 
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 44/191 = 23% purity, e*p = 44.*44./191./218. = 4.6%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9                is proton, no pion-analysis pre-cuts! -> 46/197 = 23% purity, slightly higher efficiency
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=4 instead of 3) is proton, no pion-analysis pre-cuts! -> 49/199 = 25%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=5 instead of 3) is proton, no pion-analysis pre-cuts! -> 48/201 = 24%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=6 instead of 3) is proton, no pion-analysis pre-cuts! -> 50/202 = 25%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=7 instead of 3) is proton, no pion-analysis pre-cuts! -> 50/200 = 25%, e*p = 5.7%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=8 instead of 3) is proton, no pion-analysis pre-cuts! -> 50/194 = 26%, e*p = 5.9%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=9 instead of 3) is proton, no pion-analysis pre-cuts! -> 47/176 = 27%, e*p = 5.8%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=10 instead of 3)is proton, no pion-analysis pre-cuts! -> 46/168 = 27%, e*p = 5.8%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=13 instead of 3)is proton, no pion-analysis pre-cuts! -> 43/159 = 27%, e*p = 5.3%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=14 instead of 3)is proton, no pion-analysis pre-cuts! -> 42/149 = 28%, e*p = 5.4%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=15 instead of 3)is proton, no pion-analysis pre-cuts! -> 40/135 = 30%, e*p = 5.4%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=17 instead of 3)is proton, no pion-analysis pre-cuts! -> 39/126 = 31%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=20 instead of 3)is proton, no pion-analysis pre-cuts! -> 34/114 = 30%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=25 instead of 3)is proton, no pion-analysis pre-cuts! -> 25/82 = 30%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=30 instead of 3)is proton, no pion-analysis pre-cuts! -> 22/71 = 31%
+
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<20 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 39/122 = 32%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<23 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 41/123 = 33%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<25 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 42/125 = 34%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<30 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 42/127 = 33%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<35 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 43/128 = 34%, e*p = 6.6%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<40 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 43/127 = 34%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<60 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 44/138 = 32%
+
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=16 instead of 3)is proton, no pion-analysis pre-cuts! -> 40/127 = 32%, e*p = 5.8%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, HAS pion-analysis pre-cuts! -> 39/111 = 35%, e*p = 6.3%
+      PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 44/132 = 33%, e*p = 6.7%
+
+      (*) New Def:  2) p_lading 0.45-1, p_sl<0.45. PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 43/132 = 33%, e*p = 43.*43./132./220. = 6.4%
+
+      <-- //p_leading 0.45-1, p_sublieading < 0.45, no cut on pi+
+      <-- //p-pi+: 220 events
+
+      PiZero: nshower = 2, nmichel=0, nproton=1 -> 32/260=12% in signal sample; 27/68 = 40% purity, 27/260 = 10% efficiency, p*e = 27*27/68/260 = 4.1%
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1 -> ; 19/40 = 48% purity
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 is proton -> 18/37=49% purity
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton -> 18/32=56% purity, p*e = 18.*18./32./260. = 3.9%
+      PiZero: nshower = 2, nmichel=0, nproton=1,           noly nhit<260 and startE3>9 is proton -> 21/47=45% purity -> so it is important to have ntrack=1
+
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 18/34 = 53% purity
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton, no pion-analysis pre-cuts! -> 20/36=56% purity, eff*purity = 20.*20./36./260. = 4.3%
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=4 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 19/33=58%
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=5 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 21/34=62%
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=7 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 20/33=61%
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=8 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 19/31=61%, e*p = 4.5%
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=10 instead of 3 )is proton, no pion-analysis pre-cuts! -> 13/20=65%, e*p = 3.3%
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=20 instead of 3 )is proton, no pion-analysis pre-cuts! -> 9/10=90%,  e*p = 3.1%
+
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and chi2<25 ( NdEdx>=6 instead of 3 but no startE2,E3 at all) is proton, no pion-analysis pre-cuts! -> 20/33=61%
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and chi2<30 ( NdEdx>=6 instead of 3 but no startE2,E3 at all) is proton, no pion-analysis pre-cuts! -> 20/33=61%
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and chi2<35 ( NdEdx>=6 instead of 3 but no startE2,E3 at all) is proton, no pion-analysis pre-cuts! -> 20/34=59%
+
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=6 instead of 3 ) is proton, HAS pion-analysis pre-cuts! -> 21/32=66%, e*p= 5.3%
+      PiZero: nshower = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=6 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 22/35=63%, e*p = 5.3%
+
+      (*) PiZero: nshower >= 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=6 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 30/47=64%, e*p = 7.4%, eff = 30/260 = 12%, this is the SAME for both 1) p_leading>0.45, p_sl<0.45, p+>0.15 and 2) p_lading 0.45-1, p_sl<0.45. Eff*pur for new def 2) is 30.*30./47./242 = 7.9%
+      
+      <-- //p_leading 0.45-1, p_sublieading < 0.45, no cut on pi+
+      <-- //p-pi0: 242 events
+     */
+
+    int cutnproton = 0;
+    int cutnshower = 0;
+    int cutnmichel = 0;
+
+    AnaIO::nTrack = getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, false, true, 0);
+    //AnaIO::nTrack = getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, false, false, 0);
+
+    int filleventtype = -999;
+    if(AnaIO::kSignal){
+      filleventtype = 0;
+    }
+    else if(AnaIO::true_beam_PDG==211){
+      filleventtype = 1;
+    }
+    else{
+      filleventtype = 2;
+    }
+
+    //----------- do cuts
+
+    AnaIO::hCutnshower->Fill(cutnshower, filleventtype);
+    if(kpi0){
+      if(cutnshower<2){
+        return false;
+      }
+    }
+    else{
+      if(cutnshower>0){
+        return false;
+      }
+    }
+
+    AnaIO::hCutnmichel->Fill(cutnmichel, filleventtype);
+    if(kpi0){
+      if(cutnmichel>0){
+        return false;
+      }
+    }
+    else{
+      //not found in signal, need Michel to tell 2-proton events from p-pi; ignore michel count for the momentum, things will change after implementing it.
+        /*
+          if(cutnmichel!=1){
+          continue;
+          }
+        */
+    }
+
+    AnaIO::hCutntrack->Fill(AnaIO::nTrack, filleventtype);
+    if(kpi0){
+      //with this 56% purity, without 45%
+      if(AnaIO::nTrack!=1){
+        return false;
+      }
+    }
+    else{
+      if(AnaIO::nTrack!=2){
+        return false;
+      }
+    }
+
+    AnaIO::hCutnproton->Fill(cutnproton, filleventtype);
+    if(cutnproton!=1){
+      return false;
+    }
+
+    //just for printing
+    getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, true, false, 0);
+    //debug mode: major background is -999 shower mocking protons, no efficient cut variables found
+    //getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, true, true, 1);//debug proton candidate
+    //getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, true, true, 2);//debug non-proton candidate
+
+    return true;
 }
 
 double getRecFromTruth(const int protonIdx, const vector<double> * mombyrange)
@@ -541,113 +689,9 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
     }//====================================================== switch between signal sample and full sample
 
     //3. n track daughter
-    int cutnproton = 0;
-    int cutngamma = 0;
-    int cutnmichel = 0;
-
-    AnaIO::nTrack = getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, false, true, 0);
-    //AnaIO::nTrack = getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, false, false, 0);
-
-    AnaIO::hBeamNTrack->Fill(AnaIO::nTrack, cutnproton);
-    AnaIO::hSignalVsBeamNTrack->Fill(AnaIO::nTrack, AnaIO::kSignal);
-
-    /*
-      PiPlus: ngamma = 0, nproton=1 -> 75/218=34% in signal sample; 63/467 = 13% purity, 63/218 = 29% efficiency, p*e = 63*63/218/467 = 3.9%
-      PiPlus: ngamma = 0, nproton=1,  noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 61/380 = 16% 
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 44/191 = 23% purity, e*p = 44.*44./191./218. = 4.6%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9                is proton, no pion-analysis pre-cuts! -> 46/197 = 23% purity, slightly higher efficiency
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=4 instead of 3) is proton, no pion-analysis pre-cuts! -> 49/199 = 25%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=5 instead of 3) is proton, no pion-analysis pre-cuts! -> 48/201 = 24%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=6 instead of 3) is proton, no pion-analysis pre-cuts! -> 50/202 = 25%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=7 instead of 3) is proton, no pion-analysis pre-cuts! -> 50/200 = 25%, e*p = 5.7%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=8 instead of 3) is proton, no pion-analysis pre-cuts! -> 50/194 = 26%, e*p = 5.9%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=9 instead of 3) is proton, no pion-analysis pre-cuts! -> 47/176 = 27%, e*p = 5.8%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=10 instead of 3)is proton, no pion-analysis pre-cuts! -> 46/168 = 27%, e*p = 5.8%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=13 instead of 3)is proton, no pion-analysis pre-cuts! -> 43/159 = 27%, e*p = 5.3%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=14 instead of 3)is proton, no pion-analysis pre-cuts! -> 42/149 = 28%, e*p = 5.4%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=15 instead of 3)is proton, no pion-analysis pre-cuts! -> 40/135 = 30%, e*p = 5.4%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=17 instead of 3)is proton, no pion-analysis pre-cuts! -> 39/126 = 31%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=20 instead of 3)is proton, no pion-analysis pre-cuts! -> 34/114 = 30%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=25 instead of 3)is proton, no pion-analysis pre-cuts! -> 25/82 = 30%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=30 instead of 3)is proton, no pion-analysis pre-cuts! -> 22/71 = 31%
-
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<20 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 39/122 = 32%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<23 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 41/123 = 33%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<25 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 42/125 = 34%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<30 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 42/127 = 33%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<35 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 43/128 = 34%, e*p = 6.6%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<40 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 43/127 = 34%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<60 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 44/138 = 32%
-
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and startE3>9 (NdEdx>=16 instead of 3)is proton, no pion-analysis pre-cuts! -> 40/127 = 32%, e*p = 5.8%
-      PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, HAS pion-analysis pre-cuts! -> 39/111 = 35%, e*p = 6.3%
-      (*) PiPlus: ngamma = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 44/132 = 33%, e*p = 6.7%
-
-
-      PiZero: ngamma = 2, nmichel=0, nproton=1 -> 32/260=12% in signal sample; 27/68 = 40% purity, 27/260 = 10% efficiency, p*e = 27*27/68/260 = 4.1%
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1 -> ; 19/40 = 48% purity
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 is proton -> 18/37=49% purity
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton -> 18/32=56% purity, p*e = 18.*18./32./260. = 3.9%
-      PiZero: ngamma = 2, nmichel=0, nproton=1,           noly nhit<260 and startE3>9 is proton -> 21/47=45% purity -> so it is important to have ntrack=1
-
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 and Chi2NDF<50 is proton, no pion-analysis pre-cuts! -> 18/34 = 53% purity
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 is proton, no pion-analysis pre-cuts! -> 20/36=56% purity, eff*purity = 20.*20./36./260. = 4.3%
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=4 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 19/33=58%
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=5 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 21/34=62%
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=7 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 20/33=61%
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=8 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 19/31=61%, e*p = 4.5%
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=10 instead of 3 )is proton, no pion-analysis pre-cuts! -> 13/20=65%, e*p = 3.3%
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=20 instead of 3 )is proton, no pion-analysis pre-cuts! -> 9/10=90%,  e*p = 3.1%
-
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and chi2<25 ( NdEdx>=6 instead of 3 but no startE2,E3 at all) is proton, no pion-analysis pre-cuts! -> 20/33=61%
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and chi2<30 ( NdEdx>=6 instead of 3 but no startE2,E3 at all) is proton, no pion-analysis pre-cuts! -> 20/33=61%
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and chi2<35 ( NdEdx>=6 instead of 3 but no startE2,E3 at all) is proton, no pion-analysis pre-cuts! -> 20/34=59%
-
-      PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=6 instead of 3 ) is proton, HAS pion-analysis pre-cuts! -> 21/32=66%, e*p= 5.3%
-      (*) PiZero: ngamma = 2, nmichel=0, nproton=1, ntrack=1, noly nhit<260 and startE3>9 ( NdEdx>=6 instead of 3 ) is proton, no pion-analysis pre-cuts! -> 22/35=63%, e*p = 5.3%
-
-     */
-
-    if(1){//====================================================== switch of doing selection cuts
-      if(cutnproton!=1){
-        continue;
-      }
-      
-      if(!kPiZero){
-        if(cutngamma>0){
-          continue;
-        }
-        //not found in signal, need Michel to tell 2-proton events from p-pi; ignore michel count for the momentum, things will change after implementing it.
-        /*
-          if(cutnmichel!=1){
-          continue;
-          }
-        */
-        if(AnaIO::nTrack!=2){
-          continue;
-        }
-      }
-      else{
-        if(cutngamma!=2){
-          continue;
-        }
-        
-        if(cutnmichel>0){
-          continue;
-        }
-        
-        //with this 56% purity, without 45%
-        if(AnaIO::nTrack!=1){
-          continue;
-        }
-      }
-    }//====================================================== switch of doing selection cuts
-
-    //just for printing
-    getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, true, false, 0);
-    //debug mode: major background is -999 shower mocking protons, no efficient cut variables found
-    //getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, true, true, 1);//debug proton candidate
-    //getNTrack(kPiZero, AnaIO::kSignal, cutnproton, cutngamma, cutnmichel, true, true, 2);//debug non-proton candidate
+    if(!cutTopology(kPiZero)){
+      continue;
+    }   
 
      /*   
     //x. Beam dEdx cut shadowed by beam filtering

@@ -188,9 +188,6 @@ namespace AnaIO
  TH1D * hBeamEndZ = 0x0;
  TH1I * hBeamEndZPass = 0x0;
 
- TH2D * hBeamNTrack = 0x0;
- TH2D * hSignalVsBeamNTrack = 0x0;
-
  //--- to test
  TH1D * hBeamLen = 0x0;
  TH2D * hSignalVsLen = 0x0;
@@ -210,6 +207,10 @@ namespace AnaIO
  TH2D * hCutemScore = 0x0;
  TH2D * hCutmichelScore = 0x0;
  TH2D * hCutChi2NDF = 0x0;
+ TH2D * hCutnproton = 0x0;
+ TH2D * hCutntrack = 0x0;
+ TH2D * hCutnshower = 0x0;
+ TH2D * hCutnmichel = 0x0;
 
 //==============================================================================
 //==============================================================================
@@ -490,12 +491,6 @@ void IniRecHist(TList * lout, const TString tag)
   hBeamEndZ = new TH1D("h2BeamEndZ"+tag,"",50, 0, 500); lout->Add(hBeamEndZ);
   hBeamEndZPass = new TH1I("h2BeamEndZPass"+tag,"",4, -0.5, 3.5); lout->Add(hBeamEndZPass);
 
-  const int nBeamNTrack = 10;
-  const double BeamNTrackmin = -0.5;
-  const double BeamNTrackmax = 9.5;
-  hBeamNTrack = new TH2D("h6BeamNTrackSTK"+tag,"", nBeamNTrack, BeamNTrackmin, BeamNTrackmax, 5, -0.5, 4.5); lout->Add(hBeamNTrack);
-  hSignalVsBeamNTrack = new TH2D("p6SignalVsBeanNTrackNOHPRFPUR"+tag,"", nBeamNTrack, BeamNTrackmin, BeamNTrackmax, nPass, Passmin, Passmax); lout->Add(hSignalVsBeamNTrack);
-
   //--- to test
   //sensitive to pi+ beam, but not to signal -> sensitive to pi+ beam non-signal, i.e. non-interacting
   /*
@@ -523,6 +518,10 @@ void IniRecHist(TList * lout, const TString tag)
   hCutlastE2      = new TH2D("c009CutlastE2STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutlastE2);
   hCutlastE3      = new TH2D("c010CutlastE3STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutlastE3);
 
+  hCutnshower     = new TH2D("c011CutnshowerSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnshower);
+  hCutnmichel     = new TH2D("c012CutnmichelSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnmichel);
+  hCutntrack      = new TH2D("c013CutntrackSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutntrack);
+  hCutnproton     = new TH2D("c014CutnprotonSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnproton);
 }
 
 void IniTruthHist(TList * lout, const TString tag)
