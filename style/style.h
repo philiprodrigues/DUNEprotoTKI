@@ -87,7 +87,8 @@ using namespace std;
 class style
 {
  public:
-  static TH1D * GetEff(const TH1D * ha, const TH1D *hb, const double hmax);
+  static void GetHist(const TString var, const TString xtit, const TString ytit, TTree *tree, TH1 *hist);
+  static TH1D * GetEff(const TH1D * ha, const TH1D *hb, const double hmax, TList * lout=0x0);
   static THStack * NormalizeStack(THStack * hstk);
   static THStack * ConvertToStack(const TH2D * hh);
   static void Process2DHist(TList *lout);

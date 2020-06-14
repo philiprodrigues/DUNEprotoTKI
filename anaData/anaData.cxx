@@ -258,17 +258,17 @@ not set
     if(pdg==2212){//proton
       fillstktype = 0;
     }
-    else if(pdg==211){//pi+
-      fillstktype = 1;
+    else if(pdg==211){//pi+ put it beyond others
+      fillstktype = 4;
     }
     else if(pdg==22){//gamma
-      fillstktype = 2;
+      fillstktype = 1;
     }
     else if(pdg==-999){//shower no true
-      fillstktype = 3;
+      fillstktype = 2;
     }
     else{//all others
-      fillstktype = 4;
+      fillstktype = 3;
     }
 
     //---> need to be done before any counting!!!

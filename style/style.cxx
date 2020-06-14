@@ -34,8 +34,27 @@ const TString gTagEFF="EFF";
 const TString gTagNOH="NOH";
 const TString gTagSTK="STK";
 
-TH1D * style::GetEff(const TH1D * ha, const TH1D *hb, const double hmax)
+void style::GetHist(const TString var, const TString xtit, const TString ytit, TTree *tree, TH1 *hist)
 {
+  if(!hist){
+    return;
+  }
+
+  const TString cut = hist->GetTitle();
+  const TString hname = hist->GetName();
+  printf("style::GetHist Drawing %s %s %s\n", var.Data(), hname.Data(), cut.Data());
+  tree->Draw(var+">>"+hname, cut);
+
+  hist->SetXTitle(xtit);
+  hist->SetYTitle(ytit);
+}
+
+TH1D * style::GetEff(const TH1D * ha, const TH1D *hb, const double hmax, TList * lout)
+{
+  if(!ha || !hb){
+    return 0x0;
+  }
+
   const TString hname = ha->GetName();
   TH1D * heff = (TH1D*) ha->Clone(Form("%sEFF", hname.Data()));
   heff->Sumw2();
@@ -44,6 +63,10 @@ TH1D * style::GetEff(const TH1D * ha, const TH1D *hb, const double hmax)
   heff->SetMaximum(hmax);
   heff->SetTitle(Form("%s/%s", ha->GetTitle(), hb->GetTitle()));
   heff->SetYTitle("Eff.");
+
+  if(lout){
+    lout->Add(heff);
+  }
 
   return heff;
 }
@@ -86,7 +109,7 @@ THStack * style::ConvertToStack(const TH2D * hh)
   double newintegral = 0;
   THStack * stk = new THStack(tag+"_stack", tag);
 
-  const int col[]={1011, 1008, kYellow, 1009, 1002, 1003, kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
+  const int col[]={1011, 1008, 1009, 1002, 1003, kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
   const int ncol = sizeof(col)/sizeof(int);
   if(ncol<ny){
     printf("style::ConvertToStack not enough color %d %d\n", ncol, ny); exit(1);

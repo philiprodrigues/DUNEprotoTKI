@@ -4,11 +4,12 @@ mkdir -p output
 
 compile_exe.sh drawTracking -lstyle -I../style  -L../style || return 1
 
-for kPiZero in 0 1
+for kPiZero in 0 
+#1
 do 
-    for kProton in 0 1
+    for kTrackingProton in 0 1
     do 
-        ./drawTracking $kPiZero $kProton > seedrawTracking${kPiZero}${kProton}.log
+        ./drawTracking $kPiZero $kTrackingProton > seedrawTracking${kPiZero}${kTrackingProton}.log
     done
 done
 
