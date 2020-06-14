@@ -188,7 +188,7 @@ namespace AnaIO
  TH1D * hBeamEndZ = 0x0;
  TH1I * hBeamEndZPass = 0x0;
 
- TH2I * hBeamNTrack = 0x0;
+ TH2D * hBeamNTrack = 0x0;
  TH2D * hSignalVsBeamNTrack = 0x0;
 
  //--- to test
@@ -493,7 +493,7 @@ void IniRecHist(TList * lout, const TString tag)
   const int nBeamNTrack = 10;
   const double BeamNTrackmin = -0.5;
   const double BeamNTrackmax = 9.5;
-  hBeamNTrack = new TH2I("h6BeamNTrack"+tag,"", nBeamNTrack, BeamNTrackmin, BeamNTrackmax, 5, -0.5, 4.5); lout->Add(hBeamNTrack);
+  hBeamNTrack = new TH2D("h6BeamNTrackSTK"+tag,"", nBeamNTrack, BeamNTrackmin, BeamNTrackmax, 5, -0.5, 4.5); lout->Add(hBeamNTrack);
   hSignalVsBeamNTrack = new TH2D("p6SignalVsBeanNTrackNOHPRFPUR"+tag,"", nBeamNTrack, BeamNTrackmin, BeamNTrackmax, nPass, Passmin, Passmax); lout->Add(hSignalVsBeamNTrack);
 
   //--- to test
@@ -512,11 +512,11 @@ void IniRecHist(TList * lout, const TString tag)
   hPiMomentumRes = new TH2D("b1PiMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiMomentumRes);
 
   //--- cut variables
-  hCutNdEdx       = new TH2D("c001CutNdEdxSTK"+tag,"", 20, 0, 100, 10, -0.5, 9.5); lout->Add(hCutNdEdx);
+  hCutNdEdx       = new TH2D("c001CutNdEdxSTK"+tag,"", 30, 0, 500, 10, -0.5, 9.5); lout->Add(hCutNdEdx);
   hCuttrackScore  = new TH2D("c002CuttrackScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCuttrackScore);
   hCutemScore     = new TH2D("c003CutemScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutemScore);
   hCutmichelScore = new TH2D("c004CutmichelScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutmichelScore);
-  hCutnHits       = new TH2D("c005CutnHitsSTK"+tag,"", 20, 0, 400, 10, -0.5, 9.5); lout->Add(hCutnHits);
+  hCutnHits       = new TH2D("c005CutnHitsSTK"+tag,"", 30, 0, 1500, 10, -0.5, 9.5); lout->Add(hCutnHits);
   hCutChi2NDF     = new TH2D("c006CutChi2NDFSTK"+tag,"", 30, 0, 500, 10, -0.5, 9.5); lout->Add(hCutChi2NDF);
   hCutstartE2     = new TH2D("c007CutstartE2STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE2);
   hCutstartE3     = new TH2D("c008CutstartE3STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE3);

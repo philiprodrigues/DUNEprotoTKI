@@ -127,7 +127,7 @@ void style::Process2DHist(TList *lout)
         TH1D * hcdf = 0x0;
         const double thres = 5;
         TH2D * hnor = NormalHist(htmp, hpdf, hcdf, thres, true);
-        hpdf->SetYTitle("p.d.f.");
+        hpdf->SetYTitle("N");
         hcdf->SetYTitle("c.d.f.");
         hpdf->SetTitle(tag);
         hcdf->SetTitle(tag);
@@ -145,12 +145,17 @@ void style::Process2DHist(TList *lout)
   }
 }
 
-void style::DrawHist(TList *lout, const TString outdir, const TString tag, const bool kfast)
+void style::DrawHist(TList *lout, const TString outdir, const TString tag, const bool ktext, const bool kfast)
 {
   TCanvas * c1 = new TCanvas("c1"+tag, "", 1200, 800);
   style::PadSetup(c1);
-  gPad->SetTopMargin(0.06);
-  gPad->SetRightMargin(0.03);
+  gPad->SetTopMargin(0.07);
+  gPad->SetRightMargin(0.1);
+  gPad->SetBottomMargin(0.15);
+  gStyle->SetOptTitle(1);
+  gStyle->SetStatY(0.9);
+  gStyle->SetStatColor(0);
+  gStyle->SetStatStyle(0);
 
   for(int ii=0; ii<lout->GetSize(); ii++){
     const TString tag = lout->At(ii)->GetName();
@@ -168,76 +173,107 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
       h2d = dynamic_cast<TH2 *>(hh);
     }
 
+    TH1D * hsum = 0x0;
+    if(hstk){
+      hsum = GetStackedSum(hstk); //lout->Add(hsum);
+    }
     //===================
 
     printf("Printing %s k2d %d kstk %d\n", tag.Data(), h2d!=0x0, hstk!=0x0);
 
-    gStyle->SetOptTitle(1);
+    //--- ResetStyle
+    if(h2d){
+      ResetStyle(h2d);
+    }
+    else if(hh){
+      ResetStyle(hh);
+    }
+    else{
+      ResetStyle(hstk);
+      ResetStyle(hsum);
+    }
 
-    TString dopt="text hist";
-   
+    //--- SetOptStat
+    if(h2d){
+      gStyle->SetOptStat("enou");
+    }
+    else if(hh){
+      gStyle->SetOptStat("enoumr");
+
+      if(tag.Contains(gTagEFF)){
+        gStyle->SetOptStat(0);
+      }
+    }
+    else{
+      gStyle->SetOptStat("eou");
+    }
+
+    //--- SetGrid
+    gPad->SetGrid(0,0);
+    if(h2d){
+      gPad->SetGrid(1,1);
+    }
+
+    //--- UseCurrentStyle can't go after hist set marker or line
     if(hh){
-      if(h2d){
-        style::ResetStyle(h2d);
+      hh->UseCurrentStyle();
+    }
+    else{
+      hsum->UseCurrentStyle();     
+    }
 
-        //gStyle->SetOptStat(0);
-        gStyle->SetOptStat("eou");
+    //--- hist style
+    if(hh){//including 2d
 
-        if(tag.Contains(gTagPRF)){
-          dopt = "box";
-        }
-        else if(tag.Contains(gTagNOH)){
-          dopt = "colz";
-        }
+      if(!tag.Contains("_profileX") && !tag.Contains("_nor")){
+        hh->SetMaximum(hh->GetBinContent(hh->GetMaximumBin())*1.3);
+        hh->SetMinimum(0);
       }
-      else{
-        style::ResetStyle(hh);
-
-        gStyle->SetOptStat("eoum");
-        gStyle->SetStatColor(0);
-        gStyle->SetStatStyle(0);
-        gStyle->SetStatY(0.9);
-
-        if(tag.Contains(gTagPRF)){
-          //hh->SetMaximum(0.1);
-          //hh->SetMaximum(0.3);
-          dopt = "hist";
-        }
-        else if(tag.Contains(gTagNOH)){
-          dopt = "hist";
-        }
-      }
-
-      hh->UseCurrentStyle();//can't go after setmarkersize
-      hh->SetMaximum(hh->GetBinContent(hh->GetMaximumBin())*1.3);
-      hh->SetMinimum(0);
+      hh->SetLineColor(kBlack);
+      hh->SetLineWidth(2);
       hh->SetMarkerSize(3);
 
+      if(tag.Contains(gTagEFF)){
+        hh->SetMarkerStyle(24);
+        hh->SetMarkerSize(2);
+        hh->SetMarkerColor(kRed);
+      }
+    }
+    else{
+      hstk->SetMinimum(0);
+      hstk->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.15);   
+
+      hsum->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.15);
+      hsum->SetLineColor(kBlack);
+      hsum->SetMarkerSize(2);
+    }
+
+    //--- dopt
+    TString dopt= ktext?"text hist":"hist";
+    if(h2d){
+      dopt += "box";
+      if(tag.Contains(gTagNOH)||tag.Contains(gTagPRF)||tag.Contains(gTagSTK)){
+        dopt = "colz";
+      }
+    }
+    else if(hh){
+      if(tag.Contains(gTagPRF)){
+        dopt = "hist";
+      }
+      else if(tag.Contains(gTagNOH)){
+        dopt = "hist";
+      }
+      else if(tag.Contains(gTagEFF)){
+        dopt = "E hist";
+      }
+    }
+
+    //--- draw
+    if(hh){
       hh->Draw(dopt);
     }
     else{//hstk
-      style::ResetStyle(hstk);
-      
-      hstk->SetMinimum(0);
-
-      TH1D * hsum = GetStackedSum(hstk); //lout->Add(hsum);
-      hstk->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.15);
-      hsum->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.15);
-
       if(!tag.Contains("_normalized")){
-        ResetStyle(hsum);
-        
-        gStyle->SetOptStat("eoum");
-        gStyle->SetStatColor(0);
-        gStyle->SetStatStyle(0);
-        gStyle->SetStatY(0.9);
-        //gStyle->SetOptTitle(1);
-        //gPad->SetTicks(1,1);
-
-        hsum->UseCurrentStyle();
-        hsum->SetLineColor(kBlack);
-        hsum->SetMarkerSize(2);
-
         //need to draw hsum first to show Stat box, THStack won't do thta
         hsum->Draw("hist text");
         hstk->Draw("hist same");
@@ -246,7 +282,6 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
       else{
         hstk->Draw("hist");
       }
-     
     }
 
     c1->Print(outdir+"/"+tag+".png");
@@ -295,7 +330,7 @@ TH1D* style::ToPDF(const TH1 *hraw, const TString hn)
   const Int_t x1 = hraw->GetNbinsX()+1;
   const Double_t tmpnt = hraw->Integral(x0, x1);
 
-  TH1D * hist = (TH1D*) hraw->Clone((hn+hraw->GetName())+"pdf");
+  TH1D * hist = (TH1D*) hraw->Clone((hn+hraw->GetName())+"_pdf");
   hist->Scale(0);
 
   for(Int_t ib=x0; ib<=x1; ib++){
@@ -322,11 +357,11 @@ TH1D* style::ToPDF(const TH1 *hraw, const TString hn)
 
 TH2D* style::NormalHist(const TH2D *hraw, TH1D * &hpdf, TH1D * &hcdf,  const Double_t thres, const Bool_t kmax)
 {
-  hpdf = hraw->ProjectionX(Form("%spdf",hraw->GetName()));
+  hpdf = hraw->ProjectionX(Form("%s_pdf",hraw->GetName()));
 
-  hcdf = GetCDF(hraw, Form("%scdf",hraw->GetName()));
+  hcdf = GetCDF(hraw, Form("%s_cdf",hraw->GetName()));
 
-  TH2D *hh=(TH2D*)hraw->Clone(Form("%snor",hraw->GetName()));
+  TH2D *hh=(TH2D*)hraw->Clone(Form("%s_nor",hraw->GetName()));
   hh->Scale(0);
 
   const Int_t x0 = hh->GetXaxis()->GetFirst();

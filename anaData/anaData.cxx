@@ -408,7 +408,7 @@ double getRecFromTruth(const int protonIdx, const vector<double> * mombyrange)
   int counter = 0;
   for(unsigned int ii = 0; ii < AnaIO::reco_daughter_PFP_true_byHits_ID->size(); ii++){
     if((*AnaIO::reco_daughter_PFP_true_byHits_ID)[ii] == truthID) {
-      if((*AnaIO::reco_daughter_allTrack_ID)[ii] != -1) {
+      if((*AnaIO::reco_daughter_allTrack_ID)[ii] != -1) {//allTrack force reconstruction is successful assuming track
 
         if(counter){
           printf("rpm already set!! %f %f %d %d\n", rpm, (*mombyrange)[ii], counter, ievent); //exit(1);
@@ -436,6 +436,11 @@ double getRecFromTruth(const int protonIdx, const vector<double> * mombyrange)
 
         counter++;
       }
+      /*there are indeed -1 due to fail allTrack assumption
+      else{
+        printf("getRecFromTruth id = -1!! %d %d\n", ii, (*AnaIO::reco_daughter_allTrack_ID)[ii]); exit(1);
+      }
+      */
     }
   }
 
@@ -675,7 +680,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
   cout<<"All entries "<<ientry<<endl;
 
   style::Process2DHist(lout);
-  style::DrawHist(lout, "output", tag, true);
+  style::DrawHist(lout, "output", tag, true, true);
 }
 
 void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
@@ -781,7 +786,7 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
 
   cout<<"All entries "<<ientry<<endl;
 
-  style::DrawHist(lout, "output", tag);
+  style::DrawHist(lout, "output", tag, true, true);
 }
 
 int main(int argc, char * argv[])
