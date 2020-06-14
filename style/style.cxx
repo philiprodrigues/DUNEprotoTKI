@@ -239,7 +239,7 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
     //--- hist style
     if(hh){//including 2d
 
-      if(!tag.Contains("_profileX") && !tag.Contains("_nor")){
+      if(!tag.Contains("_profileX") && !tag.Contains("_nor") && !tag.Contains(gTagEFF)){
         hh->SetMaximum(hh->GetBinContent(hh->GetMaximumBin())*1.3);
         hh->SetMinimum(0);
       }
