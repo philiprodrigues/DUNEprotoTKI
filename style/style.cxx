@@ -34,6 +34,27 @@ const TString gTagEFF="EFF";
 const TString gTagNOH="NOH";
 const TString gTagSTK="STK";
 
+TLegend *style::ShowColor()
+{
+  SetGlobalStyle();
+
+  TLegend * lg = new TLegend(0, 0, 1, 1);
+  ResetStyle(lg);
+
+  for(int ii=0; ii<20; ii++){
+    TH1D * hh=new TH1D(Form("h%d",ii),"",1,0,1);
+    const int col = 1000+ii;
+    hh->SetFillColor(col);
+    hh->SetLineColor(col);
+    lg->AddEntry(hh, Form("%d", col), "f");
+  }
+
+  lg->SetNColumns(3);
+  lg->Draw();
+
+  return lg;
+}
+
 void style::GetHist(const TString var, const TString xtit, const TString ytit, TTree *tree, TH1 *hist)
 {
   if(!hist){
@@ -109,7 +130,7 @@ THStack * style::ConvertToStack(const TH2D * hh)
   double newintegral = 0;
   THStack * stk = new THStack(tag+"_stack", tag);
 
-  const int col[]={1011, 1008, 1009, 1002, 1003, kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
+  const int col[]={1014, 1011, 1007,  kOrange, 1009, kOrange, 1003, 1008, 1002, kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
   const int ncol = sizeof(col)/sizeof(int);
   if(ncol<ny){
     printf("style::ConvertToStack not enough color %d %d\n", ncol, ny); exit(1);
@@ -187,10 +208,13 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
   TCanvas * c1 = new TCanvas("c1"+tag, "", 1200, 800);
   style::PadSetup(c1);
   gPad->SetTopMargin(0.07);
-  gPad->SetRightMargin(0.1);
+  gPad->SetRightMargin(0.11);
   gPad->SetBottomMargin(0.15);
   gStyle->SetOptTitle(1);
   gStyle->SetStatY(0.9);
+  gStyle->SetStatH(0.01);
+  gStyle->SetStatX(0.88);
+  gStyle->SetStatW(0.25);
   gStyle->SetStatColor(0);
   gStyle->SetStatStyle(0);
 
@@ -233,6 +257,9 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
     //--- SetOptStat
     if(h2d){
       gStyle->SetOptStat("enou");
+      if(tag.Contains("_nor")){
+        gStyle->SetOptStat("e");
+      }
     }
     else if(hh){
       gStyle->SetOptStat("enoumr");
@@ -1285,6 +1312,32 @@ void style::SetColor()
   gStyle->SetStatColor(0);
   gStyle->SetTitleFillColor(0);
 
+ /*
+kDeepSea=51,          kGreyScale=52,    kDarkBodyRadiator=53,
+kBlueYellow= 54,      kRainBow=55,      kInvertedDarkBodyRadiator=56,
+kBird=57,             kCubehelix=58,    kGreenRedViolet=59,
+kBlueRedYellow=60,    kOcean=61,        kColorPrintableOnGrey=62,
+kAlpine=63,           kAquamarine=64,   kArmy=65,
+kAtlantic=66,         kAurora=67,       kAvocado=68,
+kBeach=69,            kBlackBody=70,    kBlueGreenYellow=71,
+kBrownCyan=72,        kCMYK=73,         kCandy=74,
+kCherry=75,           kCoffee=76,       kDarkRainBow=77,
+kDarkTerrain=78,      kFall=79,         kFruitPunch=80,
+kFuchsia=81,          kGreyYellow=82,   kGreenBrownTerrain=83,
+kGreenPink=84,        kIsland=85,       kLake=86,
+kLightTemperature=87, kLightTerrain=88, kMint=89,
+kNeon=90,             kPastel=91,       kPearl=92,
+kPigeon=93,           kPlum=94,         kRedBlue=95,
+kRose=96,             kRust=97,         kSandyTerrain=98,
+kSienna=99,           kSolar=100,       kSouthWest=101,
+kStarryNight=102,     kSunset=103,      kTemperatureMap=104,
+kThermometer=105,     kValentine=106,   kVisibleSpectrum=107,
+kWaterMelon=108,      kCool=109,        kCopper=110,
+kGistEarth=111,       kViridis=112,     kCividis=113
+   */
+  gStyle->SetPalette(56);//only 56 available
+
+  return;
   //---
 
   const Int_t nRGBs = 5;

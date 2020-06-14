@@ -135,10 +135,13 @@ void drawTKI(const TString var, TList *lout, const TString pretag, const bool kP
   cuts.push_back("nproton==1 && nneutron!=0");
   cuts.push_back("nproton!=1 && nneutron!=0");
 
-  TString PScut = Form("&& (finProtonmomentum > %f)", ppthres);
+  TString PScut = Form("&& (finProtonmomentum > %f && finProtonmomentum < 1)", ppthres);
+  //no phase cut for pi+, need to investigate using Michel electron
+  /*
   if(!kPiZero){
     PScut += "&& (finPimomentum > 0.15)";
   }
+  */
   const TString SLcut = Form("&& (fin2Pmom < %f)", ppthres);
   vector<TString> cns;
   cns.push_back("all");
@@ -152,7 +155,8 @@ void drawTKI(const TString var, TList *lout, const TString pretag, const bool kP
   style::ResetStyle(lg);
 
   //need system color
-  const int col[]={kGray, kRed, kBlue, kOrange, kGreen+3};
+  //const int col[]={kGray, kRed, kBlue, kOrange, kGreen+3};
+  const int col[]={kOrange,  1014, 1011, 1007,  kOrange, 1009, kOrange, 1003, 1008, 1002, kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
   const TString tag = Form("%s_%s_ppthres%.0fPScut%dSLcut%d", var.Data(), pretag.Data(), ppthres*1E3, kPScut, kSLcut);
 
   double ntotall = -999;
@@ -204,10 +208,12 @@ void drawTKI(const TString var, TList *lout, const TString pretag, const bool kP
 
   TString lheader("full phase space");
   if(kPScut){
-    lheader = Form("#it{p}_{p}>%.2f", ppthres);
+    lheader = Form("%.2f<#it{p}_{p}<1", ppthres);
+    /*
     if(!kPiZero){
       lheader += ", #it{p}_{#pi^{+}}>0.15";
     }
+    */
   }
   if(kSLcut){
     lheader += Form(", #it{p}_{p}^{s.l.}<%.2f", ppthres);
