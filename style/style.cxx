@@ -311,6 +311,7 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
       hstk->SetMinimum(0);
       hstk->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.15);   
 
+      hsum->SetMinimum(0);
       hsum->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.15);
       hsum->SetLineColor(kBlack);
       hsum->SetMarkerSize(2);
