@@ -14,20 +14,6 @@
 
 #include "style.h"
 
-TH1D * getEff(const TH1D * ha, const TH1D *hb)
-{
-  const TString hname = ha->GetName();
-  TH1D * heff = (TH1D*) ha->Clone(Form("%sEFF", hname.Data()));
-  heff->Sumw2();
-  heff->Divide(ha, hb, 1, 1, "B");
-  heff->SetMinimum(0);
-  heff->SetMaximum(hname.Contains("sig")?0.2:0.7);//1.1);
-  heff->SetTitle(Form("%s/%s", ha->GetTitle(), hb->GetTitle()));
-  heff->SetYTitle("Eff.");
-
-  return heff;
-}
-
 void getHist(const TString var, const TString xtit, const TString ytit, TTree *tree, TH1 *hist)
 {
   const TString cut = hist->GetTitle();
@@ -74,9 +60,9 @@ void drawTracking(TList *lout, const TString pretag, const TString addCut="")
   getHist(varPtrue, xtitPtrue, ytitN, tree, hPtruencl);
   getHist(varPtrue, xtitPtrue, ytitN, tree, hPtruesig);
 
-  TH1D * effPtruerec = getEff(hPtruerec, hPtrueall); lout->Add(effPtruerec);
-  TH1D * effPtruencl = getEff(hPtruencl, hPtrueall); lout->Add(effPtruencl);
-  TH1D * effPtruesig = getEff(hPtruesig, hPtrueall); lout->Add(effPtruesig);
+  TH1D * effPtruerec = style::GetEff(hPtruerec, hPtrueall, 0.7); lout->Add(effPtruerec);
+  TH1D * effPtruencl = style::GetEff(hPtruencl, hPtrueall, 0.7); lout->Add(effPtruencl);
+  TH1D * effPtruesig = style::GetEff(hPtruesig, hPtrueall, 0.2); lout->Add(effPtruesig);
 
   //========================================================================
   const int nRes = 15;
@@ -196,6 +182,9 @@ int main(int argc, char* argv[])
   }
   cout<<"Reading "<<inputfn<<endl;
 
+  drawTracking(lout, tag+"0000raw");
+
+  if(kProton){
   /*
 seeana010.log:check cut kpi0 0 ndedxcut 16
 seeana010.log:check cut kpi0 0 proton tag Chi2NDF 50.00 nhits 260
@@ -207,11 +196,11 @@ seeana110.log:check cut kpi0 1 proton tag startE2 10.00 nhits 260 startE3 9.00
   const TString chicut = "&& (ndEdxCls>=6) && (chi2/ndof<31)";//490; 30, 484; 31, 489; 31.5, 493; 35, 504; 
   const TString tmecut10 = "&& (ndEdxCls>=6) && (startTruncatedMeanE10>5.8)";//5, 505; 5.5, 499; 5.8, 491; 5.9, 487
   const TString tmecut20 = "&& (ndEdxCls>=6) && (startTruncatedMeanE20>2)";//3, 401; 2, 412
-  drawTracking(lout, tag+"0000raw");
   drawTracking(lout, tag+"0001ESC",   esccut);
   drawTracking(lout, tag+"0002CHI",   chicut);
   drawTracking(lout, tag+"0003TME10", tmecut10);
   drawTracking(lout, tag+"0003TME20", tmecut20);
+  }
 
   style::Process2DHist(lout);
   style::DrawHist(lout, "output", tag, false, true);

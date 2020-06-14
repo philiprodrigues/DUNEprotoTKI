@@ -761,25 +761,25 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
     }
 
     vector<double>* mombyrange = 0x0;
-    bool kDoTracking = false;
     double * recmomentum = 0x0;
-
+    int recidx = -999;
     if(kTrackingProton){
+      recidx = protonIdx;
       mombyrange = AnaIO::reco_daughter_allTrack_momByRange_proton;
-      kDoTracking = (protonIdx>=0);
       recmomentum = &AnaIO::recProtonmomentum;
     }
     else{
+      recidx = piplusIdx;
       mombyrange = AnaIO::reco_daughter_allTrack_momByRange_muon;
-      kDoTracking = (piplusIdx>=0);
       recmomentum = &AnaIO::recPiPlusmomentum;
     }
 
+    const bool kDoTracking = (recidx>=0);
     AnaIO::hksignp->Fill(kDoTracking, AnaIO::kSignal);
  
     //has true proton
     if(kDoTracking){
-      (*recmomentum) = getRecFromTruth(protonIdx, mombyrange);
+      (*recmomentum) = getRecFromTruth(recidx, mombyrange);
       tout->Fill();
     }
   }

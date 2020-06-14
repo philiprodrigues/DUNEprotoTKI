@@ -34,6 +34,20 @@ const TString gTagEFF="EFF";
 const TString gTagNOH="NOH";
 const TString gTagSTK="STK";
 
+TH1D * style::GetEff(const TH1D * ha, const TH1D *hb, const double hmax)
+{
+  const TString hname = ha->GetName();
+  TH1D * heff = (TH1D*) ha->Clone(Form("%sEFF", hname.Data()));
+  heff->Sumw2();
+  heff->Divide(ha, hb, 1, 1, "B");
+  heff->SetMinimum(0);
+  heff->SetMaximum(hmax);
+  heff->SetTitle(Form("%s/%s", ha->GetTitle(), hb->GetTitle()));
+  heff->SetYTitle("Eff.");
+
+  return heff;
+}
+
 THStack * style::NormalizeStack(THStack * hstk)
 {
   const TString tag = hstk->GetName();
