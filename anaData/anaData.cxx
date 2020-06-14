@@ -473,8 +473,15 @@ bool cutTopology(const bool kpi0)
     int cutnshower = 0;
     int cutnmichel = 0;
 
-    AnaIO::nTrack = getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, false, true, 0);
-    //AnaIO::nTrack = getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, false, false, 0);
+    //debug=1 proton candidate; debug=2 non-proton candidate
+    const int kdebug = 0;
+    if(kdebug==0){
+      //only filling
+      AnaIO::nTrack = getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, false, true, 0);
+    }
+    else{//just no filling, still no debug
+      AnaIO::nTrack = getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, false, false, 0);
+    }
 
     int filleventtype = -999;
     if(AnaIO::kSignal){
@@ -534,11 +541,15 @@ bool cutTopology(const bool kpi0)
       return false;
     }
 
-    //just for printing
-    getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, true, false, 0);
-    //debug mode: major background is -999 shower mocking protons, no efficient cut variables found
-    //getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, true, true, 1);//debug proton candidate
-    //getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, true, true, 2);//debug non-proton candidate
+    if(kdebug==0){
+      //just for printing, no filling
+      getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, true, false, 0);
+    }
+    else{
+      //debug mode: major background is -999 shower mocking protons, no efficient cut variables found
+      //print, fill, and debug
+      getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, true, true, kdebug);
+    }
 
     return true;
 }
