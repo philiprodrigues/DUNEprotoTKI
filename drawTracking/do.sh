@@ -4,8 +4,7 @@ mkdir -p output
 
 compile_exe.sh drawTracking -lstyle -I../style  -L../style || return 1
 
-for kPiZero in 0 
-#1
+for kPiZero in 0 1
 do 
     for kTrackingProton in 0 1
     do 

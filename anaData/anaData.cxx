@@ -724,7 +724,7 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
   cout<<"All entries "<<ientry<<endl;
 
   style::Process2DHist(lout);
-  style::DrawHist(lout, "output", tag, true, true);
+  style::DrawHist(lout, "output", tag, true, false);
 }
 
 void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
@@ -830,7 +830,7 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
 
   cout<<"All entries "<<ientry<<endl;
 
-  style::DrawHist(lout, "output", tag, true, true);
+  style::DrawHist(lout, "output", tag, true, false);
 }
 
 int main(int argc, char * argv[])

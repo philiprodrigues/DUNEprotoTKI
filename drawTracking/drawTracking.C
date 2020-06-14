@@ -223,7 +223,6 @@ seeana110.log:check cut kpi0 1 proton tag startE2 10.00 nhits 260 startE3 9.00
   }
 
   style::Process2DHist(lout);
-  //DrawHist(TList* lout, const TString outdir, const TString tag, const bool ktext, const bool kfast)
   style::DrawHist(lout, "output", tag, false, false);
   //style::DrawHist(lout, "output", tag, false, 1);
 
