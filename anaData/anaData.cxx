@@ -844,10 +844,36 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
   style::DrawHist(lout, "output", tag, true, false);
 }
 
+void PrintLegend()
+{
+  TCanvas * c1 = 0x0;
+
+  vector<TString> parType;
+  parType.push_back("p");
+  parType.push_back("#pi^{+}");
+  parType.push_back("EM shower");
+  parType.push_back("others");
+  c1 = style::DrawLegend(parType, "f");
+  c1->Print("output/legend_parType.eps");
+  c1->Print("output/legend_parType.pdf");
+  c1->Print("output/legend_parType.png");
+
+  vector<TString> evtType;
+  evtType.push_back("signal");
+  evtType.push_back("background");
+  evtType.push_back("#mu^{+} beam");
+  c1 = style::DrawLegend(evtType, "f");
+  c1->Print("output/legend_evtType.eps");
+  c1->Print("output/legend_evtType.pdf");
+  c1->Print("output/legend_evtType.png");
+}
+
 int main(int argc, char * argv[])
 {
   if(argc!=4){
     cout<<"argc!=4 !"<<argc<<endl;
+    cout<<"Print legend instead!"<<endl;
+    PrintLegend();
     return 0;
   }
 

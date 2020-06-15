@@ -12,11 +12,11 @@
   */
   const TString pwd = gSystem->pwd();
   cout<<endl;
-  cout<<"Welcome to protoDUNE_exclusive repository!"<<endl;
+  cout<<"Welcome to protoDUNETKI repository!"<<endl;
   cout<<"In path: "<<pwd<<endl;
   cout<<endl;
 
-  const TString nugas=gSystem->Getenv("PROTODUNE_EXCLUSIVE");
+  const TString nugas=gSystem->Getenv("DUNEPROTOTKI");
   if(nugas!=""){
     const TString libs[]={"EG", "style"};
     for(unsigned int ii=0; ii<sizeof(libs)/sizeof(TString); ii++){

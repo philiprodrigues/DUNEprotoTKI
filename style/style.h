@@ -87,6 +87,7 @@ using namespace std;
 class style
 {
  public:
+  static TCanvas *DrawLegend(const vector<TString> entries, const TString htype, int *tmpcol=0x0, int * tmpmkr=0x0);
   static TLegend *ShowColor();
   static void GetHist(const TString var, const TString xtit, const TString ytit, TTree *tree, TH1 *hist);
   static TH1D * GetEff(const TH1D * ha, const TH1D *hb, const double hmax, TList * lout=0x0);

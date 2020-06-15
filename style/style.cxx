@@ -34,6 +34,54 @@ const TString gTagEFF="EFF";
 const TString gTagNOH="NOH";
 const TString gTagSTK="STK";
 
+TCanvas *style::DrawLegend(const vector<TString> entries, const TString htype, int *tmpcol, int * tmpmkr)
+{
+  int defcol[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
+  int * cols=0x0;
+  if(tmpcol){
+    cols=tmpcol;
+  }
+  else{
+    cols=defcol;
+    printf("style::DrawLegend using default color\n");
+  } 
+
+  int defmkr[]={20, 24, 21, 25, 22, 26, 23, 32, 34, 28, 29, 30, 20, 24, 21, 25, 22, 26, 23, 32, 34, 28, 29, 30};
+  int * mkrs=0x0;
+  if(tmpmkr){
+    mkrs=tmpmkr;
+  }
+  else{
+    mkrs=defmkr;
+    printf("style::DrawLegend using default maker\n");
+  }
+
+  const int nent = entries.size();
+
+  SetGlobalStyle();
+  TCanvas * c1 = new TCanvas("c1","", 300, 50*nent);
+  PadSetup(c1);
+
+  TLegend * lg = new TLegend(0, 0, 1, 1);
+  ResetStyle(lg, -999, 20/nent);
+
+  for(int ii=0; ii<nent; ii++){
+    TH1D * hh=new TH1D(Form("h%d",ii),"",1,0,1);
+    ResetStyle(hh);
+    const int col = cols[ii];
+    hh->SetFillColor(col);
+    hh->SetLineColor(col);
+    hh->SetMarkerStyle(mkrs[ii]);
+    hh->SetMarkerSize(2);
+    //hh->Draw(ii?"same":"");
+    lg->AddEntry(hh, entries[ii], htype);
+  }
+
+  lg->Draw();
+
+  return c1;
+}
+
 TLegend *style::ShowColor()
 {
   SetGlobalStyle();
