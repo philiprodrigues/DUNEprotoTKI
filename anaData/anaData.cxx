@@ -436,7 +436,7 @@ bool cutTopology(const bool kpi0)
       PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, HAS pion-analysis pre-cuts! -> 39/111 = 35%, e*p = 6.3%
       PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 44/132 = 33%, e*p = 6.7%
 
-      (*) New Def:  2) p_lading 0.45-1, p_sl<0.45. PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 43/132 = 33%, e*p = 43.*43./132./220. = 6.4%
+      (*) PiPlus New Def:  2) p_lading 0.45-1, p_sl<0.45. PiPlus: nshower = 0, nproton=1, ntrack = 2,  noly nhit<260 and chi2<50 (NdEdx>=16 instead of 3, no startE2, E3 cuts at all)is proton, no pion-analysis pre-cuts! -> 43/132 = 33%, e*p = 43.*43./132./220. = 6.4%
 
       <-- //p_leading 0.45-1, p_sublieading < 0.45, no cut on pi+
       <-- //p-pi+: 220 events
