@@ -598,12 +598,12 @@ bool cutTopology(const bool kpi0)
     
     //===================================================
     //only checking after-selection distributions
-    //for(unsigned int ipi0=0; ipi0<piZeroArray.size(); ipi0++){
-    if(!leadingPi0){
-      printf("leadingpi0 null!!\n"); exit(1);
+    if(kpi0){
+      if(!leadingPi0){
+        printf("leadingpi0 null!!\n"); exit(1);
+      }
+      AnaIO::hCutMpi0->Fill(leadingPi0->M(), filleventtype);
     }
-    AnaIO::hCutMpi0->Fill(leadingPi0->M(), filleventtype);
-    //}
 
     TLorentzVector *dummypi0 = 0x0;
     //no getting of pizeroarray

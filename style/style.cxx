@@ -164,6 +164,10 @@ THStack * style::NormalizeStack(THStack * hstk)
 
 THStack * style::ConvertToStack(const TH2D * hh)
 {
+  if(hh->Integral(0,10000,0,10000)<EPSILON){
+    return 0x0;
+  }
+
   const TString tag = hh->GetName();
   const TString tit = hh->GetTitle();
 
@@ -248,8 +252,12 @@ void style::Process2DHist(TList *lout)
       }
 
       if(tag.Contains(gTagSTK)){
-        THStack * stk = ConvertToStack(htmp); lout->Add(stk);
-        THStack * snor = NormalizeStack(stk); lout->Add(snor);
+        THStack * stk = ConvertToStack(htmp); 
+        if(stk){
+          lout->Add(stk);
+          THStack * snor = NormalizeStack(stk);
+          lout->Add(snor);
+        }
       }
     }
   }
