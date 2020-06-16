@@ -88,6 +88,12 @@ namespace AnaIO
   vector<double>  *reco_daughter_PFP_emScore =0x0;
   vector<double>  *reco_daughter_PFP_michelScore =0x0;
 
+  vector<int>     *reco_daughter_allShower_ID=0x0;
+  vector<double>  *reco_daughter_allShower_dirX=0x0;
+  vector<double>  *reco_daughter_allShower_dirY=0x0;
+  vector<double>  *reco_daughter_allShower_dirZ=0x0;
+  vector<double>  *reco_daughter_allShower_energy=0x0;
+
   double true_beam_endPx = -999;
   double true_beam_endPy = -999;
   double true_beam_endPz = -999;
@@ -211,6 +217,9 @@ namespace AnaIO
  TH2D * hCutntrack = 0x0;
  TH2D * hCutnshower = 0x0;
  TH2D * hCutnmichel = 0x0;
+
+ TH2D * hRecPi0Nshower = 0x0;
+ TH2D * hCutMpi0 = 0x0;
 
 //==============================================================================
 //==============================================================================
@@ -390,6 +399,12 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
   tree->SetBranchAddress("reco_daughter_PFP_emScore", &reco_daughter_PFP_emScore);
   tree->SetBranchAddress("reco_daughter_PFP_michelScore", &reco_daughter_PFP_michelScore);
 
+  tree->SetBranchAddress("reco_daughter_allShower_ID", &reco_daughter_allShower_ID);
+  tree->SetBranchAddress("reco_daughter_allShower_dirX", &reco_daughter_allShower_dirX);
+  tree->SetBranchAddress("reco_daughter_allShower_dirY", &reco_daughter_allShower_dirY);
+  tree->SetBranchAddress("reco_daughter_allShower_dirZ", &reco_daughter_allShower_dirZ);
+  tree->SetBranchAddress("reco_daughter_allShower_energy", &reco_daughter_allShower_energy);
+
   tree->SetBranchAddress("true_beam_endPx", &true_beam_endPx);
   tree->SetBranchAddress("true_beam_endPy", &true_beam_endPy);
   tree->SetBranchAddress("true_beam_endPz", &true_beam_endPz);
@@ -522,6 +537,9 @@ void IniRecHist(TList * lout, const TString tag)
   hCutnmichel     = new TH2D("c012CutnmichelSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnmichel);
   hCutntrack      = new TH2D("c013CutntrackSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutntrack);
   hCutnproton     = new TH2D("c014CutnprotonSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnproton);
+
+  hRecPi0Nshower  = new TH2D("c011bRecPi0NshowerSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hRecPi0Nshower);
+  hCutMpi0        = new TH2D("c015CutMpi0STK"+tag,"", 15, 0, 0.3, 10, -0.5, 9.5); lout->Add(hCutMpi0);
 }
 
 void IniTruthHist(TList * lout, const TString tag)

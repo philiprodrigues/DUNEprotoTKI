@@ -217,7 +217,44 @@ int getTruthFromRec(const int recidx, int & pdg, double & momentum)
   return trueidx;
 }
 
-int getNTrack(const bool kpi0, const bool ksig, int & nproton, int & nshower, int & nmichel, const bool kprint=false, const bool kfill=false, const int kdebug = 0)
+TLorentzVector * getPiZero(const int ksig, const vector<TLorentzVector> shws,  const bool kprint, const bool kfill)
+{
+  const int shsize = shws.size();
+  if(kfill){
+    AnaIO::hRecPi0Nshower->Fill(shsize, !ksig);
+  }
+
+  vector<TLorentzVector> piarr;
+  int maxEidx = -999;
+  double pi0Emax = -999;
+  if(shsize>=2){
+    for(int ii = 0; ii<shsize; ii++){
+      for(int kk = ii+1; kk<shsize; kk++){
+        const TLorentzVector tmpgg = shws[ii]+shws[kk];
+        if(kprint){
+          printf("\n============ %d %d %d \n", shsize, ii, kk);
+          tmpgg.Print();        
+        }
+
+        if(tmpgg.E() > pi0Emax){
+          pi0Emax = tmpgg.E();
+          maxEidx = piarr.size();
+        }
+
+        piarr.push_back(tmpgg);
+      }
+    }
+  }  
+
+  TLorentzVector * outcopy = 0x0;
+  if(maxEidx>=0){
+    outcopy = new TLorentzVector(piarr[maxEidx]);
+  }
+
+  return outcopy;
+}
+
+int getNTrack(const bool kpi0, const bool ksig, int & nproton, int & nshower, int & nmichel, TLorentzVector *  & leadingPi0, const bool kprint=false, const bool kfill=false, const int kdebug = 0)
 {
   /*
 root [11] beamana->Scan("reco_daughter_PFP_ID:reco_daughter_PFP_true_byHits_ID:reco_daughter_allTrack_ID:reco_daughter_allShower_ID:true_beam_daughter_ID:true_beam_daughter_reco_byHits_PFP_ID:true_beam_daughter_reco_byHits_allTrack_ID:true_beam_daughter_reco_byHits_allShower_ID")
@@ -253,6 +290,8 @@ not set
   nmichel = 0;
   nproton = 0;
  
+  vector<TLorentzVector> showerArray;
+
   static bool kShowCut = true;
 
   for(int ii=0; ii<recsize; ii++){
@@ -298,11 +337,22 @@ not set
     //michel is not found (all below 0.5, those above 0.5 are shower and other_type)
     const double trackScore  = (*AnaIO::reco_daughter_PFP_trackScore)[ii];
     if(trackScore>0.5){
+      if( (*AnaIO::reco_daughter_allTrack_ID)[ii]==-1 ){
+        printf("bad track ID! %d\n", ii); exit(1);
+      }
       ntracks++;
     }
     const double emScore     = (*AnaIO::reco_daughter_PFP_emScore)[ii];
     if(emScore>0.5){
+      if( (*AnaIO::reco_daughter_allShower_ID)[ii]==-1 ){
+        printf("bad shower ID! %d\n", ii); exit(1);
+      }
       nshower++;
+      
+      const TVector3 showerDir( (*AnaIO::reco_daughter_allShower_dirX)[ii], (*AnaIO::reco_daughter_allShower_dirY)[ii], (*AnaIO::reco_daughter_allShower_dirZ)[ii] );
+      const TVector3 showerMomentum = showerDir.Unit()*(*AnaIO::reco_daughter_allShower_energy)[ii] * 1E-3; //MeV to GeV
+      const TLorentzVector showerLv( showerMomentum, showerMomentum.Mag() );
+      showerArray.push_back(showerLv);
     }
     const double michelScore = (*AnaIO::reco_daughter_PFP_michelScore)[ii];
     if(michelScore>0.5){
@@ -395,6 +445,9 @@ not set
     kShowCut = false;
   }
 
+  //only fill nshowers when doing fill
+  leadingPi0 = getPiZero(ksig, showerArray, false, kfill);
+
   if(kprint){
     printf("\n\n");
   }
@@ -472,15 +525,17 @@ bool cutTopology(const bool kpi0)
     int cutnproton = 0;
     int cutnshower = 0;
     int cutnmichel = 0;
-
+    //vector<TLorentzVector> piZeroArray;
+    TLorentzVector * leadingPi0 = 0x0;
+ 
     //debug=1 proton candidate; debug=2 non-proton candidate
     const int kdebug = 0;
     if(kdebug==0){
       //only filling
-      AnaIO::nTrack = getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, false, true, 0);
+      AnaIO::nTrack = getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, leadingPi0, false, true, 0);
     }
     else{//just no filling, still no debug
-      AnaIO::nTrack = getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, false, false, 0);
+      AnaIO::nTrack = getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, leadingPi0, false, false, 0);
     }
 
     int filleventtype = -999;
@@ -540,15 +595,26 @@ bool cutTopology(const bool kpi0)
     if(cutnproton!=1){
       return false;
     }
+    
+    //===================================================
+    //only checking after-selection distributions
+    //for(unsigned int ipi0=0; ipi0<piZeroArray.size(); ipi0++){
+    if(!leadingPi0){
+      printf("leadingpi0 null!!\n"); exit(1);
+    }
+    AnaIO::hCutMpi0->Fill(leadingPi0->M(), filleventtype);
+    //}
 
+    TLorentzVector *dummypi0 = 0x0;
+    //no getting of pizeroarray
     if(kdebug==0){
       //just for printing, no filling
-      getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, true, false, 0);
+      getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, dummypi0, true, false, 0);
     }
     else{
       //debug mode: major background is -999 shower mocking protons, no efficient cut variables found
       //print, fill, and debug
-      getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, true, true, kdebug);
+      getNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, dummypi0, true, true, kdebug);
     }
 
     return true;
