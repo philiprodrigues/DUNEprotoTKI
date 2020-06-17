@@ -45,6 +45,9 @@ namespace AnaIO
   double chi2;
   double ndof;
 
+  Int_t           nTrack; 
+
+  //not used, keep in case ->
   //--- beam related
   int nBeamdEdxCls;
   double beamLastE0; 
@@ -61,12 +64,11 @@ namespace AnaIO
   double beamStartE5; 
   double beamTMeanLast;
   double beamTMeanStart;
+  //<--
 
   //======================================= tree in =======================================
   //--------------------------------------- anaTruth ---------------------------------------
-  //true_beam_daughter_PDG->size()
-  //(*true_beam_daughter_PDG)[0]
-  vector<int> *true_beam_daughter_PDG=0x0;
+  vector<int>    *true_beam_daughter_PDG=0x0;
   vector<double> *true_beam_daughter_startPx=0x0;
   vector<double> *true_beam_daughter_startPy=0x0;
   vector<double> *true_beam_daughter_startPz=0x0;
@@ -80,7 +82,15 @@ namespace AnaIO
   vector<vector<double> >* reco_daughter_allTrack_calibrated_dEdX_SCE = 0x0;
 
   vector<double>* reco_daughter_allTrack_Chi2_proton = 0x0;
-  vector<int>* reco_daughter_allTrack_Chi2_ndof = 0x0;
+  vector<int>*    reco_daughter_allTrack_Chi2_ndof = 0x0;
+
+  double true_beam_endPx = -999;
+  double true_beam_endPy = -999;
+  double true_beam_endPz = -999;
+
+  int true_beam_PDG   = -999;
+
+  //--------------------------------------- anaRec ---------------------------------------
 
   vector<int>     *reco_daughter_PFP_ID =0x0;
   vector<int>     *reco_daughter_PFP_nHits =0x0;
@@ -94,21 +104,6 @@ namespace AnaIO
   vector<double>  *reco_daughter_allShower_dirZ=0x0;
   vector<double>  *reco_daughter_allShower_energy=0x0;
 
-  double true_beam_endPx = -999;
-  double true_beam_endPy = -999;
-  double true_beam_endPz = -999;
-
-  int true_beam_PDG   = -999;
-
-  int true_daughter_nNeutron = -999;
-  int true_daughter_nNucleus = -999;
-  int true_daughter_nPi0 = -999;
-  int true_daughter_nPiMinus = -999;
-  int true_daughter_nPiPlus = -999;
-  int true_daughter_nProton = -999;
-
-  //--------------------------------------- anaRec ---------------------------------------
-  //--- established
   vector<int>     *data_BI_PDG_candidates=0x0;
 
   int reco_beam_type = -999;
@@ -128,101 +123,105 @@ namespace AnaIO
 
   Double_t        reco_beam_endZ;
 
+  Double_t        data_BI_X;
+  Double_t        data_BI_Y;
+  Double_t        data_BI_dirX;
+  Double_t        data_BI_dirY;
+  Double_t        data_BI_dirZ;
+  Int_t           data_BI_nMomenta;
+  Int_t           data_BI_nTracks;
+
   vector<double>  *reco_beam_calibrated_dEdX;
 
-  //--- to move above
-  Int_t           nTrack; //reco_beam_nTrackDaughters;//not fill in flat tree! Neither is nShowerDaughters
-
-  //--- to test
+  //not used, keep in case ->
   Double_t        reco_beam_len;
-
+  //<-
 
   //======================================= Truth Hist out =======================================
- TH1I * hbeamType = 0x0;
- TH1I * hndaughter = 0x0;
- TH1I * hnexcl = 0x0;
- TH2I * hksignp = 0x0;
- TH1I * hselectedDaughterType = 0x0;
- TH1I * hnproton = 0x0;
- TH1I * hnneutron = 0x0;
- TH1I * hnPiZero = 0x0;
- TH1D * hmomIniPi = 0x0;
- TH1D * hmomFinPi = 0x0;
- TH1D * hmomFinProton = 0x0;
- TH1D *hdalphat = 0x0;
- TH1D *hdphit = 0x0;
- TH1D *hdpt = 0x0;
- TH1D *hpn = 0x0;
+  TH1I * hbeamType = 0x0;
+  TH1I * hndaughter = 0x0;
+  TH1I * hnexcl = 0x0;
+  TH2I * hksignp = 0x0;
+  TH1I * hselectedDaughterType = 0x0;
+  TH1I * hnproton = 0x0;
+  TH1I * hnneutron = 0x0;
+  TH1I * hnPiZero = 0x0;
+  TH1D * hmomIniPi = 0x0;
+  TH1D * hmomFinPi = 0x0;
+  TH1D * hmomFinProton = 0x0;
+  TH1D *hdalphat = 0x0;
+  TH1D *hdphit = 0x0;
+  TH1D *hdpt = 0x0;
+  TH1D *hpn = 0x0;
+  
+  //======================================= Rec Hist out =======================================
+  TH1I * hTruthBeamType = 0x0;
+  TH1I * hTruthSignal = 0x0;
 
-//======================================= Rec Hist out =======================================
- TH1I * hTruthBeamType = 0x0;
- TH1I * hTruthSignal = 0x0;
+  TH1I * hCutbeamID = 0x0;
+  TH2D * hCutBeamType = 0x0;
+  TH2D * hCutBeamPosPass = 0x0;
+  TH2D * hCutBeamEndZ = 0x0;
+  TH2D * hCutBeamEndZPass = 0x0;
 
- //--- established
- TH1I * hnBeamdEdxCls = 0x0;
+  TH2D * hProtonMomentumRes = 0x0;
+  TH2D * hPiMomentumRes = 0x0;
+  TH2D * hCutnHits = 0x0;
+  TH2D * hCutNdEdx = 0x0;
+  TH2D * hCutstartE2 = 0x0;
+  TH2D * hCutstartE3 = 0x0;
+  TH2D * hCutlastE2 = 0x0;
+  TH2D * hCutlastE3 = 0x0;
+  TH2D * hCuttrackScore = 0x0;
+  TH2D * hCutemScore = 0x0;
+  TH2D * hCutmichelScore = 0x0;
+  TH2D * hCutChi2NDF = 0x0;
 
- TH2D * hSignalVsTMeanStart = 0x0;
- TH2D * hSignalVsTMeanLast = 0x0;
+  TH2D * hCutnproton = 0x0;
+  TH2D * hCutntrack = 0x0;
+  TH2D * hCutnshower = 0x0;
+  TH2D * hCutnmichel = 0x0;
 
- TH2D * hSignalVsStartE0 = 0x0;
- TH2D * hSignalVsStartE1 = 0x0;
- TH2D * hSignalVsStartE2 = 0x0;
- TH2D * hSignalVsStartE3 = 0x0;
- TH2D * hSignalVsStartE4 = 0x0;
- TH2D * hSignalVsStartE5 = 0x0;
- TH2D * hSignalVsLastE0 = 0x0;
- TH2D * hSignalVsLastE1 = 0x0;
- TH2D * hSignalVsLastE2 = 0x0;
- TH2D * hSignalVsLastE3 = 0x0;
- TH2D * hSignalVsLastE4 = 0x0;
- TH2D * hSignalVsLastE5 = 0x0;
+  TH2D * hRecPi0Nshower = 0x0;
+  TH2D * hCutMpi0 = 0x0;
 
- TH2D * hSigAfterVsStartE0 = 0x0;
- TH2D * hSigAfterVsStartE1 = 0x0;
- TH2D * hSigAfterVsStartE2 = 0x0;
- TH2D * hSigAfterVsStartE3 = 0x0;
- TH2D * hSigAfterVsStartE4 = 0x0;
- TH2D * hSigAfterVsStartE5 = 0x0;
- TH2D * hSigAfterVsLastE0 = 0x0;
- TH2D * hSigAfterVsLastE1 = 0x0;
- TH2D * hSigAfterVsLastE2 = 0x0;
- TH2D * hSigAfterVsLastE3 = 0x0;
- TH2D * hSigAfterVsLastE4 = 0x0;
- TH2D * hSigAfterVsLastE5 = 0x0;
+  //not used keep in case ->
+  TH1I * hnBeamdEdxCls = 0x0;
+  
+  TH2D * hSignalVsTMeanStart = 0x0;
+  TH2D * hSignalVsTMeanLast = 0x0;
+  
+  TH2D * hSignalVsStartE0 = 0x0;
+  TH2D * hSignalVsStartE1 = 0x0;
+  TH2D * hSignalVsStartE2 = 0x0;
+  TH2D * hSignalVsStartE3 = 0x0;
+  TH2D * hSignalVsStartE4 = 0x0;
+  TH2D * hSignalVsStartE5 = 0x0;
+  TH2D * hSignalVsLastE0 = 0x0;
+  TH2D * hSignalVsLastE1 = 0x0;
+  TH2D * hSignalVsLastE2 = 0x0;
+  TH2D * hSignalVsLastE3 = 0x0;
+  TH2D * hSignalVsLastE4 = 0x0;
+  TH2D * hSignalVsLastE5 = 0x0;
+  
+  TH2D * hSigAfterVsStartE0 = 0x0;
+  TH2D * hSigAfterVsStartE1 = 0x0;
+  TH2D * hSigAfterVsStartE2 = 0x0;
+  TH2D * hSigAfterVsStartE3 = 0x0;
+  TH2D * hSigAfterVsStartE4 = 0x0;
+  TH2D * hSigAfterVsStartE5 = 0x0;
+  TH2D * hSigAfterVsLastE0 = 0x0;
+  TH2D * hSigAfterVsLastE1 = 0x0;
+  TH2D * hSigAfterVsLastE2 = 0x0;
+  TH2D * hSigAfterVsLastE3 = 0x0;
+  TH2D * hSigAfterVsLastE4 = 0x0;
+  TH2D * hSigAfterVsLastE5 = 0x0;
 
- //--- to move above
- TH1I * hRecoBeamType = 0x0;
- TH1I * hBeamPosPass = 0x0;
- TH1D * hBeamEndZ = 0x0;
- TH1I * hBeamEndZPass = 0x0;
+  TH1D * hBeamLen = 0x0;
+  TH2D * hSignalVsLen = 0x0;
+  TH2D * hSigAfterVsLen = 0x0;
+  //<--
 
- //--- to test
- TH1D * hBeamLen = 0x0;
- TH2D * hSignalVsLen = 0x0;
- TH2D * hSigAfterVsLen = 0x0;
-
- //--- resolution
- TH2D * hProtonMomentumRes = 0x0;
- TH2D * hPiMomentumRes = 0x0;
-
- TH1I * hCutbeamID = 0x0;
- TH2D * hCutnHits = 0x0;
- TH2D * hCutNdEdx = 0x0;
- TH2D * hCutstartE2 = 0x0;
- TH2D * hCutstartE3 = 0x0;
- TH2D * hCutlastE2 = 0x0;
- TH2D * hCutlastE3 = 0x0;
- TH2D * hCuttrackScore = 0x0;
- TH2D * hCutemScore = 0x0;
- TH2D * hCutmichelScore = 0x0;
- TH2D * hCutChi2NDF = 0x0;
- TH2D * hCutnproton = 0x0;
- TH2D * hCutntrack = 0x0;
- TH2D * hCutnshower = 0x0;
- TH2D * hCutnmichel = 0x0;
-
- TH2D * hRecPi0Nshower = 0x0;
- TH2D * hCutMpi0 = 0x0;
 
 //==============================================================================
 //==============================================================================
@@ -309,77 +308,6 @@ TTree * GetInputTree(TFile * fin, const TString tname)
     exit(1);
   }
 
- //===============================================================
-  // variable list
-  //===============================================================
-  /*
-xlu@ubuntu:~/oldHome/workspace/.analysis/protoDUNE_anaPion$ pwd
-/home/xlu/oldHome/workspace/.analysis/protoDUNE_anaPion
-xlu@ubuntu:~/oldHome/workspace/.analysis/protoDUNE_anaPion$ cat  seestructure.log | sort | grep -v reco | grep true    | grep grand_daughter  -v | grep beam_start -v | grep daughter_end -v | grep beam_slice -v | grep elastic -v | grep beam_Pi0 -v
- new_true_beam_incidentEnergies = (vector<double>*)0x4008030
- new_true_beam_interactingEnergy = -999
- true_beam_daughter_ID = (vector<int>*)0x3b7f5d0
- true_beam_daughter_len = (vector<double>*)0x3b876b0
- true_beam_daughter_nHits = (vector<int>*)0x3bf0210
- true_beam_daughter_PDG = (vector<int>*)0x3b774f0
- true_beam_daughter_Process = (vector<string>*)0x3be0050
- true_beam_daughter_startP = (vector<double>*)0x3bbfcd0
- true_beam_daughter_startPx = (vector<double>*)0x3ba7a30
- true_beam_daughter_startPy = (vector<double>*)0x3bafb10
- true_beam_daughter_startPz = (vector<double>*)0x3bb7bf0
- true_beam_daughter_startX = (vector<double>*)0x3b8f790
- true_beam_daughter_startY = (vector<double>*)0x3b97870
- true_beam_daughter_startZ = (vector<double>*)0x3b9f950
- true_beam_endP  = 0
- true_beam_endProcess = FastScintillation
- true_beam_endPx = 0
- true_beam_endPy = 0
- true_beam_endPz = -0
- true_beam_endX  = -26.7375
- true_beam_endY  = 422.725
- true_beam_endZ  = 8.48351
- true_beam_ID    = 147
- true_beam_IDE_totalDep = 0
- true_beam_incidentEnergies = (vector<double>*)0x3fd7c90
- true_beam_interactingEnergy = -999
- true_beam_nElasticScatters = 0
- true_beam_nHits = 1271
- true_beam_PDG   = -11
- true_beam_process_dSlice = (vector<int>*)0x3dd21c0
- true_beam_processes = (vector<string>*)0x3dc1fb0
- true_beam_process_matched = (vector<int>*)0x3dda2a0
- true_beam_process_slice = (vector<int>*)0x3dca0e0
- true_daughter_nNeutron = 0
- true_daughter_nNucleus = 0
- true_daughter_nPi0 = 0
- true_daughter_nPiMinus = 0
- true_daughter_nPiPlus = 0
- true_daughter_nProton = 0
-xlu@ubuntu:~/oldHome/workspace/.analysis/protoDUNE_anaPion$ 
-   */
-
-  //to find the rec-truth 
-  //true_beam_daughter_ID = (vector<int>*)0x3b7f5d0
-  //reco_daughter_PFP_true_byHits_ID = (vector<int>*)0x3798a90
-  //reco_daughter_allTrack_ID = (vector<int>*)0x1548bf0
-  //reco_daughter_allTrack_momByRange_proton = (vector<double>*)0x3f19020
-  /*
-true_beam_daughter_ID[0] == 99
-for (size_t i = 0; i < reco_daughter_PFP_true_byHits_ID.size(); ++i) {
-  if (reco_daughter_PFP_true_byHits_ID[i] == 99) {
-    if (reco_daughter_allTrack_ID[i] != -1) {
-       reco_momentum = reco_daughter_allTrack_momByRange_proton[i]
-    }
-  }
-}
-
-// reco_daughter_allTrack_calibrated_dEdX_SCE = (vector<vector<double> >*)
-   */
-  /*
-reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
- reco_daughter_allTrack_Chi2_ndof = (vector<int>*)0x15413a0
-   */
-
   //--------------------------------------- anaTruth ---------------------------------------
   tree->SetBranchAddress("true_beam_daughter_PDG", &true_beam_daughter_PDG);
   tree->SetBranchAddress("true_beam_daughter_startPx", &true_beam_daughter_startPx);
@@ -414,13 +342,6 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
 
   tree->SetBranchAddress("true_beam_PDG", &true_beam_PDG);
 
-  tree->SetBranchAddress("true_daughter_nNeutron", &true_daughter_nNeutron);
-  tree->SetBranchAddress("true_daughter_nNucleus", &true_daughter_nNucleus);
-  tree->SetBranchAddress("true_daughter_nPi0", &true_daughter_nPi0);
-  tree->SetBranchAddress("true_daughter_nPiMinus", &true_daughter_nPiMinus);
-  tree->SetBranchAddress("true_daughter_nPiPlus", &true_daughter_nPiPlus);
-  tree->SetBranchAddress("true_daughter_nProton", &true_daughter_nProton);
-
   //--------------------------------------- anaRec ---------------------------------------
   tree->SetBranchAddress("data_BI_PDG_candidates", &data_BI_PDG_candidates);
   tree->SetBranchAddress("reco_beam_type", &reco_beam_type);
@@ -440,6 +361,14 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
   tree->SetBranchAddress("true_beam_startZ", &true_beam_startZ);
   tree->SetBranchAddress("true_beam_startDirZ", &true_beam_startDirZ);
 
+  tree->SetBranchAddress("data_BI_X", &data_BI_X);
+  tree->SetBranchAddress("data_BI_Y", &data_BI_Y);
+  tree->SetBranchAddress("data_BI_dirX", &data_BI_dirX);
+  tree->SetBranchAddress("data_BI_dirY", &data_BI_dirY);
+  tree->SetBranchAddress("data_BI_dirZ", &data_BI_dirZ);
+  tree->SetBranchAddress("data_BI_nMomenta", &data_BI_nMomenta);
+  tree->SetBranchAddress("data_BI_nTracks", &data_BI_nTracks);
+
   tree->SetBranchAddress("reco_beam_endZ", &reco_beam_endZ);
 
   //to check the difference with _allTrack_
@@ -447,8 +376,6 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
   //tree->SetBranchAddress("reco_beam_allTrack_len", &reco_beam_len);
   tree->SetBranchAddress("reco_beam_calibrated_dEdX", &reco_beam_calibrated_dEdX);
   //tree->SetBranchAddress("reco_beam_allTrack_calibrated_dEdX", &reco_beam_calibrated_dEdX);
-
-  //tree->SetBranchAddress("reco_beam_nTrackDaughters", &reco_beam_nTrackDaughters);
 
   return tree;
 }
@@ -462,8 +389,7 @@ void IniRecHist(TList * lout, const TString tag)
   hTruthBeamType = new TH1I("a0TruthBeamType"+tag,  "", 20, -0.5, 19.5); lout->Add(hTruthBeamType);
   hTruthSignal = new TH1I("a1TruthSignal"+tag,  "",  nPass, Passmin, Passmax); lout->Add(hTruthSignal);
 
-  //--- established
-  //over shadowed by beam pre-filtering
+  //over shadowed by beam pre-filtering, keep in case
   /*
   hnBeamdEdxCls = new TH1I("c1nBeamdEdxCls"+tag,"", 20, -0.5, 19.5); lout->Add(hnBeamdEdxCls);
 
@@ -500,19 +426,8 @@ void IniRecHist(TList * lout, const TString tag)
   hSigAfterVsLastE3 = new TH2D("z2SigAfterVsLastE3NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE3);
   hSigAfterVsLastE4 = new TH2D("z2SigAfterVsLastE4NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE4);
   hSigAfterVsLastE5 = new TH2D("z2SigAfterVsLastE5NOHPRFPUR"+tag,"", nE, Emin, lastEmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLastE5);
-  */
  
-  //--- to move above
-  hRecoBeamType = new TH1I("h0RecoBeamType"+tag,  "", 30, -4.5, 25.5); lout->Add(hRecoBeamType);
-
-  hBeamPosPass = new TH1I("h1BeamPosPass"+tag, "", 4, -0.5, 3.5); lout->Add(hBeamPosPass);
-
-  hBeamEndZ = new TH1D("h2BeamEndZ"+tag,"",50, 0, 500); lout->Add(hBeamEndZ);
-  hBeamEndZPass = new TH1I("h2BeamEndZPass"+tag,"",4, -0.5, 3.5); lout->Add(hBeamEndZPass);
-
-  //--- to test
   //sensitive to pi+ beam, but not to signal -> sensitive to pi+ beam non-signal, i.e. non-interacting
-  /*
   const int nlen = 10;
   const double lenmin = 0;
   const double lenmax = 250;
@@ -521,31 +436,31 @@ void IniRecHist(TList * lout, const TString tag)
   hSigAfterVsLen = new TH2D("p9SigAfterVsLenNOHPRFPUR"+tag,"", nlen, lenmin, lenmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLen);
   */
 
-  //--- resolution
-  hProtonMomentumRes = new TH2D("b0ProtonMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hProtonMomentumRes);
-  hPiMomentumRes = new TH2D("b1PiMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiMomentumRes);
+  hProtonMomentumRes = new TH2D("b000ProtonMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hProtonMomentumRes);
+  hPiMomentumRes     = new TH2D("b001PiMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiMomentumRes);
+  hRecPi0Nshower     = new TH2D("b002bRecPi0NshowerSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hRecPi0Nshower);
+  hCutNdEdx          = new TH2D("b100CutNdEdxSTK"+tag,"", 30, 0, 500, 10, -0.5, 9.5); lout->Add(hCutNdEdx);
+  hCuttrackScore     = new TH2D("b101CuttrackScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCuttrackScore);
+  hCutemScore        = new TH2D("b102CutemScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutemScore);
+  hCutmichelScore    = new TH2D("b103CutmichelScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutmichelScore);
+  hCutnHits          = new TH2D("b104CutnHitsSTK"+tag,"", 30, 0, 1500, 10, -0.5, 9.5); lout->Add(hCutnHits);
+  hCutChi2NDF        = new TH2D("b105CutChi2NDFSTK"+tag,"", 30, 0, 500, 10, -0.5, 9.5); lout->Add(hCutChi2NDF);
+  hCutstartE2        = new TH2D("b106CutstartE2STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE2);
+  hCutstartE3        = new TH2D("b107CutstartE3STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE3);
+  hCutlastE2         = new TH2D("b108CutlastE2STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutlastE2);
+  hCutlastE3         = new TH2D("b109CutlastE3STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutlastE3);
 
-  //--- cut variables
   hCutbeamID       = new TH1I("c000CutbeamID"+tag,"", 2, -0.5, 1.5); lout->Add(hCutbeamID);
+  hCutBeamType     = new TH2D("c001BeamTypeSTK"+tag,  "", 30, -4.5, 25.5, 10, -0.5, 9.5); lout->Add(hCutBeamType);
+  hCutBeamPosPass  = new TH2D("c002BeamPosPassSTK"+tag, "", 4, -0.5, 3.5, 10, -0.5, 9.5); lout->Add(hCutBeamPosPass);
+  hCutBeamEndZ     = new TH2D("c003BeamEndZSTK"+tag,"",50, 0, 500, 10, -0.5, 9.5); lout->Add(hCutBeamEndZ);
+  hCutBeamEndZPass = new TH2D("c004BeamEndZPassSTK"+tag,"",4, -0.5, 3.5, 10, -0.5, 9.5); lout->Add(hCutBeamEndZPass);
 
-  hCutNdEdx       = new TH2D("c001CutNdEdxSTK"+tag,"", 30, 0, 500, 10, -0.5, 9.5); lout->Add(hCutNdEdx);
-  hCuttrackScore  = new TH2D("c002CuttrackScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCuttrackScore);
-  hCutemScore     = new TH2D("c003CutemScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutemScore);
-  hCutmichelScore = new TH2D("c004CutmichelScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutmichelScore);
-  hCutnHits       = new TH2D("c005CutnHitsSTK"+tag,"", 30, 0, 1500, 10, -0.5, 9.5); lout->Add(hCutnHits);
-  hCutChi2NDF     = new TH2D("c006CutChi2NDFSTK"+tag,"", 30, 0, 500, 10, -0.5, 9.5); lout->Add(hCutChi2NDF);
-  hCutstartE2     = new TH2D("c007CutstartE2STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE2);
-  hCutstartE3     = new TH2D("c008CutstartE3STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE3);
-  hCutlastE2      = new TH2D("c009CutlastE2STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutlastE2);
-  hCutlastE3      = new TH2D("c010CutlastE3STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutlastE3);
-
-  hCutnshower     = new TH2D("c011CutnshowerSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnshower);
-  hCutnmichel     = new TH2D("c012CutnmichelSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnmichel);
-  hCutntrack      = new TH2D("c013CutntrackSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutntrack);
-  hCutnproton     = new TH2D("c014CutnprotonSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnproton);
-
-  hRecPi0Nshower  = new TH2D("c011bRecPi0NshowerSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hRecPi0Nshower);
-  hCutMpi0        = new TH2D("c015CutMpi0STK"+tag,"", 15, 0, 0.3, 10, -0.5, 9.5); lout->Add(hCutMpi0);
+  hCutnshower      = new TH2D("c101CutnshowerSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnshower);
+  hCutnmichel      = new TH2D("c102CutnmichelSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnmichel);
+  hCutntrack       = new TH2D("c103CutntrackSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutntrack);
+  hCutnproton      = new TH2D("c104CutnprotonSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnproton);
+  hCutMpi0         = new TH2D("c105CutMpi0STK"+tag,"", 15, 0, 0.3, 10, -0.5, 9.5); lout->Add(hCutMpi0);
 }
 
 void IniTruthHist(TList * lout, const TString tag)
