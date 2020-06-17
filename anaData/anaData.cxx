@@ -689,14 +689,25 @@ double getRecFromTruth(const int protonIdx, const vector<double> * mombyrange)
   return rpm;
 }
 
-void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
+void anaRec(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
+  bool kMC = true;
+  if(!finName.Contains("_mc_")){
+    kMC = false;
+  }
+
+  TFile * fin = new TFile(finName);
+  if(!fin->IsOpen()){
+    cout<<"fin not open!"<<endl;
+    exit(1);
+  }
+
   const bool kPiZero = tag.Contains("MPiZero");
   const bool kTrackingProton = !tag.Contains("TrackingPiPlus");
 
-  cout<<"\n\n                       Running anaRec kPiZero "<<kPiZero<<" TrackingProton "<<kTrackingProton<<endl<<endl;
+  cout<<"\n\n                       Running anaRec kMC "<<kMC<<" kPiZero "<<kPiZero<<" TrackingProton "<<kTrackingProton<<endl<<endl;
 
-  TTree * tree = AnaIO::GetInputTree("pionana/beamana");
+  TTree * tree = AnaIO::GetInputTree(fin, "pionana/beamana");
   TTree * tout = AnaIO::GetOutputTree(lout, tag);  
   AnaIO::IniRecHist(lout, tag);
 
@@ -801,17 +812,26 @@ void anaRec(TList *lout, const TString tag, const int nEntryToStop = -999)
   cout<<"All entries "<<ientry<<endl;
 
   style::Process2DHist(lout);
-  style::DrawHist(lout, "output", tag, true, false);
 }
 
-void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
+void anaTruth(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
+  if(!finName.Contains("_mc_")){
+    printf("anaTruth _mc_ not found in file name! %s\n", finName.Data()); exit(1);
+  }
+
+  TFile * fin = new TFile(finName);
+  if(!fin->IsOpen()){
+    cout<<"fin not open!"<<endl;
+    exit(1);
+  }
+
   const bool kPiZero = tag.Contains("MPiZero");
   const bool kTrackingProton = !tag.Contains("TrackingPiPlus");
 
   cout<<"\n\n                       Running anaTruth kPiZero "<<kPiZero<<" TrackingProton "<<kTrackingProton<<endl<<endl;
 
-  TTree * tree = AnaIO::GetInputTree("pionana/beamana");
+  TTree * tree = AnaIO::GetInputTree(fin, "pionana/beamana");
   TTree * tout = AnaIO::GetOutputTree(lout, tag);
   AnaIO::IniTruthHist(lout, tag);
 
@@ -907,7 +927,6 @@ void anaTruth(TList *lout, const TString tag, const int nEntryToStop = -999)
 
   cout<<"All entries "<<ientry<<endl;
 
-  style::DrawHist(lout, "output", tag, true, false);
 }
 
 void PrintLegend()
@@ -963,22 +982,27 @@ int main(int argc, char * argv[])
 
   //=======================================================================================
   //------------------------- MC
+  TString mcfinName = "input/protoDUNE_mc_reco_flattree.root";
   TList * mclout = new TList;
 
-  TFile * mcfin = new TFile("input/protoDUNE_mc_reco_flattree.root");
-  if(!mcfin->IsOpen()){
-    cout<<"mcfin not open!"<<endl;
-    exit(1);
-  }
-
   if(kTruth){
-    anaTruth(mclout, tag);
+    anaTruth(mcfinName, mclout, tag);
   }
   else{
-    anaRec(mclout, tag);
+    anaRec(mcfinName, mclout, tag);
+
+    /*
+    TString datafinName = "input/protoDUNE_data_reco_flattree.root";
+    TList * datalout = new TList;    
+
+    anaRec(datafin, datalout, tag);
+    */
   }
   //------------------------- Data
   //=======================================================================================
+
+  const double plotscale = 1.0;
+  style::DrawHist(mclout, plotscale, 0x0, "output", tag, true, false);
 
   TFile * fout = new TFile(Form("output/outanaData_%s.root", tag.Data()),"recreate");
 

@@ -34,6 +34,15 @@ const TString gTagEFF="EFF";
 const TString gTagNOH="NOH";
 const TString gTagSTK="STK";
 
+void style::ScaleStack(THStack *stk, const double scale)
+{
+  const TList * ll = stk->GetHists();
+  for(Int_t ii=0; ii<ll->GetEntries(); ii++){
+    TH1D *hh = (TH1D*)ll->At(ii);
+    hh->Scale(scale);
+  }
+}
+
 TCanvas *style::DrawLegend(const vector<TString> entries, const TString htype, int *tmpcol, int * tmpmkr)
 {
   int defcol[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
@@ -263,7 +272,7 @@ void style::Process2DHist(TList *lout)
   }
 }
 
-void style::DrawHist(TList *lout, const TString outdir, const TString tag, const bool ktext, const bool kfast)
+void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, const TString outdir, const TString tag, const bool ktext, const bool kfast)
 {
   TCanvas * c1 = new TCanvas("c1"+tag, "", 1200, 800);
   style::PadSetup(c1);
@@ -300,16 +309,19 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
     }
     //===================
 
-    printf("Printing %s k2d %d kstk %d\n", tag.Data(), h2d!=0x0, hstk!=0x0);
+    printf("Printing %s k2d %d kstk %d scale %f\n", tag.Data(), h2d!=0x0, hstk!=0x0, plotscale);
 
     //--- ResetStyle
     if(h2d){
+      h2d->Scale(plotscale);
       ResetStyle(h2d);
     }
     else if(hh){
+      hh->Scale(plotscale);
       ResetStyle(hh);
     }
     else{
+      ScaleStack(hstk, plotscale);
       ResetStyle(hstk);
       ResetStyle(hsum);
     }
@@ -407,6 +419,27 @@ void style::DrawHist(TList *lout, const TString outdir, const TString tag, const
       else{
         hstk->Draw("hist");
       }
+    }
+
+    if(overlayList){
+   
+      TH1 * hoverlay = dynamic_cast<TH1*> (overlayList->FindObject(tag));
+      if(!hoverlay){
+        THStack * stkOverlay = dynamic_cast<THStack *> (overlayList->FindObject(tag));
+        if(stkOverlay){
+          hoverlay = GetStackedSum(stkOverlay);
+        }
+      }
+
+      if(hoverlay){
+        printf("style::DrawHist drawing overlay %s\n", hoverlay->GetName());
+        ResetStyle(hoverlay);
+        hoverlay->SetMarkerStyle(20);
+        hoverlay->SetMarkerSize(2);
+        hoverlay->SetMarkerColor(kBlack);
+        hoverlay->Draw("same E");
+      }
+
     }
 
     c1->Print(outdir+"/"+tag+".png");

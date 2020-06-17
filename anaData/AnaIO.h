@@ -297,9 +297,9 @@ TTree * GetOutputTree(TList * lout, const TString tag)
   return tout;
 }
 
-TTree * GetInputTree(const TString tname)
+TTree * GetInputTree(TFile * fin, const TString tname)
 {
-  TTree * tree=(TTree*) gDirectory->Get(tname);
+  TTree * tree=(TTree*) fin->Get(tname);
   if(!tree){
     cout<<"no tree!"<<endl;
     gDirectory->ls();
