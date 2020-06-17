@@ -115,7 +115,7 @@ double GetTruncatedMean(vector<double> array, const int nsample)
   return sum / (nterm+1E-10);
 }
 
-double GetTruncatedMean(const vector<double> tmparr, const unsigned int nsample0, const unsigned int nsample1, const double lowerFrac, const double upperFrac)
+double GetTruncatedMean(const vector<double> &tmparr, const unsigned int nsample0, const unsigned int nsample1, const double lowerFrac, const double upperFrac)
 {
   //for proton Bragg peak use 0.4-0.95. Seen by CDF of startE using signal proton samples in drawTracking
 
@@ -142,7 +142,7 @@ double GetTruncatedMean(const vector<double> tmparr, const unsigned int nsample0
 }
 
 
-void GetdEdx(const vector<double> arraydEdx, vector<double> &startE, vector<double> &endE, const unsigned int padding=0)
+void GetdEdx(const vector<double> &arraydEdx, vector<double> &startE, vector<double> &endE, const unsigned int padding=0)
 {
   const unsigned int ncls = arraydEdx.size();
 
@@ -159,6 +159,20 @@ void GetdEdx(const vector<double> arraydEdx, vector<double> &startE, vector<doub
   }
 }
 
+bool GetbeamID(const std::vector<int> & pidCandidates)
+{
+  //https://github.com/calcuttj/PionStudies/blob/master/rDataFrame/eventSelection.h
+  //line 149
+
+  //https://github.com/calcuttj/PionStudies/blob/master/rDataFrame/eventSelection.C
+  //line 128
+  // auto data_all = data_frame
+  //    .Define("beamPID", data_beam_PID, {"data_BI_PDG_candidates"})
+  //line 157
+  // .Filter("beamPID == true"); 
+
+  return ( (std::find(pidCandidates.begin(), pidCandidates.end(), 211)) != pidCandidates.end());
+};
 
 bool Manual_beamPos_mc(const double beam_startX, const double beam_startY, const double beam_startZ, const double beam_dirX, const double beam_dirY,   const double beam_dirZ, const double true_dirX,   const double true_dirY, const double true_dirZ,   const double true_startX, const double true_startY, const double true_startZ) 
 {

@@ -43,7 +43,7 @@ void style::ScaleStack(THStack *stk, const double scale)
   }
 }
 
-TCanvas *style::DrawLegend(const vector<TString> entries, const TString htype, int *tmpcol, int * tmpmkr)
+TCanvas *style::DrawLegend(const vector<TString> &entries, const TString htype, int *tmpcol, int * tmpmkr)
 {
   int defcol[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
   int * cols=0x0;

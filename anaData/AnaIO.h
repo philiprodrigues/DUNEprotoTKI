@@ -109,6 +109,8 @@ namespace AnaIO
 
   //--------------------------------------- anaRec ---------------------------------------
   //--- established
+  vector<int>     *data_BI_PDG_candidates=0x0;
+
   int reco_beam_type = -999;
 
   Double_t        reco_beam_startX;
@@ -203,6 +205,7 @@ namespace AnaIO
  TH2D * hProtonMomentumRes = 0x0;
  TH2D * hPiMomentumRes = 0x0;
 
+ TH1I * hCutbeamID = 0x0;
  TH2D * hCutnHits = 0x0;
  TH2D * hCutNdEdx = 0x0;
  TH2D * hCutstartE2 = 0x0;
@@ -419,6 +422,7 @@ reco_daughter_allTrack_Chi2_proton = (vector<double>*)0x1180370
   tree->SetBranchAddress("true_daughter_nProton", &true_daughter_nProton);
 
   //--------------------------------------- anaRec ---------------------------------------
+  tree->SetBranchAddress("data_BI_PDG_candidates", &data_BI_PDG_candidates);
   tree->SetBranchAddress("reco_beam_type", &reco_beam_type);
 
   tree->SetBranchAddress("reco_beam_startX", &reco_beam_startX);
@@ -522,6 +526,8 @@ void IniRecHist(TList * lout, const TString tag)
   hPiMomentumRes = new TH2D("b1PiMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiMomentumRes);
 
   //--- cut variables
+  hCutbeamID       = new TH1I("c000CutbeamID"+tag,"", 2, -0.5, 1.5); lout->Add(hCutbeamID);
+
   hCutNdEdx       = new TH2D("c001CutNdEdxSTK"+tag,"", 30, 0, 500, 10, -0.5, 9.5); lout->Add(hCutNdEdx);
   hCuttrackScore  = new TH2D("c002CuttrackScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCuttrackScore);
   hCutemScore     = new TH2D("c003CutemScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutemScore);

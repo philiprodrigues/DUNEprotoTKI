@@ -191,33 +191,37 @@ void setFullSignal(const bool kpi0)
 
 int getTruthFromRec(const int recidx, int & pdg, double & momentum)
 {
-  const int truthID = (*AnaIO::reco_daughter_PFP_true_byHits_ID)[recidx];
-  int trueidx = -999;
-  int counter = 0;
-  for(unsigned int ii = 0; ii<AnaIO::true_beam_daughter_ID->size(); ii++){
-    if(  (*AnaIO::true_beam_daughter_ID)[ii] == truthID ){
-      if(counter){
-        printf("getTruthFromRec truthID found again %d %d\n", recidx, truthID); exit(1);
-      }
-      trueidx = ii;
-      counter++;
-    }
-  }
-
   pdg = -999;
   momentum = -999;
+  int trueidx = -999;
 
-  if(trueidx>=0){
-    pdg = (*AnaIO::true_beam_daughter_PDG)[trueidx];
+  if(AnaIO::reco_daughter_PFP_true_byHits_ID && AnaIO::reco_daughter_PFP_true_byHits_ID->size() ){//in data this is size = 0 but not null
 
-    const TVector3 vec((*AnaIO::true_beam_daughter_startPx)[trueidx], (*AnaIO::true_beam_daughter_startPy)[trueidx], (*AnaIO::true_beam_daughter_startPz)[trueidx]);
-    momentum = vec.Mag();
+    const int truthID = (*AnaIO::reco_daughter_PFP_true_byHits_ID)[recidx];
+    int counter = 0;
+    for(unsigned int ii = 0; ii<AnaIO::true_beam_daughter_ID->size(); ii++){
+      if(  (*AnaIO::true_beam_daughter_ID)[ii] == truthID ){
+        if(counter){
+          printf("getTruthFromRec truthID found again %d %d\n", recidx, truthID); exit(1);
+        }
+        trueidx = ii;
+        counter++;
+      }
+    }
+    
+    if(trueidx>=0){
+      pdg = (*AnaIO::true_beam_daughter_PDG)[trueidx];
+      
+      const TVector3 vec((*AnaIO::true_beam_daughter_startPx)[trueidx], (*AnaIO::true_beam_daughter_startPy)[trueidx], (*AnaIO::true_beam_daughter_startPz)[trueidx]);
+      momentum = vec.Mag();
+    }
+    
   }
 
   return trueidx;
 }
 
-TLorentzVector * getPiZero(const int ksig, const vector<TLorentzVector> shws,  const bool kprint, const bool kfill)
+TLorentzVector * getPiZero(const int ksig, const vector<TLorentzVector> & shws,  const bool kprint, const bool kfill)
 {
   const int shsize = shws.size();
   if(kfill){
@@ -732,9 +736,11 @@ void anaRec(TString finName, TList *lout, const TString tag, const int nEntryToS
     //____________________________________________________________________________________________________
 
     //calculate before any cuts! Only filled after ALL cuts!
-    const int TruthBeamType = GetParticleType(AnaIO::true_beam_PDG);
-   
-    setFullSignal(kPiZero);
+    int TruthBeamType = -999;
+    if(kMC){
+      TruthBeamType = GetParticleType(AnaIO::true_beam_PDG);
+      setFullSignal(kPiZero);
+    }
 
     //for to see within signal
     if(0){//====================================================== switch between signal sample and full sample
@@ -744,8 +750,17 @@ void anaRec(TString finName, TList *lout, const TString tag, const int nEntryToS
     }
     else{
       //0. true beam particle //"In data the beam Instrumentation is able to filter for these events but is not inside the MC" so read data file has this
-      if(AnaIO::true_beam_PDG != 211 && AnaIO::true_beam_PDG != -13){
-        continue;
+      if(kMC){
+        if(AnaIO::true_beam_PDG != 211 && AnaIO::true_beam_PDG != -13){
+          continue;
+        }
+      }
+      else{
+        const bool data_beamID = GetbeamID((*AnaIO::data_BI_PDG_candidates));
+        AnaIO::hCutbeamID->Fill(data_beamID);
+        if(!data_beamID){
+          continue;
+        }
       }
       
       //for pi+ it is worse to include this pion-ana-cut (e*p: 6.7->6.3%), for pi0 it is the same e*p, better purity, worse efficiency.
@@ -753,9 +768,9 @@ void anaRec(TString finName, TList *lout, const TString tag, const int nEntryToS
         //x. primary beam type 
         AnaIO::hRecoBeamType->Fill(AnaIO::reco_beam_type);
         //no effect, shadowed by TMeanStart cut
-        //    if(AnaIO::reco_beam_type!=13){//13: Pandora "track like"
-        //      continue;
-        //    }
+        if(AnaIO::reco_beam_type!=13){//13: Pandora "track like"
+          continue;
+        }
         
         //1. beam position MC cut, need MC truth, how is it possible in analysis?
         const bool kBeamPosPass = GetBeamPosPass();
@@ -980,29 +995,48 @@ int main(int argc, char * argv[])
   tag+=(kProton?"_TrackingProton":"_TrackingPiPlus");
   tag+=(kTruth?"_anaTruth":"_anaRec");
 
+  TList * mclout = 0x0;
+  TList * datalout = 0x0;
+
+  if(1){//switch for test
+    mclout = new TList;
+  }
+  else{
+    datalout = new TList;
+  }
+
   //=======================================================================================
   //------------------------- MC
   TString mcfinName = "input/protoDUNE_mc_reco_flattree.root";
-  TList * mclout = new TList;
 
   if(kTruth){
     anaTruth(mcfinName, mclout, tag);
   }
   else{
-    anaRec(mcfinName, mclout, tag);
+    if(mclout){
+      anaRec(mcfinName, mclout, tag);
+    }
 
-    /*
-    TString datafinName = "input/protoDUNE_data_reco_flattree.root";
-    TList * datalout = new TList;    
-
-    anaRec(datafin, datalout, tag);
-    */
+    if(datalout){
+      TString datafinName = "input/protoDUNE_data_reco_flattree.root";
+      anaRec(datafinName, datalout, tag);
+    }
   }
   //------------------------- Data
   //=======================================================================================
 
   const double plotscale = 1.0;
-  style::DrawHist(mclout, plotscale, 0x0, "output", tag, true, false);
+  if(mclout){
+    if(datalout){
+
+    }
+    else{
+      style::DrawHist(mclout, plotscale, 0x0, "output", tag, true, false);
+    }
+  }
+  else if(datalout){
+    style::DrawHist(datalout, plotscale, 0x0, "output", tag, true, false);
+  }
 
   TFile * fout = new TFile(Form("output/outanaData_%s.root", tag.Data()),"recreate");
 
