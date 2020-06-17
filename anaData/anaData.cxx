@@ -961,24 +961,28 @@ int main(int argc, char * argv[])
   tag+=(kProton?"_TrackingProton":"_TrackingPiPlus");
   tag+=(kTruth?"_anaTruth":"_anaRec");
 
-  TList * lout = new TList;
+  //=======================================================================================
+  //------------------------- MC
+  TList * mclout = new TList;
 
-  TFile * fin = new TFile("input/protoDUNE_reco_flattree.root");
-  if(!fin->IsOpen()){
-    cout<<"fin not open!"<<endl;
+  TFile * mcfin = new TFile("input/protoDUNE_mc_reco_flattree.root");
+  if(!mcfin->IsOpen()){
+    cout<<"mcfin not open!"<<endl;
     exit(1);
   }
 
   if(kTruth){
-    anaTruth(lout, tag);
+    anaTruth(mclout, tag);
   }
   else{
-    anaRec(lout, tag);
+    anaRec(mclout, tag);
   }
+  //------------------------- Data
+  //=======================================================================================
 
   TFile * fout = new TFile(Form("output/outanaData_%s.root", tag.Data()),"recreate");
 
-  lout->Write();
+  mclout->Write();
   fout->Save();
   fout->Close();
 
