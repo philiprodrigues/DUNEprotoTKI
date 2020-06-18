@@ -1,16 +1,19 @@
 
                 
       PiPlus:
-      no NdEdx cut,   kPiZero 0 fullsig 224.0 signal 38.0 all 152.0 purity 25.0% eff 17.0% ep 4.2%
-  (*) with NdEdx cut, kPiZero 0 fullsig 224.0 signal 34.0 all 103.0 purity 33.0% eff 15.2% ep 5.0%
-
+      no NdEdx cut,        kPiZero 0 fullsig 224.0 signal 38.0 all 152.0 purity 25.0% eff 17.0% ep 4.2%
+      with NdEdx cut (6),  kPiZero 0 fullsig 224.0 signal 40.0 all 157.0 purity 25.5% eff 17.9% ep 4.5%
+      with NdEdx cut (16), with ESC instead of chi2, kPiZero 0 fullsig 224.0 signal 32.0 all 97.0 purity 33.0% eff 14.3% ep 4.7%
+  (*) with NdEdx cut (16),                           kPiZero 0 fullsig 224.0 signal 34.0 all 103.0 purity 33.0% eff 15.2% ep 5.0%
 
 
 
       PiZero:  
-      no NdEdx cut,   kPiZero 1 fullsig 246.0 signal 31.0 all 60.0 purity 51.7% eff 12.6% ep 6.5%
-  (*) with NdEdx cut, kPiZero 1 fullsig 246.0 signal 29.0 all 50.0 purity 58.0% eff 11.8% ep 6.8%
- 
+      no NdEdx cut,        kPiZero 1 fullsig 246.0 signal 31.0 all 60.0 purity 51.7% eff 12.6% ep 6.5%
+      with NdEdx cut (16), kPiZero 1 fullsig 246.0 signal 9.0 all 10.0 purity 90.0% eff 3.7% ep 3.3%
+      with NdEdx cut (6), chi2 instead of ESC, kPiZero 1 fullsig 246.0 signal 27.0 all 50.0 purity 54.0% eff 11.0% ep 5.9%
+  (*) with NdEdx cut (6),                      kPiZero 1 fullsig 246.0 signal 29.0 all 50.0 purity 58.0% eff 11.8% ep 6.8%
+
 
 
 

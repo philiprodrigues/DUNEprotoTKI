@@ -177,7 +177,6 @@ not set
       //all signal protons have startE3 > 9
       //with Chi2NDF cut  44/191 = 23% purity; without 46/197 = 23% purity, slightly higher efficiency
       //test if(startE2>10 && nhits<260 && startE3>9 && Chi2NDF<50){
-      
       const double cutSE2 = 10;
       const double cutSE3 = 9;
       isSelProton = (startE2>cutSE2 && nhits<cutNH && startE3>cutSE3);
