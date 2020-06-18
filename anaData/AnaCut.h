@@ -113,12 +113,10 @@ not set
       printf("check cut kpi0 %d ndedxcut %d\n", kpi0, ndedxcut);
     }
 
-    /*to test
     if(NdEdx<ndedxcut){
       //do not count it as anything
       continue;
     }
-    */
     //<--- need to be done before any counting!!!
 
     //track and em scores at 0.5 look reasonable as baseline (after 0.5 the proton fraction look flat)

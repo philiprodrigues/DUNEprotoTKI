@@ -450,24 +450,53 @@ void PrintLegend()
 {
   TCanvas * c1 = 0x0;
 
+  //  int defcol[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
+
+  {
   vector<TString> parType;
   parType.push_back("p");
   parType.push_back("#pi^{+}");
   parType.push_back("EM shower");
   parType.push_back("others");
-  c1 = style::DrawLegend(parType, "f");
+  parType.push_back("data");
+
+  vector<TString> htype;
+  htype.push_back("f");
+  htype.push_back("f");
+  htype.push_back("f");
+  htype.push_back("f");
+  htype.push_back("pl");
+
+  const int cols[]={1008, 1009, 1002, 1003, kRed};
+  const int mrks[]={1,1,1,1,6};
+  c1 = style::DrawLegend(parType, htype, cols, mrks);
+
   c1->Print("output/legend_parType.eps");
   c1->Print("output/legend_parType.pdf");
   c1->Print("output/legend_parType.png");
+  }
 
+  {
   vector<TString> evtType;
   evtType.push_back("signal");
   evtType.push_back("background");
   evtType.push_back("#mu^{+} beam");
-  c1 = style::DrawLegend(evtType, "f");
+  evtType.push_back("data");
+
+  vector<TString> htype;
+  htype.push_back("f");
+  htype.push_back("f");
+  htype.push_back("f");
+  htype.push_back("pl");
+
+  const int cols[]={1008, 1009, 1002, kRed};
+  const int mrks[]={1,1,1,6};
+  c1 = style::DrawLegend(evtType, htype, cols, mrks);
+
   c1->Print("output/legend_evtType.eps");
   c1->Print("output/legend_evtType.pdf");
   c1->Print("output/legend_evtType.png");
+  }
 }
 
 //=== end
