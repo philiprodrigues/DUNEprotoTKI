@@ -332,7 +332,9 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
         koverlay = false;
       }
       else{
-        hh->Scale(plotscale);
+        if(plotscale!=1){//avoid resetting hist maximum         
+          hh->Scale(plotscale);
+        }
       }
     }
 

@@ -21,7 +21,7 @@ void drawTracking(TList *lout, const TString pretag, const TString addCut)
 
   cout<<"\n\n                       Running kPiZero "<<kPiZero<<" TrackingProton "<<kTrackingProton<<endl<<endl;
 
-  TTree * tree = (TTree*)gDirectory->Get("tree");
+  TTree * tree = (TTree*)gDirectory->Get("mc/tree");
   if(!tree){
     cout<<"no tree!"<<endl;
     exit(1);
@@ -90,10 +90,10 @@ void drawTracking(TList *lout, const TString pretag, const TString addCut)
   const double Emin = 0;
 
   const int nstartE      = kTrackingProton? 30 : 40;
-  const double startEmax = kTrackingProton? 30 : 5;
+  const double startEmax = kTrackingProton? 30 : 10;
 
   const int nlastE       = kTrackingProton? 40 : 40;
-  const double lastEmax  = kTrackingProton? 10 : 5;
+  const double lastEmax  = kTrackingProton? 10 : 10;
 
   TH2D * hResstartE0Rec = new TH2D(pretag+"h5ResstartE0RecNOHPRF", cut2d, nstartE, Emin, startEmax, nRes, Resmin, Resmax); //lout->Add(hResstartE0Rec);
   TH2D * hResstartE1Rec = new TH2D(pretag+"h5ResstartE1RecNOHPRF", cut2d, nstartE, Emin, startEmax, nRes, Resmin, Resmax); //lout->Add(hResstartE1Rec);
@@ -223,7 +223,7 @@ seeana110.log:check cut kpi0 1 proton tag startE2 10.00 nhits 260 startE3 9.00
   }
 
   style::Process2DHist(lout);
-  style::DrawHist(lout, "output", tag, false, false);
+  style::DrawHist(lout, 1, 0x0, "output", tag, false, false);
   //style::DrawHist(lout, "output", tag, false, 1);
 
   TFile * fout= new TFile(Form("output/outdrawTracking_%s.root", tag.Data()),"recreate");
