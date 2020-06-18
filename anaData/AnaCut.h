@@ -112,7 +112,8 @@ not set
     if(kShowCut){
       printf("check cut kpi0 %d ndedxcut %d\n", kpi0, ndedxcut);
     }
-    /* do not use, too complicated
+
+    /*to test
     if(NdEdx<ndedxcut){
       //do not count it as anything
       continue;
@@ -137,10 +138,15 @@ not set
       }
       nshower++;
       
-      const TVector3 showerDir( (*AnaIO::reco_daughter_allShower_dirX)[ii], (*AnaIO::reco_daughter_allShower_dirY)[ii], (*AnaIO::reco_daughter_allShower_dirZ)[ii] );
-      const TVector3 showerMomentum = showerDir.Unit()*(*AnaIO::reco_daughter_allShower_energy)[ii] * 1E-3; //MeV to GeV
-      const TLorentzVector showerLv( showerMomentum, showerMomentum.Mag() );
-      showerArray.push_back(showerLv);
+      if(AnaIO::reco_daughter_allShower_energy){
+        const TVector3 showerDir( (*AnaIO::reco_daughter_allShower_dirX)[ii], (*AnaIO::reco_daughter_allShower_dirY)[ii], (*AnaIO::reco_daughter_allShower_dirZ)[ii] );
+        const TVector3 showerMomentum = showerDir.Unit()*(*AnaIO::reco_daughter_allShower_energy)[ii] * 1E-3; //MeV to GeV
+        const TLorentzVector showerLv( showerMomentum, showerMomentum.Mag() );
+        showerArray.push_back(showerLv);
+      }
+      else{
+        printf("shower energy null!!\n"); exit(1);
+      }
     }
     const double michelScore = (*AnaIO::reco_daughter_PFP_michelScore_collection)[ii];
     if(michelScore>0.5){
@@ -313,10 +319,12 @@ bool CutTopology(const bool kpi0)
   //===================================================
   //only checking after-selection distributions
   if(kpi0){
-    if(!leadingPi0){
+    if(leadingPi0){
+      style::FillInRange(AnaIO::hCutMpi0, leadingPi0->M(), filleventtype);
+    }
+    else{
       printf("leadingpi0 null!!\n"); exit(1);
     }
-      style::FillInRange(AnaIO::hCutMpi0, leadingPi0->M(), filleventtype);
   }
   
   TLorentzVector *dummypi0 = 0x0;

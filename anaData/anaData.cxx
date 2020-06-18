@@ -22,7 +22,7 @@
 #include <vector>       // std::vector
 
 const bool gkOnlySignal = false;
-const int gkDataBit = 1;//3;
+const int gkDataBit = 3;
 
 int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
@@ -75,24 +75,25 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     }
 
     //for to see within signal
-    if(gkOnlySignal){//====================================================== switch between signal sample and full sample
+    if(gkOnlySignal){//====================================================== switch between signal sample and selected sample
       if(!AnaIO::kSignal){
         continue;
       }
     }
     else{
+    
       if(!AnaCut::CutBeamAllInOne(kMC)){
         continue;
       }
-    }//====================================================== switch between signal sample and full sample
-
-    //count beam after beam cut before topology cut
-    selBeamCount++;
-
-    //3. n track daughter
-    if(!AnaCut::CutTopology(kPiZero)){
-      continue;
-    }   
+      
+      //count beam after beam cut before topology cut
+      selBeamCount++;
+      
+      //3. n track daughter
+      if(!AnaCut::CutTopology(kPiZero)){
+        continue;
+      }   
+    }//====================================================== switch between signal sample and selected sample
 
      /*   
     //x. Beam dEdx cut shadowed by beam filtering
@@ -125,6 +126,21 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
   cout<<"All entries "<<ientry<<endl;
 
   style::Process2DHist(lout);
+
+  if(kMC){
+    /*
+seeana010.log:kPiZero 0 signal 224.0 all 224.0 purity 100.0%
+seeana110.log:kPiZero 1 signal 246.0 all 246.0 purity 100.0%
+     */
+    const double nfullsig = kPiZero? 246.0 : 224.0;
+    const double nsig = AnaIO::hTruthSignal->GetBinContent(2);
+    const double nbk = AnaIO::hTruthSignal->GetBinContent(1);
+    const double nall = nsig+nbk;
+    const double purity = nsig/nall;
+    const double eff = nsig/nfullsig;
+    const double ep = eff*purity;
+    printf("kPiZero %d fullsig %.1f signal %.1f all %.1f purity %.1f%% eff %.1f%% ep %.1f%%\n", kPiZero, nfullsig, nsig, nall, purity*100, eff*100, ep*100);
+  }
 
   return selBeamCount; 
 }
@@ -306,16 +322,17 @@ int main(int argc, char * argv[])
 
   printf("anaRec beamcount data: %.0f mc: %.0f plotscale %f\n", dataBeamCount, mcBeamCount, plotscale);
 
+  const bool kfast = true;
   if(mclout){
     if(datalout){
-      style::DrawHist(mclout, plotscale, datalout, "output", tag, true, false);
+      style::DrawHist(mclout, plotscale, datalout, "output", tag, true, kfast);
     }
     else{
-      style::DrawHist(mclout, 1, 0x0, "output", tag, true, false);
+      style::DrawHist(mclout, 1, 0x0, "output", tag, true, kfast);
     }
   }
   else if(datalout){
-    style::DrawHist(datalout, 1, 0x0, "output", tag, true, false);
+    style::DrawHist(datalout, 1, 0x0, "output", tag, true, kfast);
   }
 
   TFile * fout = new TFile(Form("output/outanaData_%s.root", tag.Data()),"recreate");
