@@ -506,16 +506,20 @@ int main(int argc, char * argv[])
   tag+=(kProton?"_TrackingProton":"_TrackingPiPlus");
   tag+=(kTruth?"_anaTruth":"_anaRec");
 
+  TList * mclout = new TList;
+  TList * datalout = new TList;
+
+  /*
   TList * mclout = 0x0;
   TList * datalout = 0x0;
 
-  if(1){//switch for test
+  if(0){//switch for test
     mclout = new TList;
   }
   else{
     datalout = new TList;
   }
-
+  */
   double mcBeamCount = -999;
   double dataBeamCount = -999;
   //=======================================================================================
@@ -537,20 +541,20 @@ int main(int argc, char * argv[])
   }
   //------------------------- Data
   //=======================================================================================
+  const double plotscale = dataBeamCount/mcBeamCount;
 
-  printf("anaRec beamcount data: %.0f mc: %.0f\n", dataBeamCount, mcBeamCount);
+  printf("anaRec beamcount data: %.0f mc: %.0f plotscale %f\n", dataBeamCount, mcBeamCount, plotscale);
 
-  const double plotscale = 1.0;
   if(mclout){
     if(datalout){
-
+      style::DrawHist(mclout, plotscale, datalout, "output", tag, true, false);
     }
     else{
-      style::DrawHist(mclout, plotscale, 0x0, "output", tag, true, false);
+      style::DrawHist(mclout, 1, 0x0, "output", tag, true, false);
     }
   }
   else if(datalout){
-    style::DrawHist(datalout, plotscale, 0x0, "output", tag, true, false);
+    style::DrawHist(datalout, 1, 0x0, "output", tag, true, false);
   }
 
   TFile * fout = new TFile(Form("output/outanaData_%s.root", tag.Data()),"recreate");
@@ -558,6 +562,7 @@ int main(int argc, char * argv[])
     TDirectory * ld = gDirectory->mkdir("mc");
     ld->cd();
     mclout->Write();
+    gDirectory->cd("../");
   }
   if(datalout){
     TDirectory * ld = gDirectory->mkdir("data");

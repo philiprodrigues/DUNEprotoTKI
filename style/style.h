@@ -87,6 +87,7 @@ using namespace std;
 class style
 {
  public:
+  static void FillInRange(TH1 * hh,  double xx, const double yy=-999);
   static void ScaleStack(THStack *stk, const double scale);
   static TCanvas *DrawLegend(const vector<TString> &entries, const TString htype, int *tmpcol=0x0, int * tmpmkr=0x0);
   static TLegend *ShowColor();
@@ -95,7 +96,7 @@ class style
   static THStack * NormalizeStack(THStack * hstk);
   static THStack * ConvertToStack(const TH2D * hh);
   static void Process2DHist(TList *lout);
-  static void DrawHist(TList *lout, const double plotscale, TList * overlayList, const TString outdir, const TString tag, const bool ktext, const bool kfast);
+  static void DrawHist(TList *lout, const double plotscale, TList * overlayList, const TString outdir, const TString tag, bool ktext, const bool kfast);
   static TH1D* ToPDF(const TH1 *hraw, const TString hn="pdf");
   static TH1D * GetCDF(const TH2D *hraw, const TString hname="cdf");
   static TH2D* NormalHist(const TH2D *hraw, TH1D * &hpdf,  TH1D * &hcdf,  const Double_t thres=0, const Bool_t kmax=kFALSE);

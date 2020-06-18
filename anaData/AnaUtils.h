@@ -48,7 +48,7 @@ TLorentzVector * GetPiZero(const int ksig, const vector<TLorentzVector> & shws, 
 {
   const int shsize = shws.size();
   if(kfill){
-    AnaIO::hRecPi0Nshower->Fill(shsize, !ksig);
+    style::FillInRange(AnaIO::hRecPi0Nshower, shsize, !ksig);
   }
 
   vector<TLorentzVector> piarr;

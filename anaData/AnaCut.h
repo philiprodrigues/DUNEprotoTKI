@@ -109,7 +109,7 @@ not set
     const vector<double>  dedxarray = (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii];
     const int NdEdx = dedxarray.size();
     if(kfill){
-      AnaIO::hCutNdEdx->Fill(NdEdx, fillstktype);
+      style::FillInRange(AnaIO::hCutNdEdx, NdEdx, fillstktype);
     }
     const int ndedxcut = kpi0 ? 6 : 16; //need E[3], at least 4 cls
     if(kShowCut){
@@ -207,26 +207,26 @@ not set
 
     if(kfill){
       if(pdg==2212 && isSelProton){
-        AnaIO::hProtonMomentumRes->Fill(truemomentum, recp/truemomentum-1);
+        style::FillInRange(AnaIO::hProtonMomentumRes, truemomentum, recp/truemomentum-1);
       }
       else if(pdg==211 && !isSelProton){
-        AnaIO::hPiMomentumRes->Fill(truemomentum, recp/truemomentum-1);
+        style::FillInRange(AnaIO::hPiMomentumRes, truemomentum, recp/truemomentum-1);
       }
 
       if(!kdebug || 
          (kdebug==1 && isSelProton) ||
          (kdebug==2 && !isSelProton)
          ){
-      AnaIO::hCutstartE2->Fill(startE2, fillstktype);
-      AnaIO::hCutstartE3->Fill(startE3, fillstktype);
-      AnaIO::hCutlastE2->Fill(lastE2, fillstktype);
-      AnaIO::hCutlastE3->Fill(lastE3, fillstktype);
+      style::FillInRange(AnaIO::hCutstartE2, startE2, fillstktype);
+      style::FillInRange(AnaIO::hCutstartE3, startE3, fillstktype);
+      style::FillInRange(AnaIO::hCutlastE2, lastE2, fillstktype);
+      style::FillInRange(AnaIO::hCutlastE3, lastE3, fillstktype);
 
-      AnaIO::hCutnHits->Fill(nhits, fillstktype);
-      AnaIO::hCutChi2NDF->Fill(Chi2NDF, fillstktype);
-      AnaIO::hCuttrackScore->Fill(trackScore, fillstktype);
-      AnaIO::hCutemScore->Fill(emScore, fillstktype);
-      AnaIO::hCutmichelScore->Fill(michelScore, fillstktype);
+      style::FillInRange(AnaIO::hCutnHits, nhits, fillstktype);
+      style::FillInRange(AnaIO::hCutChi2NDF, Chi2NDF, fillstktype);
+      style::FillInRange(AnaIO::hCuttrackScore, trackScore, fillstktype);
+      style::FillInRange(AnaIO::hCutemScore, emScore, fillstktype);
+      style::FillInRange(AnaIO::hCutmichelScore, michelScore, fillstktype);
       }
     }
 
@@ -330,7 +330,7 @@ bool CutTopology(const bool kpi0)
     const int filleventtype = AnaUtils::GetFillEventType();
     //----------- do cuts
 
-    AnaIO::hCutnshower->Fill(cutnshower, filleventtype);
+    style::FillInRange(AnaIO::hCutnshower, cutnshower, filleventtype);
     if(kpi0){
       if(cutnshower<2){
         return false;
@@ -342,7 +342,7 @@ bool CutTopology(const bool kpi0)
       }
     }
 
-    AnaIO::hCutnmichel->Fill(cutnmichel, filleventtype);
+    style::FillInRange(AnaIO::hCutnmichel, cutnmichel, filleventtype);
     if(kpi0){
       if(cutnmichel>0){
         return false;
@@ -357,7 +357,7 @@ bool CutTopology(const bool kpi0)
         */
     }
 
-    AnaIO::hCutntrack->Fill(AnaIO::nTrack, filleventtype);
+    style::FillInRange(AnaIO::hCutntrack, AnaIO::nTrack, filleventtype);
     if(kpi0){
       //with this 56% purity, without 45%
       if(AnaIO::nTrack!=1){
@@ -370,7 +370,7 @@ bool CutTopology(const bool kpi0)
       }
     }
 
-    AnaIO::hCutnproton->Fill(cutnproton, filleventtype);
+    style::FillInRange(AnaIO::hCutnproton, cutnproton, filleventtype);
     if(cutnproton!=1){
       return false;
     }
@@ -381,7 +381,7 @@ bool CutTopology(const bool kpi0)
       if(!leadingPi0){
         printf("leadingpi0 null!!\n"); exit(1);
       }
-      AnaIO::hCutMpi0->Fill(leadingPi0->M(), filleventtype);
+      style::FillInRange(AnaIO::hCutMpi0, leadingPi0->M(), filleventtype);
     }
 
     TLorentzVector *dummypi0 = 0x0;
@@ -526,13 +526,15 @@ bool CutBeamAllInOne(const bool kmc)
 {
   //0. true beam particle //"In data the beam Instrumentation is able to filter for these events but is not inside the MC" so read data file has this
   if(kmc){
-    if(AnaIO::true_beam_PDG != 211 && AnaIO::true_beam_PDG != -13){
+    const bool mc_beampass =(AnaIO::true_beam_PDG == 211 || AnaIO::true_beam_PDG == -13);
+    style::FillInRange(AnaIO::hCutbeamID, mc_beampass);
+    if(!mc_beampass){
       return false;
     }
   }
   else{
     const bool data_beamID = CutBeamID((*AnaIO::data_BI_PDG_candidates));
-    AnaIO::hCutbeamID->Fill(data_beamID);
+    style::FillInRange(AnaIO::hCutbeamID, data_beamID);
     if(!data_beamID){
       return false;
     }
@@ -543,7 +545,7 @@ bool CutBeamAllInOne(const bool kmc)
   //for pi+ it is worse to include this pion-ana-cut (e*p: 6.7->6.3%), for pi0 it is the same e*p, better purity, worse efficiency.
   if(1){//====================================================== switch off pion analysis cuts
         //x. primary beam type 
-    AnaIO::hCutBeamType->Fill(AnaIO::reco_beam_type, filleventtype);
+    style::FillInRange(AnaIO::hCutBeamType, AnaIO::reco_beam_type, filleventtype);
     //no effect, shadowed by TMeanStart cut
     if(AnaIO::reco_beam_type!=13){//13: Pandora "track like"
       return false;
@@ -551,15 +553,15 @@ bool CutBeamAllInOne(const bool kmc)
     
     //1. beam position MC cut, need MC truth, how is it possible in analysis?
     const bool kBeamPosPass = kmc ? CutMCBeamPos() : CutDataBeamPos();
-    AnaIO::hCutBeamPosPass->Fill(kBeamPosPass, filleventtype);
+    style::FillInRange(AnaIO::hCutBeamPosPass, kBeamPosPass, filleventtype);
     if(!kBeamPosPass){
       return false;
     }
     //-> now signal purity 138/3537 = 3.9%, 2283 pi+ bea, 801 e+ beam
     
     //2. APA3 
-    AnaIO::hCutBeamEndZ->Fill(AnaIO::reco_beam_endZ, filleventtype);
-    AnaIO::hCutBeamEndZPass->Fill(!(AnaIO::reco_beam_endZ>=226), filleventtype);
+    style::FillInRange(AnaIO::hCutBeamEndZ, AnaIO::reco_beam_endZ, filleventtype);
+    style::FillInRange(AnaIO::hCutBeamEndZPass, !(AnaIO::reco_beam_endZ>=226), filleventtype);
     if(AnaIO::reco_beam_endZ>=226){
       return false;
     }
@@ -576,7 +578,7 @@ bool CutBeamdEdx(const double varSignal)
   vector<double> startE, lastE;
   AnaUtils::GetdEdx( *AnaIO::reco_beam_calibrated_dEdX, startE, lastE, 2);
   AnaIO::nBeamdEdxCls = startE.size();
-  AnaIO::hnBeamdEdxCls->Fill(AnaIO::nBeamdEdxCls);
+  style::FillInRange(AnaIO::hnBeamdEdxCls, AnaIO::nBeamdEdxCls);
   if(AnaIO::nBeamdEdxCls<6){
     return false;
   }
@@ -591,14 +593,14 @@ bool CutBeamdEdx(const double varSignal)
   
   AnaIO::beamTMeanStart = AnaUtils::GetTruncatedMean(startE, AnaIO::nBeamdEdxCls-6);
   
-  AnaIO::hSignalVsStartE0->Fill(AnaIO::beamStartE0, varSignal);
-  AnaIO::hSignalVsStartE1->Fill(AnaIO::beamStartE1, varSignal);
-  AnaIO::hSignalVsStartE2->Fill(AnaIO::beamStartE2, varSignal);
-  AnaIO::hSignalVsStartE3->Fill(AnaIO::beamStartE3, varSignal);
-  AnaIO::hSignalVsStartE4->Fill(AnaIO::beamStartE4, varSignal);
-  AnaIO::hSignalVsStartE5->Fill(AnaIO::beamStartE5, varSignal);
+  style::FillInRange(AnaIO::hSignalVsStartE0, AnaIO::beamStartE0, varSignal);
+  style::FillInRange(AnaIO::hSignalVsStartE1, AnaIO::beamStartE1, varSignal);
+  style::FillInRange(AnaIO::hSignalVsStartE2, AnaIO::beamStartE2, varSignal);
+  style::FillInRange(AnaIO::hSignalVsStartE3, AnaIO::beamStartE3, varSignal);
+  style::FillInRange(AnaIO::hSignalVsStartE4, AnaIO::beamStartE4, varSignal);
+  style::FillInRange(AnaIO::hSignalVsStartE5, AnaIO::beamStartE5, varSignal);
   
-  AnaIO::hSignalVsTMeanStart->Fill(AnaIO::beamTMeanStart, varSignal);
+  style::FillInRange(AnaIO::hSignalVsTMeanStart, AnaIO::beamTMeanStart, varSignal);
   
   //has Bragg Peak
   AnaIO::beamLastE0 = lastE[0];
@@ -610,12 +612,12 @@ bool CutBeamdEdx(const double varSignal)
   
   AnaIO::beamTMeanLast = AnaUtils::GetTruncatedMean(lastE, 6);
   
-  AnaIO::hSignalVsLastE0->Fill(AnaIO::beamLastE0, varSignal);
-  AnaIO::hSignalVsLastE1->Fill(AnaIO::beamLastE1, varSignal);
-  AnaIO::hSignalVsLastE2->Fill(AnaIO::beamLastE2, varSignal);
-  AnaIO::hSignalVsLastE3->Fill(AnaIO::beamLastE3, varSignal);
-  AnaIO::hSignalVsLastE4->Fill(AnaIO::beamLastE4, varSignal);
-  AnaIO::hSignalVsLastE5->Fill(AnaIO::beamLastE5, varSignal);
+  style::FillInRange(AnaIO::hSignalVsLastE0, AnaIO::beamLastE0, varSignal);
+  style::FillInRange(AnaIO::hSignalVsLastE1, AnaIO::beamLastE1, varSignal);
+  style::FillInRange(AnaIO::hSignalVsLastE2, AnaIO::beamLastE2, varSignal);
+  style::FillInRange(AnaIO::hSignalVsLastE3, AnaIO::beamLastE3, varSignal);
+  style::FillInRange(AnaIO::hSignalVsLastE4, AnaIO::beamLastE4, varSignal);
+  style::FillInRange(AnaIO::hSignalVsLastE5, AnaIO::beamLastE5, varSignal);
   
   //both need to tune for different energy
   //it is so clean that no need to cut on last since there is no Bragg peak form proton any more
@@ -623,22 +625,22 @@ bool CutBeamdEdx(const double varSignal)
     return false;
   }
   
-  AnaIO::hSignalVsTMeanLast->Fill(AnaIO::beamTMeanLast, varSignal);
+  style::FillInRange(AnaIO::hSignalVsTMeanLast, AnaIO::beamTMeanLast, varSignal);
   
-  AnaIO::hSigAfterVsStartE0->Fill(AnaIO::beamStartE0, varSignal);
-  AnaIO::hSigAfterVsStartE1->Fill(AnaIO::beamStartE1, varSignal);
-  AnaIO::hSigAfterVsStartE2->Fill(AnaIO::beamStartE2, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsStartE0, AnaIO::beamStartE0, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsStartE1, AnaIO::beamStartE1, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsStartE2, AnaIO::beamStartE2, varSignal);
   
-  AnaIO::hSigAfterVsLastE0->Fill(AnaIO::beamLastE0, varSignal);
-  AnaIO::hSigAfterVsLastE1->Fill(AnaIO::beamLastE1, varSignal);
-  AnaIO::hSigAfterVsLastE2->Fill(AnaIO::beamLastE2, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsLastE0, AnaIO::beamLastE0, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsLastE1, AnaIO::beamLastE1, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsLastE2, AnaIO::beamLastE2, varSignal);
   
-  AnaIO::hSigAfterVsStartE3->Fill(AnaIO::beamStartE3, varSignal);
-  AnaIO::hSigAfterVsLastE3->Fill(AnaIO::beamLastE3, varSignal);
-  AnaIO::hSigAfterVsStartE4->Fill(AnaIO::beamStartE4, varSignal);
-  AnaIO::hSigAfterVsLastE4->Fill(AnaIO::beamLastE4, varSignal);
-  AnaIO::hSigAfterVsStartE5->Fill(AnaIO::beamStartE5, varSignal);
-  AnaIO::hSigAfterVsLastE5->Fill(AnaIO::beamLastE5, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsStartE3, AnaIO::beamStartE3, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsLastE3, AnaIO::beamLastE3, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsStartE4, AnaIO::beamStartE4, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsLastE4, AnaIO::beamLastE4, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsStartE5, AnaIO::beamStartE5, varSignal);
+  style::FillInRange(AnaIO::hSigAfterVsLastE5, AnaIO::beamLastE5, varSignal);
   
   return true;
 }
