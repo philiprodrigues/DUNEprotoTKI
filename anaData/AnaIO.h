@@ -94,9 +94,9 @@ namespace AnaIO
 
   vector<int>     *reco_daughter_PFP_ID =0x0;
   vector<int>     *reco_daughter_PFP_nHits =0x0;
-  vector<double>  *reco_daughter_PFP_trackScore =0x0;
-  vector<double>  *reco_daughter_PFP_emScore =0x0;
-  vector<double>  *reco_daughter_PFP_michelScore =0x0;
+  vector<double>  *reco_daughter_PFP_trackScore_collection =0x0;
+  vector<double>  *reco_daughter_PFP_emScore_collection =0x0;
+  vector<double>  *reco_daughter_PFP_michelScore_collection =0x0;
 
   vector<int>     *reco_daughter_allShower_ID=0x0;
   vector<double>  *reco_daughter_allShower_dirX=0x0;
@@ -326,9 +326,9 @@ TTree * GetInputTree(TFile * fin, const TString tname)
 
   tree->SetBranchAddress("reco_daughter_PFP_ID", &reco_daughter_PFP_ID);
   tree->SetBranchAddress("reco_daughter_PFP_nHits", &reco_daughter_PFP_nHits);
-  tree->SetBranchAddress("reco_daughter_PFP_trackScore", &reco_daughter_PFP_trackScore);
-  tree->SetBranchAddress("reco_daughter_PFP_emScore", &reco_daughter_PFP_emScore);
-  tree->SetBranchAddress("reco_daughter_PFP_michelScore", &reco_daughter_PFP_michelScore);
+  tree->SetBranchAddress("reco_daughter_PFP_trackScore_collection", &reco_daughter_PFP_trackScore_collection);
+  tree->SetBranchAddress("reco_daughter_PFP_emScore_collection", &reco_daughter_PFP_emScore_collection);
+  tree->SetBranchAddress("reco_daughter_PFP_michelScore_collection", &reco_daughter_PFP_michelScore_collection);
 
   tree->SetBranchAddress("reco_daughter_allShower_ID", &reco_daughter_allShower_ID);
   tree->SetBranchAddress("reco_daughter_allShower_dirX", &reco_daughter_allShower_dirX);
@@ -439,11 +439,11 @@ void IniRecHist(TList * lout, const TString tag)
   hProtonMomentumRes = new TH2D("b000ProtonMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hProtonMomentumRes);
   hPiMomentumRes     = new TH2D("b001PiMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiMomentumRes);
   hRecPi0Nshower     = new TH2D("b002bRecPi0NshowerSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hRecPi0Nshower);
-  hCutNdEdx          = new TH2D("b100CutNdEdxSTK"+tag,"", 30, 0, 500, 10, -0.5, 9.5); lout->Add(hCutNdEdx);
-  hCuttrackScore     = new TH2D("b101CuttrackScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCuttrackScore);
-  hCutemScore        = new TH2D("b102CutemScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutemScore);
-  hCutmichelScore    = new TH2D("b103CutmichelScoreSTK"+tag,"", 20, 0, 1, 10, -0.5, 9.5); lout->Add(hCutmichelScore);
-  hCutnHits          = new TH2D("b104CutnHitsSTK"+tag,"", 30, 0, 1500, 10, -0.5, 9.5); lout->Add(hCutnHits);
+  hCutNdEdx          = new TH2D("b100CutNdEdxSTK"+tag,"", 50, 0, 50, 10, -0.5, 9.5); lout->Add(hCutNdEdx);
+  hCuttrackScore     = new TH2D("b101CuttrackScoreSTK"+tag,"", 50, 0, 1, 10, -0.5, 9.5); lout->Add(hCuttrackScore);
+  hCutemScore        = new TH2D("b102CutemScoreSTK"+tag,"", 50, 0, 1, 10, -0.5, 9.5); lout->Add(hCutemScore);
+  hCutmichelScore    = new TH2D("b103CutmichelScoreSTK"+tag,"", 50, 0, 1, 10, -0.5, 9.5); lout->Add(hCutmichelScore);
+  hCutnHits          = new TH2D("b104CutnHitsSTK"+tag,"", 50, 0, 500, 10, -0.5, 9.5); lout->Add(hCutnHits);
   hCutChi2NDF        = new TH2D("b105CutChi2NDFSTK"+tag,"", 30, 0, 500, 10, -0.5, 9.5); lout->Add(hCutChi2NDF);
   hCutstartE2        = new TH2D("b106CutstartE2STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE2);
   hCutstartE3        = new TH2D("b107CutstartE3STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE3);

@@ -40,10 +40,11 @@ void style::FillInRange(TH1 * hh,  double xx, const double yy)
   const double xmax = hh->GetXaxis()->GetBinUpEdge(hh->GetNbinsX());
 
   if(xx<xmin){
-    xx = xmin+EPSILON;
+    xx = xmin+0.5*hh->GetXaxis()->GetBinWidth(1);
   }
-  if(xx>xmax){
-    xx = xmax-EPSILON;
+  //= will be right filled
+  if(xx>=xmax){
+    xx = xmax-0.5*hh->GetXaxis()->GetBinWidth(hh->GetNbinsX());
   }
 
   TH2 * h2 = dynamic_cast<TH2*>(hh);
@@ -307,6 +308,7 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
   gStyle->SetStatW(0.25);
   gStyle->SetStatColor(0);
   gStyle->SetStatStyle(0);
+  gStyle->SetTitleX(0.55);
 
   for(int ii=0; ii<lout->GetSize(); ii++){
     bool koverlay = (overlayList!=0x0);
@@ -357,7 +359,7 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
 
     //===================
 
-    printf("style::DrawHist Printing %s k2d %d kstk %d koverlay %d foundOverlay %d scale %f\n", tag.Data(), h2d!=0x0, hstk!=0x0, koverlay, holay!=0x0, plotscale);
+    printf("style::DrawHist Printing %s k2d %d kstk %d koverlay %d foundOverlay %d scale %f entries %f %f\n", tag.Data(), h2d!=0x0, hstk!=0x0, koverlay, holay!=0x0, plotscale, hsum?hsum->GetEntries():-999, holay?holay->GetEntries():-999);
 
     //--- ResetStyle
     if(h2d){
@@ -372,8 +374,7 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
     }
 
     //--- SetOptStat
-    if(koverlay){
-      gStyle->SetOptStat(0);
+    if(holay){
     }
     else{
       if(h2d){
@@ -389,8 +390,8 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
           gStyle->SetOptStat(0);
         }
       }
-      else{
-        gStyle->SetOptStat("eou");
+      else{//stk
+        gStyle->SetOptStat("eoumr");
       }
     }
 
@@ -401,13 +402,27 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
     }
 
     //--- UseCurrentStyle can't go after hist set marker or line
+    TPaveStats * psStatBox = 0x0;
+    if(holay){
+      gStyle->SetOptStat("eoumr");
+      holay->UseCurrentStyle();
+      holay->Draw();//to generate statbox
+      c1->Update();//needed to generate stat box
+      psStatBox = (TPaveStats*)(((TPaveStats*)c1->GetPrimitive("stats"))->Clone("ovps"));
+      if(!psStatBox){
+        printf("no stat box! %d\n", gStyle->GetOptStat()); exit(1);
+      }
+      gStyle->SetOptStat(0);
+    }
+
     if(hh){
       hh->UseCurrentStyle();
     }
     else{
       hsum->UseCurrentStyle();     
+      hstk->UseCurrentStyle();
     }
-
+   
     //--- maximum and hist style
     if(hh){//including 2d
 
@@ -436,7 +451,7 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
       hsum->SetMinimum(0);
       hsum->SetMaximum(hsum->GetBinContent(hsum->GetMaximumBin())*1.15);
       hsum->SetLineColor(kBlack);
-      hsum->SetMarkerSize(2);
+      hsum->SetMarkerSize(1);
 
       if(holay){
         const double rmax = holay->GetBinContent(holay->GetMaximumBin())/hsum->GetBinContent(hsum->GetMaximumBin());
@@ -450,38 +465,41 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
     }
 
     //--- dopt
-    if(koverlay){
-      ktext=false;
-    }
-    TString dopt= ktext?"text hist":"hist";
+    TString dHistOpt= (ktext&&holay==0x0)?"text hist":"hist";
+    const TString dOverlayOpt = ktext?"text same E":"same E";
     if(h2d){
-      dopt += "box";
+      dHistOpt += "box";
       if(tag.Contains(gTagNOH)||tag.Contains(gTagPRF)||tag.Contains(gTagSTK)){
-        dopt = "colz";
+        dHistOpt = "colz";
       }
     }
     else if(hh){
       if(tag.Contains(gTagPRF)){
-        dopt = "hist";
+        dHistOpt = "hist";
       }
       else if(tag.Contains(gTagNOH)){
-        dopt = "hist";
+        dHistOpt = "hist";
       }
       else if(tag.Contains(gTagEFF)){
-        dopt = "E hist";
+        dHistOpt = "E hist";
       }
     }
 
     //--- draw
     if(hh){
-      hh->Draw(dopt);
+      hh->Draw(dHistOpt);
     }
     else{//hstk
       if(!tag.Contains("_normalized")){
         //need to draw hsum first to show Stat box, THStack won't do thta
-        hsum->Draw(koverlay?"hist":"hist text");
-        hstk->Draw("hist same");
-        hsum->Draw("axis same");//get the ticks
+        if(holay){
+          hstk->Draw("hist");
+        }
+        else{
+          hsum->Draw("hist text");
+          hstk->Draw("hist same");
+          hsum->Draw("axis same");//get the ticks
+        }
       }
       else{
         hstk->Draw("hist");
@@ -490,12 +508,23 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
 
     if(holay){
       printf("style::DrawHist drawing overlay %s\n", holay->GetName());
+      /*
+      c1->Update();//needed to generate stat box
+      TPaveStats * oldstat = (TPaveStats*)c1->GetPrimitive("stats");
+      if(oldstat){
+        delete oldstat;
+        c1->Modified(); c1->Update();//needed for removal to take effect
+      }
+      */
       ResetStyle(holay);
-      holay->SetMarkerStyle(20);
-      holay->SetMarkerSize(2);
+      //holay->SetMarkerStyle(20);
+      holay->SetMarkerStyle(6);
+      holay->SetMarkerSize(1);
       holay->SetMarkerColor(kRed);
       holay->SetLineColor(kRed);
-      holay->Draw("same E");
+      holay->Draw(dOverlayOpt);
+      psStatBox->Draw();
+      c1->Update();
     }
 
     c1->Print(outdir+"/"+tag+".png");

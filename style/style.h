@@ -61,6 +61,7 @@
 #include "TMatrixD.h"
 #include "TMinuit.h"
 #include "TPaletteAxis.h"
+#include "TPaveStats.h"
 #include "TPaveText.h"
 #include "TPolyMarker.h"
 #include "TProfile.h"

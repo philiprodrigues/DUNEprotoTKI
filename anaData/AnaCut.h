@@ -1,9 +1,6 @@
 #ifndef _ANACUT_H_
 #define _ANACUT_H_
 
-#include "AnaIO.h"
-#include "AnaUtils.h"
-
 using namespace std;
 
 namespace AnaCut
@@ -115,23 +112,26 @@ not set
     if(kShowCut){
       printf("check cut kpi0 %d ndedxcut %d\n", kpi0, ndedxcut);
     }
+    /* do not use, too complicated
     if(NdEdx<ndedxcut){
       //do not count it as anything
       continue;
     }
+    */
     //<--- need to be done before any counting!!!
 
     //track and em scores at 0.5 look reasonable as baseline (after 0.5 the proton fraction look flat)
     //michel is not found (all below 0.5, those above 0.5 are shower and other_type)
-    const double trackScore  = (*AnaIO::reco_daughter_PFP_trackScore)[ii];
-    if(trackScore>0.5){
+    const double trackScore  = (*AnaIO::reco_daughter_PFP_trackScore_collection)[ii];
+    if(trackScore>0.5 && (*AnaIO::reco_daughter_allTrack_ID)[ii]!=-1 ){
       if( (*AnaIO::reco_daughter_allTrack_ID)[ii]==-1 ){
         printf("bad track ID! %d\n", ii); exit(1);
       }
       ntracks++;
     }
-    const double emScore     = (*AnaIO::reco_daughter_PFP_emScore)[ii];
-    if(emScore>0.5){
+    const double emScore     = (*AnaIO::reco_daughter_PFP_emScore_collection)[ii];
+    //already requiring good shower
+    if(emScore>0.5 && (*AnaIO::reco_daughter_allShower_ID)[ii]!=-1){
       if( (*AnaIO::reco_daughter_allShower_ID)[ii]==-1 ){
         printf("bad shower ID! %d\n", ii); exit(1);
       }
@@ -142,7 +142,7 @@ not set
       const TLorentzVector showerLv( showerMomentum, showerMomentum.Mag() );
       showerArray.push_back(showerLv);
     }
-    const double michelScore = (*AnaIO::reco_daughter_PFP_michelScore)[ii];
+    const double michelScore = (*AnaIO::reco_daughter_PFP_michelScore_collection)[ii];
     if(michelScore>0.5){
       nmichel++;
     }
@@ -157,10 +157,10 @@ not set
 
     //========== proton tagging now!
   
-    const double startE2 = dedxarray[2];
-    const double startE3 = dedxarray[3];
-    const double lastE2 = dedxarray[NdEdx-1-2];
-    const double lastE3 = dedxarray[NdEdx-1-3];
+    const double startE2 = NdEdx<3?-999:dedxarray[2];
+    const double startE3 = NdEdx<4?-999:dedxarray[3];
+    const double lastE2  = NdEdx<3?-999:dedxarray[NdEdx-1-2];
+    const double lastE3  = NdEdx<4?-999:dedxarray[NdEdx-1-3];
 
     const double chi2 = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
     const double ndof = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
@@ -543,30 +543,28 @@ bool CutBeamAllInOne(const bool kmc)
   const int filleventtype = AnaUtils::GetFillEventType();
 
   //for pi+ it is worse to include this pion-ana-cut (e*p: 6.7->6.3%), for pi0 it is the same e*p, better purity, worse efficiency.
-  if(1){//====================================================== switch off pion analysis cuts
-        //x. primary beam type 
-    style::FillInRange(AnaIO::hCutBeamType, AnaIO::reco_beam_type, filleventtype);
-    //no effect, shadowed by TMeanStart cut
-    if(AnaIO::reco_beam_type!=13){//13: Pandora "track like"
-      return false;
-    }
-    
-    //1. beam position MC cut, need MC truth, how is it possible in analysis?
-    const bool kBeamPosPass = kmc ? CutMCBeamPos() : CutDataBeamPos();
-    style::FillInRange(AnaIO::hCutBeamPosPass, kBeamPosPass, filleventtype);
-    if(!kBeamPosPass){
-      return false;
-    }
-    //-> now signal purity 138/3537 = 3.9%, 2283 pi+ bea, 801 e+ beam
-    
-    //2. APA3 
-    style::FillInRange(AnaIO::hCutBeamEndZ, AnaIO::reco_beam_endZ, filleventtype);
-    style::FillInRange(AnaIO::hCutBeamEndZPass, !(AnaIO::reco_beam_endZ>=226), filleventtype);
-    if(AnaIO::reco_beam_endZ>=226){
-      return false;
-    }
-    //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
-  }//====================================================== switch off pion analysis cuts
+  //x. primary beam type 
+  style::FillInRange(AnaIO::hCutBeamType, AnaIO::reco_beam_type, filleventtype);
+  //no effect, shadowed by TMeanStart cut
+  if(AnaIO::reco_beam_type!=13){//13: Pandora "track like"
+    return false;
+  }
+  
+  //1. beam position MC cut, need MC truth, how is it possible in analysis?
+  const bool kBeamPosPass = kmc ? CutMCBeamPos() : CutDataBeamPos();
+  style::FillInRange(AnaIO::hCutBeamPosPass, kBeamPosPass, filleventtype);
+  if(!kBeamPosPass){
+    return false;
+  }
+  //-> now signal purity 138/3537 = 3.9%, 2283 pi+ bea, 801 e+ beam
+  
+  //2. APA3 
+  style::FillInRange(AnaIO::hCutBeamEndZ, AnaIO::reco_beam_endZ, filleventtype);
+  style::FillInRange(AnaIO::hCutBeamEndZPass, !(AnaIO::reco_beam_endZ>=226), filleventtype);
+  if(AnaIO::reco_beam_endZ>=226){
+    return false;
+  }
+  //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
 
   return true;
 }
