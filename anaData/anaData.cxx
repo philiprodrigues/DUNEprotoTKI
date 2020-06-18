@@ -22,7 +22,7 @@
 #include <vector>       // std::vector
 
 const bool gkOnlySignal = false;
-const int gkDataBit = 3;
+const int gkDataBit = 1;//3;
 
 int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {

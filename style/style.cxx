@@ -508,14 +508,6 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
 
     if(holay){
       printf("style::DrawHist drawing overlay %s\n", holay->GetName());
-      /*
-      c1->Update();//needed to generate stat box
-      TPaveStats * oldstat = (TPaveStats*)c1->GetPrimitive("stats");
-      if(oldstat){
-        delete oldstat;
-        c1->Modified(); c1->Update();//needed for removal to take effect
-      }
-      */
       ResetStyle(holay);
       //holay->SetMarkerStyle(20);
       holay->SetMarkerStyle(6);
