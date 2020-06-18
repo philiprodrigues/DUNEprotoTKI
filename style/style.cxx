@@ -65,10 +65,10 @@ void style::ScaleStack(THStack *stk, const double scale)
   }
 }
 
-TCanvas *style::DrawLegend(const vector<TString> &entries, const TString htype, int *tmpcol, int * tmpmkr)
+TCanvas *style::DrawLegend(const vector<TString> &entries, const vector<TString>& htype, const int *tmpcol, const int * tmpmkr)
 {
-  int defcol[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
-  int * cols=0x0;
+  const int defcol[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
+  const int * cols=0x0;
   if(tmpcol){
     cols=tmpcol;
   }
@@ -77,8 +77,8 @@ TCanvas *style::DrawLegend(const vector<TString> &entries, const TString htype, 
     printf("style::DrawLegend using default color\n");
   } 
 
-  int defmkr[]={20, 24, 21, 25, 22, 26, 23, 32, 34, 28, 29, 30, 20, 24, 21, 25, 22, 26, 23, 32, 34, 28, 29, 30};
-  int * mkrs=0x0;
+  const int defmkr[]={20, 24, 21, 25, 22, 26, 23, 32, 34, 28, 29, 30, 20, 24, 21, 25, 22, 26, 23, 32, 34, 28, 29, 30};
+  const int * mkrs=0x0;
   if(tmpmkr){
     mkrs=tmpmkr;
   }
@@ -103,9 +103,10 @@ TCanvas *style::DrawLegend(const vector<TString> &entries, const TString htype, 
     hh->SetFillColor(col);
     hh->SetLineColor(col);
     hh->SetMarkerStyle(mkrs[ii]);
-    hh->SetMarkerSize(2);
+    hh->SetMarkerSize(3);
+    hh->SetMarkerColor(col);
     //hh->Draw(ii?"same":"");
-    lg->AddEntry(hh, entries[ii], htype);
+    lg->AddEntry(hh, entries[ii], htype[ii]);
   }
 
   lg->Draw();
