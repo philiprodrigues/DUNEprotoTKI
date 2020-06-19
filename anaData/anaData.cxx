@@ -109,9 +109,11 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     //============== Benchmark after ALL cuts !!! =========================
     //benchmark
 
-    AnaIO::hTruthBeamType->Fill(TruthBeamType);
-    AnaIO::hTruthSignal->Fill(AnaIO::kSignal);
-   
+    if(kMC){
+      AnaIO::hTruthBeamType->Fill(TruthBeamType);
+      AnaIO::hTruthSignal->Fill(AnaIO::kSignal);
+    }
+
     //======================= NO cuts below ========================
 
     //--- to test

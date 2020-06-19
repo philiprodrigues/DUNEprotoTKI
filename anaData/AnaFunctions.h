@@ -357,6 +357,22 @@ double SmeardpTT(const double sigma)
   return fran->GetRandom();
 }
 
+double GetThetaRef(const TVector3 &vold, const TVector3 &vreftmp)
+{
+  const TVector3 vrefUnit = vreftmp.Unit();
+
+  const double oldDotRef = vrefUnit.Dot(vold);
+  const TVector3 pL = vrefUnit * oldDotRef;
+  const TVector3 pT = vold - pL;
+
+  double theta = TMath::ATan(pT.Mag()/oldDotRef);
+  if(theta<0){
+    theta += TMath::Pi();
+  }
+
+  return theta;
+}
+
  void getCommonTKI(const int targetA, const int targetZ, const TLorentzVector *neutrinofullp, const TLorentzVector *muonfullp, const TLorentzVector *baryonfullp, double & dalphat, double & dphit, double & dpt, double & neutronmomentum, double & muontheta, double & baryontheta)
 {
   //note that this is for general calculation, all particle energy is sqrt(p^2+m^2)!

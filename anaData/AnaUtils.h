@@ -41,6 +41,60 @@ enum{
   gkNotCaredType
 };
 
+TVector3 GetRecBeamDir()
+{
+  const TVector3 tmpbeam(AnaIO::reco_beam_trackDirX, 
+                         AnaIO::reco_beam_trackDirY, 
+                         AnaIO::reco_beam_trackDirZ );
+  return tmpbeam;
+}
+
+
+TVector3 GetTruthBeamFull()
+{
+  const TVector3 tmpbeam(AnaIO::true_beam_endPx, 
+                         AnaIO::true_beam_endPy, 
+                         AnaIO::true_beam_endPz );
+  return tmpbeam;
+}
+
+
+TVector3 GetRecTrackVectLab(const int ii, const bool kProton)
+{
+  const double trackMBR = kProton? (*AnaIO::reco_daughter_allTrack_momByRange_proton)[ii] : (*AnaIO::reco_daughter_allTrack_momByRange_muon)[ii];
+  TVector3 trackVectLab;
+  trackVectLab.SetMagThetaPhi(trackMBR, (*AnaIO::reco_daughter_allTrack_Theta)[ii], (*AnaIO::reco_daughter_allTrack_Phi)[ii]);
+
+  return trackVectLab;
+}
+
+TVector3 GetTruthTrackVectLab(const int ii)
+{
+  const TVector3 trackVectLab((*AnaIO::true_beam_daughter_startPx)[ii], 
+                              (*AnaIO::true_beam_daughter_startPy)[ii], 
+                              (*AnaIO::true_beam_daughter_startPz)[ii] );
+  return trackVectLab;
+}
+
+TLorentzVector GetMomentumRefBeam(const bool isTruth, const int trackIndex, const bool kProton)
+{
+  const TVector3 tmpBeam = isTruth ? GetTruthBeamFull() : GetRecBeamDir();
+
+  const TVector3 vecLab = isTruth ? GetTruthTrackVectLab(trackIndex) : GetRecTrackVectLab(trackIndex, kProton);
+
+  //
+  const double thetaRefBeam = AnaFunctions::GetThetaRef(vecLab, tmpBeam.Unit());
+
+  TVector3 vectRefBeam;
+  vectRefBeam.SetMagThetaPhi(vecLab.Mag(), thetaRefBeam, 0);
+
+  TLorentzVector momentumRefBeam;
+  momentumRefBeam.SetVectM(vectRefBeam, kProton? AnaFunctions::ProtonMass() : AnaFunctions::PionMass() );
+
+  return momentumRefBeam;
+}
+
+
 TLorentzVector * GetPiZero(const int ksig, const vector<TLorentzVector> & shws,  const bool kprint, const bool kfill)
 {
   const int shsize = shws.size();

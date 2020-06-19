@@ -6,10 +6,10 @@ using namespace std;
 namespace AnaCut
 {
 
-int GetTruthFromRec(const int recidx, int & pdg, double & momentum)
+int GetTruthFromRec(const int recidx, int & pdg, TLorentzVector *& momRefBeam)
 {
   pdg = -999;
-  momentum = -999;
+  momRefBeam = 0x0;
   int trueidx = -999;
 
   if(AnaIO::reco_daughter_PFP_true_byHits_ID && AnaIO::reco_daughter_PFP_true_byHits_ID->size() ){//in data this is size = 0 but not null
@@ -29,8 +29,7 @@ int GetTruthFromRec(const int recidx, int & pdg, double & momentum)
     if(trueidx>=0){
       pdg = (*AnaIO::true_beam_daughter_PDG)[trueidx];
       
-      const TVector3 vec((*AnaIO::true_beam_daughter_startPx)[trueidx], (*AnaIO::true_beam_daughter_startPy)[trueidx], (*AnaIO::true_beam_daughter_startPz)[trueidx]);
-      momentum = vec.Mag();
+      momRefBeam = new TLorentzVector(AnaUtils::GetMomentumRefBeam(true, trueidx, pdg==2212));
     }
     
   }
@@ -39,7 +38,8 @@ int GetTruthFromRec(const int recidx, int & pdg, double & momentum)
 }
 
 
-int GetNTrack(const bool kpi0, const bool ksig, int & nproton, int & nshower, int & nmichel, TLorentzVector *  & leadingPi0, const bool kprint=false, const bool kfill=false, const int kdebug = 0)
+//int GetNTrack(const bool kpi0, const bool ksig, int & nproton, int & nshower, int & nmichel, TLorentzVector * & leadingProton, TLorentzVector *& leadingPiplus, TLorentzVector *  & leadingPi0, const bool kprint=false, const bool kfill=false)
+int GetNTrack(const bool kpi0, const bool ksig, int & nproton, int & nshower, int & nmichel, TLorentzVector *  & leadingPi0, const bool kprint, const bool kfill)
 {
   /*
 root [11] beamana->Scan("reco_daughter_PFP_ID:reco_daughter_PFP_true_byHits_ID:reco_daughter_allTrack_ID:reco_daughter_allShower_ID:true_beam_daughter_ID:true_beam_daughter_reco_byHits_PFP_ID:true_beam_daughter_reco_byHits_allTrack_ID:true_beam_daughter_reco_byHits_allShower_ID")
@@ -74,16 +74,20 @@ not set
   nshower = 0;
   nmichel = 0;
   nproton = 0;
- 
+
+  //proton and pion array only keeps the leading one, ie, only [0] will be returned
+  //vector<TLorentzVector> protonArray; 
+  //vector<TLorentzVector> pionArray; //that is non-proton actually
   vector<TLorentzVector> showerArray;
 
-  static bool kShowCut = true;
+  static bool kPrintCutInfo = true;
 
   for(int ii=0; ii<recsize; ii++){
 
+    //__________________________________________ Get Truth information __________________________________________
     int pdg = -999;
-    double truemomentum = -999;
-    const int trueidx = GetTruthFromRec(ii, pdg, truemomentum);
+    TLorentzVector * truthMomRefBeam = 0x0;
+    const int trueidx = GetTruthFromRec(ii, pdg, truthMomRefBeam);
 
     int fillstktype = -999;
     if(pdg==2212){//proton
@@ -102,6 +106,8 @@ not set
       fillstktype = 3;
     }
 
+    //__________________________________________ Cut PFP before counting  __________________________________________
+
     //---> need to be done before any counting!!!
     const vector<double>  dedxarray = (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii];
     const int NdEdx = dedxarray.size();
@@ -109,7 +115,7 @@ not set
       style::FillInRange(AnaIO::hCutNdEdx, NdEdx, fillstktype);
     }
     const int ndedxcut = kpi0 ? 6 : 16; //need E[3], at least 4 cls
-    if(kShowCut){
+    if(kPrintCutInfo){
       printf("check cut kpi0 %d ndedxcut %d\n", kpi0, ndedxcut);
     }
 
@@ -118,6 +124,8 @@ not set
       continue;
     }
     //<--- need to be done before any counting!!!
+
+    //__________________________________________ Count without continue  __________________________________________
 
     //track and em scores at 0.5 look reasonable as baseline (after 0.5 the proton fraction look flat)
     //michel is not found (all below 0.5, those above 0.5 are shower and other_type)
@@ -151,6 +159,8 @@ not set
       nmichel++;
     }
 
+
+    //--------------------------------------------> need to move inside trackScore !! ->
     //nhit 260 is just clean-up
     const int nhits          = (*AnaIO::reco_daughter_PFP_nHits)[ii];
     /*//they are indeed different: 236 80
@@ -170,7 +180,7 @@ not set
     const double ndof = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
     const double Chi2NDF = chi2/(ndof+1E-10);
 
-    bool isSelProton = false;
+    int recParticleType = -999;
     const double cutNH = 260;
     if(kpi0){
       //all signal protons have nhit below 260
@@ -179,61 +189,78 @@ not set
       //test if(startE2>10 && nhits<260 && startE3>9 && Chi2NDF<50){
       const double cutSE2 = 10;
       const double cutSE3 = 9;
-      isSelProton = (startE2>cutSE2 && nhits<cutNH && startE3>cutSE3);
-      if(kShowCut){
+      if(startE2>cutSE2 && nhits<cutNH && startE3>cutSE3){
+        recParticleType = AnaUtils::gkProton;
+      }
+
+      if(kPrintCutInfo){
         printf("check cut kpi0 %d proton tag startE2 %.2f nhits %.0f startE3 %.2f\n", kpi0, cutSE2, cutNH, cutSE3); 
       }
     }
     else{
       const double cutCHI = 50;
-      isSelProton = (Chi2NDF<cutCHI && nhits<cutNH);
-      if(kShowCut){
+      if(Chi2NDF<cutCHI && nhits<cutNH){
+        recParticleType = AnaUtils::gkProton;
+      }
+      else{
+        recParticleType = AnaUtils::gkPiPlus;
+      }
+
+      if(kPrintCutInfo){
         printf("check cut kpi0 %d proton tag Chi2NDF %.2f nhits %.0f\n", kpi0, cutCHI, cutNH);
       }
     }
 
-    double recp        = -999;
-    if(isSelProton){
+    if(recParticleType==AnaUtils::gkProton){
       nproton++;
-      recp = (*AnaIO::reco_daughter_allTrack_momByRange_proton)[ii];
-    }
-    else{
-      //temporary pi+ momentum
-      recp = (*AnaIO::reco_daughter_allTrack_momByRange_muon)[ii];
     }
     //========== proton tagging done!
+    //--------------------------------------------> need to move inside trackScore !! <---
    
+    //__________________________________________ Get Reco kinematics  __________________________________________
+    const TLorentzVector recMomRefBeam = AnaUtils::GetMomentumRefBeam(false, ii, recParticleType==AnaUtils::gkProton);
 
+    //__________________________________________ Print and Fill  __________________________________________
     if(kprint){
       printf("test sig %d rii %d/%d tii %4d pdg %4d sE2 %6.1f sE3 %6.1f lE2 %6.1f lE3 %6.1f nhi %4d tkS %6.1f emS %6.1f miS %6.1f sum %6.1f chf %6.1f\n", ksig, ii, recsize, trueidx, pdg, startE2, startE3, lastE2, lastE3, nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore, Chi2NDF);
     }
 
     if(kfill){
-      if(pdg==2212 && isSelProton){
-        style::FillInRange(AnaIO::hProtonMomentumRes, truemomentum, recp/truemomentum-1);
-      }
-      else if(pdg==211 && !isSelProton){
-        style::FillInRange(AnaIO::hPiMomentumRes, truemomentum, recp/truemomentum-1);
-      }
+      const double momentumRes = truthMomRefBeam? recMomRefBeam.P()/truthMomRefBeam->P()-1 : -999;
+      const double thetaRes    = truthMomRefBeam? (recMomRefBeam.Theta()-truthMomRefBeam->Theta())*TMath::RadToDeg() : -999;
 
-      if(!kdebug || 
-         (kdebug==1 && isSelProton) ||
-         (kdebug==2 && !isSelProton)
-         ){
-      style::FillInRange(AnaIO::hCutstartE2, startE2, fillstktype);
-      style::FillInRange(AnaIO::hCutstartE3, startE3, fillstktype);
-      style::FillInRange(AnaIO::hCutlastE2, lastE2, fillstktype);
-      style::FillInRange(AnaIO::hCutlastE3, lastE3, fillstktype);
-
+      if(recParticleType==AnaUtils::gkProton){
+        if(pdg==2212){
+          style::FillInRange(AnaIO::hProtonMomentumRes, truthMomRefBeam->P(), momentumRes);
+          style::FillInRange(AnaIO::hProtonThetaRes, truthMomRefBeam->Theta()*TMath::RadToDeg(), thetaRes);
+        }
+        style::FillInRange(AnaIO::hRecProtonMomentum, recMomRefBeam.P(), fillstktype);
+        style::FillInRange(AnaIO::hRecProtonTheta, recMomRefBeam.Theta()*TMath::RadToDeg(), fillstktype);
+        style::FillInRange(AnaIO::hRecProtonLastE2, lastE2, fillstktype);
+        style::FillInRange(AnaIO::hRecProtonLastE3, lastE3, fillstktype);
+      }
+      else if(recParticleType==AnaUtils::gkPiPlus){
+        if(pdg==211){
+          style::FillInRange(AnaIO::hPiMomentumRes, truthMomRefBeam->P(), momentumRes);
+          style::FillInRange(AnaIO::hPiThetaRes, truthMomRefBeam->Theta()*TMath::RadToDeg(), thetaRes);
+        }
+        style::FillInRange(AnaIO::hRecPiplusMomentum, recMomRefBeam.P(), fillstktype);
+        style::FillInRange(AnaIO::hRecPiplusTheta, recMomRefBeam.Theta()*TMath::RadToDeg(), fillstktype);
+        style::FillInRange(AnaIO::hRecPiplusLastE2, lastE2, fillstktype);
+        style::FillInRange(AnaIO::hRecPiplusLastE3, lastE3, fillstktype);
+      }
+           
       style::FillInRange(AnaIO::hCutnHits, nhits, fillstktype);
       style::FillInRange(AnaIO::hCutChi2NDF, Chi2NDF, fillstktype);
       style::FillInRange(AnaIO::hCuttrackScore, trackScore, fillstktype);
       style::FillInRange(AnaIO::hCutemScore, emScore, fillstktype);
       style::FillInRange(AnaIO::hCutmichelScore, michelScore, fillstktype);
-      }
+
+      style::FillInRange(AnaIO::hCutstartE2, startE2, fillstktype);
+      style::FillInRange(AnaIO::hCutstartE3, startE3, fillstktype);
     }
 
-    kShowCut = false;
+    kPrintCutInfo = false;
   }
 
   //only fill nshowers when doing fill
@@ -252,17 +279,16 @@ bool CutTopology(const bool kpi0)
   int cutnproton = 0;
   int cutnshower = 0;
   int cutnmichel = 0;
-  //vector<TLorentzVector> piZeroArray;
-  TLorentzVector * leadingPi0 = 0x0;
-  
-  //debug=1 proton candidate; debug=2 non-proton candidate
-  const int kdebug = 0;
-  if(kdebug==0){
-    //only filling
-    AnaIO::nTrack = GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, leadingPi0, false, true, 0);
+  TLorentzVector * leadingPi0 = 0x0;  
+
+  const bool kFillBefore = true;
+  if(kFillBefore){
+    //no print, fill
+    AnaIO::nTrack = GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, leadingPi0, false, true);
   }
-  else{//just no filling, still no debug
-    AnaIO::nTrack = GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, leadingPi0, false, false, 0);
+  else{
+    //no print, no fill
+    AnaIO::nTrack = GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, leadingPi0, false, false);
   }
   
   const int filleventtype = AnaUtils::GetFillEventType();
@@ -325,15 +351,15 @@ bool CutTopology(const bool kpi0)
   }
   
   TLorentzVector *dummypi0 = 0x0;
-  //no getting of pizeroarray
-  if(kdebug==0){
-    //just for printing, no filling
-    GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, dummypi0, true, false, 0);
+  //no getting of pizero
+  if(kFillBefore){
+    //print, no fill
+    GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, dummypi0, true, false);
   }
   else{
     //debug mode: major background is -999 shower mocking protons, no efficient cut variables found
-    //print, fill, and debug
-    GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, dummypi0, true, true, kdebug);
+    //print, fill
+    GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, dummypi0, true, true);
   }
   
   return true;
@@ -505,6 +531,18 @@ bool CutBeamAllInOne(const bool kmc)
     return false;
   }
   //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
+
+  //___________________________ fill beam kinematics _________________________
+
+  const TVector3 recBeam = AnaUtils::GetRecBeamDir();//currently only use dir
+
+  if(kmc){
+    const TVector3 truthBeam = AnaUtils::GetTruthBeamFull();
+    const double beamthetaRes = (recBeam.Theta()-truthBeam.Theta())*TMath::RadToDeg();//use absolute difference 
+    style::FillInRange(AnaIO::hBeamThetaRes, truthBeam.Theta()*TMath::RadToDeg(), beamthetaRes);
+  }
+
+  style::FillInRange(AnaIO::hRecBeamTheta, recBeam.Theta()*TMath::RadToDeg(), filleventtype);
 
   return true;
 }

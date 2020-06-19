@@ -77,8 +77,6 @@ namespace AnaIO
   vector<int>* reco_daughter_PFP_true_byHits_ID = 0x0;
   vector<int>* reco_daughter_allTrack_ID = 0x0;
 
-  vector<double>* reco_daughter_allTrack_momByRange_proton = 0x0;
-  vector<double>* reco_daughter_allTrack_momByRange_muon = 0x0;
   vector<vector<double> >* reco_daughter_allTrack_calibrated_dEdX_SCE = 0x0;
 
   vector<double>* reco_daughter_allTrack_Chi2_proton = 0x0;
@@ -103,6 +101,12 @@ namespace AnaIO
   vector<double>  *reco_daughter_allShower_dirY=0x0;
   vector<double>  *reco_daughter_allShower_dirZ=0x0;
   vector<double>  *reco_daughter_allShower_energy=0x0;
+
+  vector<double>* reco_daughter_allTrack_momByRange_proton = 0x0;
+  vector<double>* reco_daughter_allTrack_momByRange_muon = 0x0;
+
+  vector<double>* reco_daughter_allTrack_Theta = 0x0;
+  vector<double>* reco_daughter_allTrack_Phi = 0x0;
 
   vector<int>     *data_BI_PDG_candidates=0x0;
 
@@ -131,9 +135,8 @@ namespace AnaIO
   Int_t           data_BI_nMomenta;
   Int_t           data_BI_nTracks;
 
-  vector<double>  *reco_beam_calibrated_dEdX;
-
   //not used, keep in case ->
+  vector<double>  *reco_beam_calibrated_dEdX;
   Double_t        reco_beam_len;
   //<-
 
@@ -164,14 +167,32 @@ namespace AnaIO
   TH2D * hCutBeamEndZ = 0x0;
   TH2D * hCutBeamEndZPass = 0x0;
 
+  TH2D * hBeamThetaRes = 0x0;
+
+  TH2D * hProtonThetaRes = 0x0;
+  TH2D * hPiThetaRes = 0x0;
+
   TH2D * hProtonMomentumRes = 0x0;
   TH2D * hPiMomentumRes = 0x0;
+
+  TH2D * hRecBeamTheta = 0x0;
+
+  TH2D * hRecProtonMomentum = 0x0;
+  TH2D * hRecProtonTheta = 0x0;
+  TH2D * hRecProtonLastE2 = 0x0;
+  TH2D * hRecProtonLastE3 = 0x0;
+
+  TH2D * hRecPiplusMomentum = 0x0;
+  TH2D * hRecPiplusTheta = 0x0;
+  TH2D * hRecPiplusLastE2 = 0x0;
+  TH2D * hRecPiplusLastE3 = 0x0;
+
+  TH2D * hRecPi0Nshower = 0x0;
+
   TH2D * hCutnHits = 0x0;
   TH2D * hCutNdEdx = 0x0;
   TH2D * hCutstartE2 = 0x0;
   TH2D * hCutstartE3 = 0x0;
-  TH2D * hCutlastE2 = 0x0;
-  TH2D * hCutlastE3 = 0x0;
   TH2D * hCuttrackScore = 0x0;
   TH2D * hCutemScore = 0x0;
   TH2D * hCutmichelScore = 0x0;
@@ -181,8 +202,6 @@ namespace AnaIO
   TH2D * hCutntrack = 0x0;
   TH2D * hCutnshower = 0x0;
   TH2D * hCutnmichel = 0x0;
-
-  TH2D * hRecPi0Nshower = 0x0;
   TH2D * hCutMpi0 = 0x0;
 
   //not used keep in case ->
@@ -318,8 +337,6 @@ TTree * GetInputTree(TFile * fin, const TString tname)
   tree->SetBranchAddress("reco_daughter_PFP_true_byHits_ID", &reco_daughter_PFP_true_byHits_ID);
   tree->SetBranchAddress("reco_daughter_allTrack_ID", &reco_daughter_allTrack_ID);
 
-  tree->SetBranchAddress("reco_daughter_allTrack_momByRange_proton", &reco_daughter_allTrack_momByRange_proton);
-  tree->SetBranchAddress("reco_daughter_allTrack_momByRange_muon", &reco_daughter_allTrack_momByRange_muon);
   tree->SetBranchAddress("reco_daughter_allTrack_calibrated_dEdX_SCE", &reco_daughter_allTrack_calibrated_dEdX_SCE);
   tree->SetBranchAddress("reco_daughter_allTrack_Chi2_proton", &reco_daughter_allTrack_Chi2_proton);
   tree->SetBranchAddress("reco_daughter_allTrack_Chi2_ndof", &reco_daughter_allTrack_Chi2_ndof);
@@ -335,6 +352,12 @@ TTree * GetInputTree(TFile * fin, const TString tname)
   tree->SetBranchAddress("reco_daughter_allShower_dirY", &reco_daughter_allShower_dirY);
   tree->SetBranchAddress("reco_daughter_allShower_dirZ", &reco_daughter_allShower_dirZ);
   tree->SetBranchAddress("reco_daughter_allShower_energy", &reco_daughter_allShower_energy);
+
+  tree->SetBranchAddress("reco_daughter_allTrack_momByRange_proton", &reco_daughter_allTrack_momByRange_proton);
+  tree->SetBranchAddress("reco_daughter_allTrack_momByRange_muon", &reco_daughter_allTrack_momByRange_muon);
+
+  tree->SetBranchAddress("reco_daughter_allTrack_Theta", &reco_daughter_allTrack_Theta);
+  tree->SetBranchAddress("reco_daughter_allTrack_Phi", &reco_daughter_allTrack_Phi);
 
   tree->SetBranchAddress("true_beam_endPx", &true_beam_endPx);
   tree->SetBranchAddress("true_beam_endPy", &true_beam_endPy);
@@ -436,31 +459,79 @@ void IniRecHist(TList * lout, const TString tag)
   hSigAfterVsLen = new TH2D("p9SigAfterVsLenNOHPRFPUR"+tag,"", nlen, lenmin, lenmax, nPass, Passmin, Passmax); lout->Add(hSigAfterVsLen);
   */
 
-  hProtonMomentumRes = new TH2D("b000ProtonMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hProtonMomentumRes);
-  hPiMomentumRes     = new TH2D("b001PiMomentumResNOH"+tag,"", 20, 0, 2, 20, -1, 1); lout->Add(hPiMomentumRes);
-  hRecPi0Nshower     = new TH2D("b002bRecPi0NshowerSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hRecPi0Nshower);
-  hCutNdEdx          = new TH2D("b100CutNdEdxSTK"+tag,"", 50, 0, 50, 10, -0.5, 9.5); lout->Add(hCutNdEdx);
-  hCuttrackScore     = new TH2D("b101CuttrackScoreSTK"+tag,"", 50, 0, 1, 10, -0.5, 9.5); lout->Add(hCuttrackScore);
-  hCutemScore        = new TH2D("b102CutemScoreSTK"+tag,"", 50, 0, 1, 10, -0.5, 9.5); lout->Add(hCutemScore);
-  hCutmichelScore    = new TH2D("b103CutmichelScoreSTK"+tag,"", 50, 0, 1, 10, -0.5, 9.5); lout->Add(hCutmichelScore);
-  hCutnHits          = new TH2D("b104CutnHitsSTK"+tag,"", 50, 0, 500, 10, -0.5, 9.5); lout->Add(hCutnHits);
-  hCutChi2NDF        = new TH2D("b105CutChi2NDFSTK"+tag,"", 30, 0, 500, 10, -0.5, 9.5); lout->Add(hCutChi2NDF);
-  hCutstartE2        = new TH2D("b106CutstartE2STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE2);
-  hCutstartE3        = new TH2D("b107CutstartE3STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutstartE3);
-  hCutlastE2         = new TH2D("b108CutlastE2STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutlastE2);
-  hCutlastE3         = new TH2D("b109CutlastE3STK"+tag,"", 30, 0, 30, 10, -0.5, 9.5); lout->Add(hCutlastE3);
+  const int nres = 20;
+  const double resmin = -1;
+  const double resmax = 1;
+
+  //beam
+  const int nbmTheta = 80;
+  const double bmThetamin = 0;
+  const double bmThetamax = 40;//in deg
+  //daughter
+  const int ndTheta = 20;
+  const double dThetamin = 0;
+  const double dThetamax = 180;//in deg
+
+  const int nmomentum = 30;
+  const double momentummin = 0;
+  const double momentummax = 1.2;
+
+  const int ndedx = 60;
+  const double dedxmin = 0;
+  const double dedxmax = 30;
+
+  const int nevtType = 10;
+  const double evtTypemin = -0.5;
+  const double evtTypemax = 9.5;
+
+  const int nscore = 50;
+  const double scoremin = 0;
+  const double scoremax = 1;
+
+  const int ncounter = 10;
+  const double countermin = -0.5;
+  const double countermax = 9.5;
+
+
+  hBeamThetaRes      = new TH2D("b000BeamThetaResNOH"+tag,"",      nbmTheta, bmThetamin, bmThetamax, 25, -20, 30); lout->Add(hBeamThetaRes);
+  hProtonThetaRes    = new TH2D("b001ProtonThetaResNOH"+tag,"",    ndTheta, dThetamin, dThetamax, 25, -20, 30); lout->Add(hProtonThetaRes);
+  hProtonMomentumRes = new TH2D("b002ProtonMomentumResNOH"+tag,"", nmomentum, momentummin, momentummax, nres, -0.2, 0.2); lout->Add(hProtonMomentumRes);
+  hPiThetaRes        = new TH2D("b003PiThetaResNOH"+tag,"",        ndTheta, dThetamin, dThetamax, 25, -20, 30); lout->Add(hPiThetaRes);
+  hPiMomentumRes     = new TH2D("b004PiMomentumResNOH"+tag,"",     nmomentum, momentummin, momentummax, nres, resmin, resmax); lout->Add(hPiMomentumRes);
+
+  hRecBeamTheta       = new TH2D("b010bRecBeamThetaSTK"+tag,"",       nbmTheta, bmThetamin, bmThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecBeamTheta);
+  hRecProtonMomentum  = new TH2D("b011bRecProtonMomentumSTK"+tag,"",  nmomentum, momentummin, momentummax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonMomentum);
+  hRecProtonTheta     = new TH2D("b012bRecProtonThetaSTK"+tag,"",     ndTheta, dThetamin, dThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonTheta);
+  hRecPiplusMomentum  = new TH2D("b013bRecPiplusMomentumSTK"+tag,"",  nmomentum, momentummin, momentummax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusMomentum);
+  hRecPiplusTheta     = new TH2D("b014bRecPiplusThetaSTK"+tag,"",     ndTheta, dThetamin, dThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusTheta);
+
+  hRecProtonLastE2    = new TH2D("b020RecProtonLastE2STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonLastE2);
+  hRecProtonLastE3    = new TH2D("b021RecProtonLastE3STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonLastE3);
+  hRecPiplusLastE2    = new TH2D("b022RecPiplusLastE2STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusLastE2);
+  hRecPiplusLastE3    = new TH2D("b023RecPiplusLastE3STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusLastE3);
+
+  hRecPi0Nshower      = new TH2D("b030bRecPi0NshowerSTK"+tag,"",      ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPi0Nshower);
+
+  hCutNdEdx          = new TH2D("b100CutNdEdxSTK"+tag,"",          50, 0, 50, nevtType, evtTypemin, evtTypemax); lout->Add(hCutNdEdx);
+  hCuttrackScore     = new TH2D("b101CuttrackScoreSTK"+tag,"",     nscore, scoremin, scoremax, nevtType, evtTypemin, evtTypemax); lout->Add(hCuttrackScore);
+  hCutemScore        = new TH2D("b102CutemScoreSTK"+tag,"",        nscore, scoremin, scoremax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutemScore);
+  hCutmichelScore    = new TH2D("b103CutmichelScoreSTK"+tag,"",    nscore, scoremin, scoremax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutmichelScore);
+  hCutnHits          = new TH2D("b104CutnHitsSTK"+tag,"",          50, 0, 500, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnHits);
+  hCutChi2NDF        = new TH2D("b105CutChi2NDFSTK"+tag,"",        30, 0, 500, nevtType, evtTypemin, evtTypemax); lout->Add(hCutChi2NDF);
+  hCutstartE2        = new TH2D("b106CutstartE2STK"+tag,"",        ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutstartE2);
+  hCutstartE3        = new TH2D("b107CutstartE3STK"+tag,"",        ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutstartE3);
 
   hCutbeamID       = new TH1I("c000CutbeamID"+tag,"", 2, -0.5, 1.5); lout->Add(hCutbeamID);
-  hCutBeamType     = new TH2D("c001BeamTypeSTK"+tag,  "", 30, -4.5, 25.5, 10, -0.5, 9.5); lout->Add(hCutBeamType);
-  hCutBeamPosPass  = new TH2D("c002BeamPosPassSTK"+tag, "", 4, -0.5, 3.5, 10, -0.5, 9.5); lout->Add(hCutBeamPosPass);
-  hCutBeamEndZ     = new TH2D("c003BeamEndZSTK"+tag,"",50, 0, 500, 10, -0.5, 9.5); lout->Add(hCutBeamEndZ);
-  hCutBeamEndZPass = new TH2D("c004BeamEndZPassSTK"+tag,"",4, -0.5, 3.5, 10, -0.5, 9.5); lout->Add(hCutBeamEndZPass);
+  hCutBeamType     = new TH2D("c001BeamTypeSTK"+tag,  "", 30, -4.5, 25.5, nevtType, evtTypemin, evtTypemax); lout->Add(hCutBeamType);
+  hCutBeamPosPass  = new TH2D("c002BeamPosPassSTK"+tag, "", 4, -0.5, 3.5, nevtType, evtTypemin, evtTypemax); lout->Add(hCutBeamPosPass);
+  hCutBeamEndZ     = new TH2D("c003BeamEndZSTK"+tag,"",50, 0, 500, nevtType, evtTypemin, evtTypemax); lout->Add(hCutBeamEndZ);
+  hCutBeamEndZPass = new TH2D("c004BeamEndZPassSTK"+tag,"",4, -0.5, 3.5, nevtType, evtTypemin, evtTypemax); lout->Add(hCutBeamEndZPass);
 
-  hCutnshower      = new TH2D("c101CutnshowerSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnshower);
-  hCutnmichel      = new TH2D("c102CutnmichelSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnmichel);
-  hCutntrack       = new TH2D("c103CutntrackSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutntrack);
-  hCutnproton      = new TH2D("c104CutnprotonSTK"+tag,"", 10, -0.5, 9.5, 10, -0.5, 9.5); lout->Add(hCutnproton);
-  hCutMpi0         = new TH2D("c105CutMpi0STK"+tag,"", 15, 0, 0.3, 10, -0.5, 9.5); lout->Add(hCutMpi0);
+  hCutnshower      = new TH2D("c101CutnshowerSTK"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnshower);
+  hCutnmichel      = new TH2D("c102CutnmichelSTK"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnmichel);
+  hCutntrack       = new TH2D("c103CutntrackSTK"+tag,"",  ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutntrack);
+  hCutnproton      = new TH2D("c104CutnprotonSTK"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnproton);
+  hCutMpi0         = new TH2D("c105CutMpi0STK"+tag,"", 15, 0, 0.3, nevtType, evtTypemin, evtTypemax); lout->Add(hCutMpi0);
 }
 
 void IniTruthHist(TList * lout, const TString tag)

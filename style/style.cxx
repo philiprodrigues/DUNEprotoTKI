@@ -312,14 +312,27 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
   gStyle->SetTitleX(0.55);
 
   for(int ii=0; ii<lout->GetSize(); ii++){
-    bool koverlay = (overlayList!=0x0);
-
     const TString tag = lout->At(ii)->GetName();
-    if(tag.Contains("_normalized")){
-      koverlay = false;
-    }    
-
     printf("style::DrawHist Trying printing %s\n", tag.Data());
+
+    TH1 * holay = 0x0;
+    if(overlayList && !tag.Contains("_normalized")){
+      holay = dynamic_cast<TH1*> (overlayList->FindObject(tag));
+      if(!holay){
+        THStack * stkOverlay = dynamic_cast<THStack *> (overlayList->FindObject(tag));
+        if(stkOverlay){
+          holay = GetStackedSum(stkOverlay);
+        }
+      }
+    }
+    if(holay){
+      //no overlay if empty
+      if(holay->Integral(0,10000)<EPSILON){
+        holay = 0x0;
+      }
+    }
+
+    //==============
 
     TH1 * hh = dynamic_cast<TH1*> (lout->At(ii));
     THStack * hstk = dynamic_cast<THStack *>(lout->At(ii));
@@ -331,36 +344,41 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
     if(hh){
       h2d = dynamic_cast<TH2 *>(hh);
       if(h2d){
+        //skip empty
+        if(h2d->Integral(0, 10000, 0,10000)<EPSILON){
+          continue;
+        }
+
         printf("style::DrawHist blocking2d %s\n", h2d->GetName()); 
-        koverlay = false;
+        holay = 0x0;
       }
       else{
-        if(plotscale!=1){//avoid resetting hist maximum         
+        //skip empty
+        if(hh->Integral(0,10000)<EPSILON){
+          continue;
+        }
+      }
+    }
+
+    if(holay){
+      if(plotscale!=1){//avoid resetting hist maximum         
+        if(hh){
           hh->Scale(plotscale);
+        }
+        else{
+          ScaleStack(hstk, plotscale);
         }
       }
     }
 
     TH1D * hsum = 0x0;
     if(hstk){
-      ScaleStack(hstk, plotscale);
       hsum = GetStackedSum(hstk); //lout->Add(hsum);
-    }
-
-    TH1 * holay = 0x0;
-    if(koverlay){
-      holay = dynamic_cast<TH1*> (overlayList->FindObject(tag));
-      if(!holay){
-        THStack * stkOverlay = dynamic_cast<THStack *> (overlayList->FindObject(tag));
-        if(stkOverlay){
-          holay = GetStackedSum(stkOverlay);
-        }
-      }
     }
 
     //===================
 
-    printf("style::DrawHist Printing %s k2d %d kstk %d koverlay %d foundOverlay %d scale %f entries %f %f\n", tag.Data(), h2d!=0x0, hstk!=0x0, koverlay, holay!=0x0, plotscale, hsum?hsum->GetEntries():-999, holay?holay->GetEntries():-999);
+    printf("style::DrawHist Printing %s k2d %d kstk %d foundOverlay %d scale %f entries %f %f\n", tag.Data(), h2d!=0x0, hstk!=0x0, holay!=0x0, plotscale, hsum?hsum->GetEntries():-999, holay?holay->GetEntries():-999);
 
     //--- ResetStyle
     if(h2d){
@@ -409,10 +427,17 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
       holay->UseCurrentStyle();
       holay->Draw();//to generate statbox
       c1->Update();//needed to generate stat box
-      psStatBox = (TPaveStats*)(((TPaveStats*)c1->GetPrimitive("stats"))->Clone("ovps"));
-      if(!psStatBox){
+
+      TPaveStats* tmpps = (TPaveStats*)c1->GetPrimitive("stats");
+      if(!tmpps){
         printf("no stat box! %d\n", gStyle->GetOptStat()); exit(1);
       }
+
+      psStatBox = (TPaveStats*)(tmpps->Clone("ovps"));
+      TList *listOfLines = psStatBox->GetListOfLines();
+      TText *tentry = psStatBox->GetLineWith("Entries");
+      tentry->SetTextColor(kRed);
+   
       gStyle->SetOptStat(0);
     }
 
