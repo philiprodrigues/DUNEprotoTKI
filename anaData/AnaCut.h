@@ -127,15 +127,69 @@ not set
 
     //__________________________________________ Count without continue  __________________________________________
 
+    const int nhits          = (*AnaIO::reco_daughter_PFP_nHits)[ii];
+    /*//they are indeed different: 236 80
+      if(nhits != NdEdx){
+      printf("nhits!=dedx size %d %d\n", nhits, NdEdx); exit(1);
+      }
+    */
+  
+    const double startE2 = NdEdx<3?-999:dedxarray[2];
+    const double startE3 = NdEdx<4?-999:dedxarray[3];
+    const double lastE2  = NdEdx<3?-999:dedxarray[NdEdx-1-2];
+    const double lastE3  = NdEdx<4?-999:dedxarray[NdEdx-1-3];
+    
+    const double chi2 = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
+    const double ndof = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
+    const double Chi2NDF = chi2/(ndof+1E-10);
+    
     //track and em scores at 0.5 look reasonable as baseline (after 0.5 the proton fraction look flat)
     //michel is not found (all below 0.5, those above 0.5 are shower and other_type)
+    int recParticleType = -999;
     const double trackScore  = (*AnaIO::reco_daughter_PFP_trackScore_collection)[ii];
     if(trackScore>0.5 && (*AnaIO::reco_daughter_allTrack_ID)[ii]!=-1 ){
       if( (*AnaIO::reco_daughter_allTrack_ID)[ii]==-1 ){
         printf("bad track ID! %d\n", ii); exit(1);
       }
       ntracks++;
+
+      //========== proton tagging now!
+      //all signal protons have nhit below 260
+      const double cutNH = 260;
+      if(kpi0){
+        //all signal protons have startE3 > 9
+        //with Chi2NDF cut  44/191 = 23% purity; without 46/197 = 23% purity, slightly higher efficiency
+        //test if(startE2>10 && nhits<260 && startE3>9 && Chi2NDF<50){
+        const double cutSE2 = 10;
+        const double cutSE3 = 9;
+        if(startE2>cutSE2 && nhits<cutNH && startE3>cutSE3){
+          recParticleType = AnaUtils::gkProton;
+        }
+
+        if(kPrintCutInfo){
+          printf("check cut kpi0 %d proton tag startE2 %.2f nhits %.0f startE3 %.2f\n", kpi0, cutSE2, cutNH, cutSE3); 
+        }
+      }
+      else{
+        const double cutCHI = 50;
+        if(Chi2NDF<cutCHI && nhits<cutNH){
+          recParticleType = AnaUtils::gkProton;
+        }
+        else{
+          recParticleType = AnaUtils::gkPiPlus;
+        }
+
+        if(kPrintCutInfo){
+          printf("check cut kpi0 %d proton tag Chi2NDF %.2f nhits %.0f\n", kpi0, cutCHI, cutNH);
+        }
+      }
+
+      if(recParticleType==AnaUtils::gkProton){
+        nproton++;
+      }
+      //========== proton tagging done!
     }
+
     const double emScore     = (*AnaIO::reco_daughter_PFP_emScore_collection)[ii];
     //already requiring good shower
     if(emScore>0.5 && (*AnaIO::reco_daughter_allShower_ID)[ii]!=-1){
@@ -154,68 +208,11 @@ not set
         printf("shower energy null!!\n"); exit(1);
       }
     }
+
     const double michelScore = (*AnaIO::reco_daughter_PFP_michelScore_collection)[ii];
     if(michelScore>0.5){
       nmichel++;
     }
-
-
-    //--------------------------------------------> need to move inside trackScore !! ->
-    //nhit 260 is just clean-up
-    const int nhits          = (*AnaIO::reco_daughter_PFP_nHits)[ii];
-    /*//they are indeed different: 236 80
-    if(nhits != NdEdx){
-      printf("nhits!=dedx size %d %d\n", nhits, NdEdx); exit(1);
-    }
-    */
-
-    //========== proton tagging now!
-  
-    const double startE2 = NdEdx<3?-999:dedxarray[2];
-    const double startE3 = NdEdx<4?-999:dedxarray[3];
-    const double lastE2  = NdEdx<3?-999:dedxarray[NdEdx-1-2];
-    const double lastE3  = NdEdx<4?-999:dedxarray[NdEdx-1-3];
-
-    const double chi2 = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
-    const double ndof = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
-    const double Chi2NDF = chi2/(ndof+1E-10);
-
-    int recParticleType = -999;
-    const double cutNH = 260;
-    if(kpi0){
-      //all signal protons have nhit below 260
-      //all signal protons have startE3 > 9
-      //with Chi2NDF cut  44/191 = 23% purity; without 46/197 = 23% purity, slightly higher efficiency
-      //test if(startE2>10 && nhits<260 && startE3>9 && Chi2NDF<50){
-      const double cutSE2 = 10;
-      const double cutSE3 = 9;
-      if(startE2>cutSE2 && nhits<cutNH && startE3>cutSE3){
-        recParticleType = AnaUtils::gkProton;
-      }
-
-      if(kPrintCutInfo){
-        printf("check cut kpi0 %d proton tag startE2 %.2f nhits %.0f startE3 %.2f\n", kpi0, cutSE2, cutNH, cutSE3); 
-      }
-    }
-    else{
-      const double cutCHI = 50;
-      if(Chi2NDF<cutCHI && nhits<cutNH){
-        recParticleType = AnaUtils::gkProton;
-      }
-      else{
-        recParticleType = AnaUtils::gkPiPlus;
-      }
-
-      if(kPrintCutInfo){
-        printf("check cut kpi0 %d proton tag Chi2NDF %.2f nhits %.0f\n", kpi0, cutCHI, cutNH);
-      }
-    }
-
-    if(recParticleType==AnaUtils::gkProton){
-      nproton++;
-    }
-    //========== proton tagging done!
-    //--------------------------------------------> need to move inside trackScore !! <---
    
     //__________________________________________ Get Reco kinematics  __________________________________________
     const TLorentzVector recMomRefBeam = AnaUtils::GetMomentumRefBeam(false, ii, recParticleType==AnaUtils::gkProton);
@@ -226,9 +223,18 @@ not set
     }
 
     if(kfill){
+      style::FillInRange(AnaIO::hCutnHits, nhits, fillstktype);
+      style::FillInRange(AnaIO::hCutChi2NDF, Chi2NDF, fillstktype);
+      style::FillInRange(AnaIO::hCuttrackScore, trackScore, fillstktype);
+      style::FillInRange(AnaIO::hCutemScore, emScore, fillstktype);
+      style::FillInRange(AnaIO::hCutmichelScore, michelScore, fillstktype);
+
+      style::FillInRange(AnaIO::hCutstartE2, startE2, fillstktype);
+      style::FillInRange(AnaIO::hCutstartE3, startE3, fillstktype);
+
       const double momentumRes = truthMomRefBeam? recMomRefBeam.P()/truthMomRefBeam->P()-1 : -999;
       const double thetaRes    = truthMomRefBeam? (recMomRefBeam.Theta()-truthMomRefBeam->Theta())*TMath::RadToDeg() : -999;
-
+ 
       if(recParticleType==AnaUtils::gkProton){
         if(pdg==2212){
           style::FillInRange(AnaIO::hProtonMomentumRes, truthMomRefBeam->P(), momentumRes);
@@ -249,15 +255,6 @@ not set
         style::FillInRange(AnaIO::hRecPiplusLastE2, lastE2, fillstktype);
         style::FillInRange(AnaIO::hRecPiplusLastE3, lastE3, fillstktype);
       }
-           
-      style::FillInRange(AnaIO::hCutnHits, nhits, fillstktype);
-      style::FillInRange(AnaIO::hCutChi2NDF, Chi2NDF, fillstktype);
-      style::FillInRange(AnaIO::hCuttrackScore, trackScore, fillstktype);
-      style::FillInRange(AnaIO::hCutemScore, emScore, fillstktype);
-      style::FillInRange(AnaIO::hCutmichelScore, michelScore, fillstktype);
-
-      style::FillInRange(AnaIO::hCutstartE2, startE2, fillstktype);
-      style::FillInRange(AnaIO::hCutstartE3, startE3, fillstktype);
     }
 
     kPrintCutInfo = false;
