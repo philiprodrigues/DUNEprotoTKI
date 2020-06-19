@@ -324,7 +324,7 @@ int main(int argc, char * argv[])
 
   printf("anaRec beamcount data: %.0f mc: %.0f plotscale %f\n", dataBeamCount, mcBeamCount, plotscale);
 
-  const bool kfast = false;//true;
+  const bool kfast = true;
   if(mclout){
     if(datalout){
       style::DrawHist(mclout, plotscale, datalout, "output", tag, true, kfast);

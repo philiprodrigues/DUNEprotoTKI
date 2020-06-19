@@ -8,10 +8,13 @@ mkdir -p output
 compile_exe.sh anaData -lstyle -I../style  -L../style || return 1
 
 #make legend
-#./anaData ; exit
+#./anaData ; 
+
+#exit
 
 
-for kPiZero in 0 1
+for kPiZero in 0
+#0 1
 do 
     for kProton in 1
 #0 1

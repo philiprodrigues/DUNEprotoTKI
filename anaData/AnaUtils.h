@@ -43,9 +43,9 @@ enum{
 
 TVector3 GetRecBeamDir()
 {
-  const TVector3 tmpbeam(AnaIO::reco_beam_trackDirX, 
-                         AnaIO::reco_beam_trackDirY, 
-                         AnaIO::reco_beam_trackDirZ );
+  const TVector3 tmpbeam(AnaIO::reco_beam_trackEndDirX, 
+                         AnaIO::reco_beam_trackEndDirY, 
+                         AnaIO::reco_beam_trackEndDirZ );
   return tmpbeam;
 }
 

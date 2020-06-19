@@ -118,6 +118,9 @@ namespace AnaIO
   Double_t        reco_beam_trackDirX;
   Double_t        reco_beam_trackDirY;
   Double_t        reco_beam_trackDirZ;
+  Double_t        reco_beam_trackEndDirX;
+  Double_t        reco_beam_trackEndDirY;
+  Double_t        reco_beam_trackEndDirZ;
   Double_t        true_beam_startX;
   Double_t        true_beam_startY;
   Double_t        true_beam_startZ;
@@ -369,18 +372,22 @@ TTree * GetInputTree(TFile * fin, const TString tname)
   tree->SetBranchAddress("data_BI_PDG_candidates", &data_BI_PDG_candidates);
   tree->SetBranchAddress("reco_beam_type", &reco_beam_type);
 
-  tree->SetBranchAddress("reco_beam_startX", &reco_beam_startX);
   tree->SetBranchAddress("reco_beam_trackDirX", &reco_beam_trackDirX);
+  tree->SetBranchAddress("reco_beam_trackDirY", &reco_beam_trackDirY);
+  tree->SetBranchAddress("reco_beam_trackDirZ", &reco_beam_trackDirZ);
+  tree->SetBranchAddress("reco_beam_trackEndDirX", &reco_beam_trackEndDirX);
+  tree->SetBranchAddress("reco_beam_trackEndDirY", &reco_beam_trackEndDirY);
+  tree->SetBranchAddress("reco_beam_trackEndDirZ", &reco_beam_trackEndDirZ);
+
+  tree->SetBranchAddress("reco_beam_startX", &reco_beam_startX);
   tree->SetBranchAddress("true_beam_startX", &true_beam_startX);
   tree->SetBranchAddress("true_beam_startDirX", &true_beam_startDirX);
 
   tree->SetBranchAddress("reco_beam_startY", &reco_beam_startY);
-  tree->SetBranchAddress("reco_beam_trackDirY", &reco_beam_trackDirY);
   tree->SetBranchAddress("true_beam_startY", &true_beam_startY);
   tree->SetBranchAddress("true_beam_startDirY", &true_beam_startDirY);
 
   tree->SetBranchAddress("reco_beam_startZ", &reco_beam_startZ);
-  tree->SetBranchAddress("reco_beam_trackDirZ", &reco_beam_trackDirZ);
   tree->SetBranchAddress("true_beam_startZ", &true_beam_startZ);
   tree->SetBranchAddress("true_beam_startDirZ", &true_beam_startDirZ);
 
@@ -466,7 +473,7 @@ void IniRecHist(TList * lout, const TString tag)
   //beam
   const int nbmTheta = 80;
   const double bmThetamin = 0;
-  const double bmThetamax = 40;//in deg
+  const double bmThetamax = 60;//in deg
   //daughter
   const int ndTheta = 20;
   const double dThetamin = 0;
