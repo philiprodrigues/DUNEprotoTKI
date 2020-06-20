@@ -357,11 +357,16 @@ void SetFullSignal(const bool kpi0)
   //}
 }
 
+/*
 double GetTruncatedMean(vector<double> array, const int nsample)
 {
   const double fracTrun = 0.6;
   const double nterm = nsample*fracTrun;
   //either nsample<0, or total nterm is too small
+
+  if(nterm<=0){
+    return -999;
+  }
 
   std::sort(array.begin(), array.begin()+nsample);
 
@@ -372,6 +377,7 @@ double GetTruncatedMean(vector<double> array, const int nsample)
   }
   return sum / (nterm+1E-10);
 }
+*/
 
 double GetTruncatedMean(const vector<double> &tmparr, const unsigned int nsample0, const unsigned int nsample1, const double lowerFrac, const double upperFrac)
 {
@@ -385,7 +391,8 @@ double GetTruncatedMean(const vector<double> &tmparr, const unsigned int nsample
   //double tme = GetTruncatedMean(dedx_vector, 2, dedx_vector_size-5, 0.1, 0.6)
   //
 
-  if(nsample1>=tmparr.size()){
+  //require nsample0<nsample1<size
+  if(nsample1>=tmparr.size() || nsample0>=nsample1){
     return -999;
   }
 
@@ -394,21 +401,23 @@ double GetTruncatedMean(const vector<double> &tmparr, const unsigned int nsample
     array.push_back(tmparr[ii]);
   }
 
+  const int iter0 = array.size()*lowerFrac;
+  const int iter1 = array.size()*upperFrac;
+  const int nterm = iter1-iter0;
+  if( nterm<=0 ){
+    return -999;
+  }
+
   std::sort(array.begin(), array.end());
 
   double sum =0.0;
-
-  const int iter0 = array.size()*lowerFrac;
-  const int iter1 = array.size()*upperFrac;
-
   for(int ii=iter0; ii< iter1; ii++){
     sum += array[ii];
   }
-  return sum / ( (iter1-iter0)+1E-10);
+  return sum / ( nterm+1E-10);
 }
 
-
-void GetdEdx(const vector<double> &arraydEdx, vector<double> &startE, vector<double> &endE, const unsigned int padding=0)
+int GetdEdx(const vector<double> &arraydEdx, vector<double> &startE, vector<double> &endE, const unsigned int padding=0)
 {
   //
   //return a subset using non-0 padding
@@ -417,7 +426,7 @@ void GetdEdx(const vector<double> &arraydEdx, vector<double> &startE, vector<dou
   const unsigned int ncls = arraydEdx.size();
 
   if(ncls<=padding){
-    return;
+    return 0;
   }
 
   //start from [2] because [0] and [1] in both start and last are weird
@@ -427,8 +436,30 @@ void GetdEdx(const vector<double> &arraydEdx, vector<double> &startE, vector<dou
     const double endpe = arraydEdx[ncls-1-kk];
     endE.push_back(endpe);
   }
+
+  return startE.size();
 }
 
+int GetFSdEdx(const unsigned int ii, double & startE2, double & startE3, double & startTME, double & lastE2, double & lastE3, double & lastTME)
+{
+  const vector<double> recodEdxarray = (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii];
+
+  vector<double> startEarray, lastEarray;
+  //full range, no padding
+  const int ndEdx = AnaUtils::GetdEdx(recodEdxarray, startEarray, lastEarray);
+
+  startE2 = ndEdx<3? -999: startEarray[2];
+  startE3 = ndEdx<4? -999 :startEarray[3];
+  lastE2 = ndEdx<3? -999: lastEarray[2];
+  lastE3 = ndEdx<4? -999 :lastEarray[3];
+  //has Bragg peak
+  startTME = AnaUtils::GetTruncatedMean(startEarray, 2, 6, 0.4,  0.95);
+
+  //no Bragg peak
+  lastTME  = AnaUtils::GetTruncatedMean(lastEarray,  2, ndEdx-8, 0.05, 0.6);
+
+  return ndEdx;
+}
 
 double GetRecFromTruth(const int protonIdx, const vector<double> * mombyrange)
 {

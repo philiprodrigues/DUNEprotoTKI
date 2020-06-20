@@ -93,10 +93,10 @@ int GetNTrack(const bool kpi0, const int truthEventType, int & nproton, int & ns
     }
 
     //__________________________________________ Cut PFP before counting -> no cut any more  __________________________________________
+    double startE2, startE3, startTME, lastE2, lastE3, lastTME;
+    const int NdEdx = AnaUtils::GetFSdEdx(ii, startE2, startE3, startTME, lastE2, lastE3, lastTME);
 
     //---> need to be done before any counting!!!
-    const vector<double>  dedxarray = (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii];
-    const int NdEdx = dedxarray.size();
     if(kfill){
       style::FillInRange(AnaIO::hCutNdEdx, NdEdx, fillstktype);
     }
@@ -122,11 +122,6 @@ int GetNTrack(const bool kpi0, const int truthEventType, int & nproton, int & ns
       }
     */
   
-    const double startE2 = NdEdx<3?-999:dedxarray[2];
-    const double startE3 = NdEdx<4?-999:dedxarray[3];
-    const double lastE2  = NdEdx<3?-999:dedxarray[NdEdx-1-2];
-    const double lastE3  = NdEdx<4?-999:dedxarray[NdEdx-1-3];
-    
     const double chi2 = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
     const double ndof = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
     const double Chi2NDF = chi2/(ndof+1E-10);
@@ -243,8 +238,10 @@ int GetNTrack(const bool kpi0, const int truthEventType, int & nproton, int & ns
         style::FillInRange(AnaIO::hRecProtonTheta, recMomRefBeam.Theta()*TMath::RadToDeg(), fillstktype);
         style::FillInRange(AnaIO::hRecProtonStartE2, startE2, fillstktype);
         style::FillInRange(AnaIO::hRecProtonStartE3, startE3, fillstktype);
+        style::FillInRange(AnaIO::hRecProtonStartTME, startTME, fillstktype);
         style::FillInRange(AnaIO::hRecProtonLastE2, lastE2, fillstktype);
         style::FillInRange(AnaIO::hRecProtonLastE3, lastE3, fillstktype);
+        style::FillInRange(AnaIO::hRecProtonLastTME, lastTME, fillstktype);
       }
       else if(recParticleType==AnaUtils::gkPiPlus){
         if(pdg==211){
@@ -255,8 +252,10 @@ int GetNTrack(const bool kpi0, const int truthEventType, int & nproton, int & ns
         style::FillInRange(AnaIO::hRecPiplusTheta, recMomRefBeam.Theta()*TMath::RadToDeg(), fillstktype);
         style::FillInRange(AnaIO::hRecPiplusStartE2, startE2, fillstktype);
         style::FillInRange(AnaIO::hRecPiplusStartE3, startE3, fillstktype);
+        style::FillInRange(AnaIO::hRecPiplusStartTME, startTME, fillstktype);
         style::FillInRange(AnaIO::hRecPiplusLastE2, lastE2, fillstktype);
         style::FillInRange(AnaIO::hRecPiplusLastE3, lastE3, fillstktype);
+        style::FillInRange(AnaIO::hRecPiplusLastTME, lastTME, fillstktype);
       }
     }
 
@@ -534,84 +533,105 @@ bool CutBeamAllInOne(const bool kmc)
   return true;
 }
 
-
-
-bool CutBeamdEdx(const double varSignal)
+bool GetBeamdEdx(const int evtType)
 {
   //
-  //for testing only, not in use
+  //calculate all beam dEdx
   //
 
   vector<double> startE, lastE;
   AnaUtils::GetdEdx( *AnaIO::reco_beam_calibrated_dEdX, startE, lastE, 2);
-  AnaIO::nBeamdEdxCls = startE.size();
-  style::FillInRange(AnaIO::hnBeamdEdxCls, AnaIO::nBeamdEdxCls);
-  if(AnaIO::nBeamdEdxCls<6){
+
+  AnaIO::beamNdEdx = startE.size();
+  style::FillInRange(AnaIO::hBeamNdEdx, AnaIO::beamNdEdx, evtType);
+
+  const bool kfailN = (AnaIO::beamNdEdx<6);
+  if(kfailN){
     return false;
   }
 
   //no bragg peak
-  AnaIO::beamStartE0 = startE[0];
-  AnaIO::beamStartE1 = startE[1];
-  AnaIO::beamStartE2 = startE[2];
-  AnaIO::beamStartE3 = startE[3];
-  AnaIO::beamStartE4 = startE[4];
-  AnaIO::beamStartE5 = startE[5];
-  
-  AnaIO::beamTMeanStart = AnaUtils::GetTruncatedMean(startE, AnaIO::nBeamdEdxCls-6);
-  
-  style::FillInRange(AnaIO::hSignalVsStartE0, AnaIO::beamStartE0, varSignal);
-  style::FillInRange(AnaIO::hSignalVsStartE1, AnaIO::beamStartE1, varSignal);
-  style::FillInRange(AnaIO::hSignalVsStartE2, AnaIO::beamStartE2, varSignal);
-  style::FillInRange(AnaIO::hSignalVsStartE3, AnaIO::beamStartE3, varSignal);
-  style::FillInRange(AnaIO::hSignalVsStartE4, AnaIO::beamStartE4, varSignal);
-  style::FillInRange(AnaIO::hSignalVsStartE5, AnaIO::beamStartE5, varSignal);
-  
-  style::FillInRange(AnaIO::hSignalVsTMeanStart, AnaIO::beamTMeanStart, varSignal);
+  AnaIO::beamStartE0 = kfailN ? -999 : startE[0];
+  AnaIO::beamStartE1 = kfailN ? -999 : startE[1];
+  AnaIO::beamStartE2 = kfailN ? -999 : startE[2];
+  AnaIO::beamStartE3 = kfailN ? -999 : startE[3];
+  AnaIO::beamStartE4 = kfailN ? -999 : startE[4];
+  AnaIO::beamStartE5 = kfailN ? -999 : startE[5];
   
   //has Bragg Peak
-  AnaIO::beamLastE0 = lastE[0];
-  AnaIO::beamLastE1 = lastE[1];
-  AnaIO::beamLastE2 = lastE[2];
-  AnaIO::beamLastE3 = lastE[3];
-  AnaIO::beamLastE4 = lastE[4];
-  AnaIO::beamLastE5 = lastE[5];
-  
-  AnaIO::beamTMeanLast = AnaUtils::GetTruncatedMean(lastE, 6);
-  
-  style::FillInRange(AnaIO::hSignalVsLastE0, AnaIO::beamLastE0, varSignal);
-  style::FillInRange(AnaIO::hSignalVsLastE1, AnaIO::beamLastE1, varSignal);
-  style::FillInRange(AnaIO::hSignalVsLastE2, AnaIO::beamLastE2, varSignal);
-  style::FillInRange(AnaIO::hSignalVsLastE3, AnaIO::beamLastE3, varSignal);
-  style::FillInRange(AnaIO::hSignalVsLastE4, AnaIO::beamLastE4, varSignal);
-  style::FillInRange(AnaIO::hSignalVsLastE5, AnaIO::beamLastE5, varSignal);
-  
-  //both need to tune for different energy
-  //it is so clean that no need to cut on last since there is no Bragg peak form proton any more
-  if(AnaIO::beamTMeanStart>2.8){
-    return false;
-  }
-  
-  style::FillInRange(AnaIO::hSignalVsTMeanLast, AnaIO::beamTMeanLast, varSignal);
-  
-  style::FillInRange(AnaIO::hSigAfterVsStartE0, AnaIO::beamStartE0, varSignal);
-  style::FillInRange(AnaIO::hSigAfterVsStartE1, AnaIO::beamStartE1, varSignal);
-  style::FillInRange(AnaIO::hSigAfterVsStartE2, AnaIO::beamStartE2, varSignal);
-  
-  style::FillInRange(AnaIO::hSigAfterVsLastE0, AnaIO::beamLastE0, varSignal);
-  style::FillInRange(AnaIO::hSigAfterVsLastE1, AnaIO::beamLastE1, varSignal);
-  style::FillInRange(AnaIO::hSigAfterVsLastE2, AnaIO::beamLastE2, varSignal);
-  
-  style::FillInRange(AnaIO::hSigAfterVsStartE3, AnaIO::beamStartE3, varSignal);
-  style::FillInRange(AnaIO::hSigAfterVsLastE3, AnaIO::beamLastE3, varSignal);
-  style::FillInRange(AnaIO::hSigAfterVsStartE4, AnaIO::beamStartE4, varSignal);
-  style::FillInRange(AnaIO::hSigAfterVsLastE4, AnaIO::beamLastE4, varSignal);
-  style::FillInRange(AnaIO::hSigAfterVsStartE5, AnaIO::beamStartE5, varSignal);
-  style::FillInRange(AnaIO::hSigAfterVsLastE5, AnaIO::beamLastE5, varSignal);
-  
+  AnaIO::beamLastE0 = kfailN ? -999 : lastE[0];
+  AnaIO::beamLastE1 = kfailN ? -999 : lastE[1];
+  AnaIO::beamLastE2 = kfailN ? -999 : lastE[2];
+  AnaIO::beamLastE3 = kfailN ? -999 : lastE[3];
+  AnaIO::beamLastE4 = kfailN ? -999 : lastE[4];
+  AnaIO::beamLastE5 = kfailN ? -999 : lastE[5];
+
+  //double GetTruncatedMean(const vector<double> &tmparr, const unsigned int nsample0, const unsigned int nsample1, const double lowerFrac, const double upperFrac)
+  AnaIO::beamStartTME = AnaUtils::GetTruncatedMean(startE, 0, AnaIO::beamNdEdx-6-1, 0.05, 0.6);
+  AnaIO::beamLastTME  = AnaUtils::GetTruncatedMean(lastE,  0, 5,                    0.4,  0.95);
+
   return true;
 }
 
+void FillBeamdEdx(const int evtType, const bool kBefore)
+{
+  //
+  //
+  //
+  if(kBefore){
+
+    GetBeamdEdx(evtType);
+
+    //only for ndEdx>=6, otherwise a huge peak at underflow (0)
+    if(AnaIO::beamNdEdx>=6){
+      style::FillInRange(AnaIO::hBeamStartTME, AnaIO::beamStartTME, evtType);
+      style::FillInRange(AnaIO::hBeamLastTME, AnaIO::beamLastTME, evtType);
+      
+      style::FillInRange(AnaIO::hBeamStartE0, AnaIO::beamStartE0, evtType);
+      style::FillInRange(AnaIO::hBeamStartE1, AnaIO::beamStartE1, evtType);
+      style::FillInRange(AnaIO::hBeamStartE2, AnaIO::beamStartE2, evtType);
+      style::FillInRange(AnaIO::hBeamStartE3, AnaIO::beamStartE3, evtType);
+      style::FillInRange(AnaIO::hBeamStartE4, AnaIO::beamStartE4, evtType);
+      style::FillInRange(AnaIO::hBeamStartE5, AnaIO::beamStartE5, evtType);
+      
+      style::FillInRange(AnaIO::hBeamLastE0, AnaIO::beamLastE0, evtType);
+      style::FillInRange(AnaIO::hBeamLastE1, AnaIO::beamLastE1, evtType);
+      style::FillInRange(AnaIO::hBeamLastE2, AnaIO::beamLastE2, evtType);
+      style::FillInRange(AnaIO::hBeamLastE3, AnaIO::beamLastE3, evtType);
+      style::FillInRange(AnaIO::hBeamLastE4, AnaIO::beamLastE4, evtType);
+      style::FillInRange(AnaIO::hBeamLastE5, AnaIO::beamLastE5, evtType);
+    }
+  }
+  else{
+    //fill all event even ndEdx<6
+    //PC = Post-Cut
+    style::FillInRange(AnaIO::hBeamPCStartTME,AnaIO::beamStartTME, evtType);
+    style::FillInRange(AnaIO::hBeamPCLastTME, AnaIO::beamLastTME, evtType);
+    
+    style::FillInRange(AnaIO::hBeamPCStartE0, AnaIO::beamStartE0, evtType);
+    style::FillInRange(AnaIO::hBeamPCStartE1, AnaIO::beamStartE1, evtType);
+    style::FillInRange(AnaIO::hBeamPCStartE2, AnaIO::beamStartE2, evtType);
+    style::FillInRange(AnaIO::hBeamPCStartE3, AnaIO::beamStartE3, evtType);
+    style::FillInRange(AnaIO::hBeamPCStartE4, AnaIO::beamStartE4, evtType);
+    style::FillInRange(AnaIO::hBeamPCStartE5, AnaIO::beamStartE5, evtType);
+    
+    style::FillInRange(AnaIO::hBeamPCLastE0, AnaIO::beamLastE0, evtType);
+    style::FillInRange(AnaIO::hBeamPCLastE1, AnaIO::beamLastE1, evtType);
+    style::FillInRange(AnaIO::hBeamPCLastE2, AnaIO::beamLastE2, evtType);
+    style::FillInRange(AnaIO::hBeamPCLastE3, AnaIO::beamLastE3, evtType);
+    style::FillInRange(AnaIO::hBeamPCLastE4, AnaIO::beamLastE4, evtType);
+    style::FillInRange(AnaIO::hBeamPCLastE5, AnaIO::beamLastE5, evtType);
+  }
+
+  //old code
+  /*
+//both need to tune for different energy
+  //it is so clean that no need to cut on last since there is no Bragg peak form proton any more
+  if(AnaIO::beamStartTME>2.8){
+    return false;
+  }
+   */
+}
 
 //end of namespace
 }

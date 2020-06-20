@@ -33,6 +33,7 @@ const TString gTagPUR="PUR";
 const TString gTagEFF="EFF";
 const TString gTagNOH="NOH";
 const TString gTagSTK="STK";
+const TString gTagNTX="NTX";
 
 double style::PrintStat(const TString tag, TH1 *hh, const double val0, const double val1, const double oldsel)
 {
@@ -352,10 +353,19 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
   gStyle->SetStatStyle(0);
   gStyle->SetTitleX(0.55);
 
+  const bool oldktx = ktext;
+
   for(int ii=0; ii<lout->GetSize(); ii++){
     const TString tag = lout->At(ii)->GetName();
     if(kprint){
       printf("style::DrawHist Trying printing %s\n", tag.Data());
+    }
+
+    if(tag.Contains(gTagNTX)){
+      ktext = false;
+    }
+    else{
+      ktext = oldktx;
     }
 
     TH1 * holay = 0x0;
@@ -550,7 +560,7 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
 
     //--- dopt
     TString dHistOpt= (ktext&&holay==0x0)?"text hist":"hist";
-    const TString dOverlayOpt = ktext?"text same E":"same E";
+    const TString dOverlayOpt = ktext?"text same E":"same hist";
     if(h2d){
       dHistOpt += "box";
       if(tag.Contains(gTagNOH)||tag.Contains(gTagPRF)||tag.Contains(gTagSTK)){
@@ -600,6 +610,7 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
       holay->SetMarkerSize(1);
       holay->SetMarkerColor(kRed);
       holay->SetLineColor(kRed);
+      holay->SetLineWidth(2);
       holay->Draw(dOverlayOpt);
       psStatBox->Draw();
       c1->Update();

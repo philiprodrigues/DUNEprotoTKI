@@ -89,6 +89,8 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     const int evtType =  AnaUtils::GetFillEventType();
 
     //====================== Do cuts ======================
+    //just do the plotting to test
+    AnaCut::FillBeamdEdx(evtType, true);
 
     //gkOnlySignal=true: use MC signal and no cuts
     if(gkOnlySignal){
@@ -103,6 +105,9 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     }
     //count beam after beam cut before other cuts
     selBeamCount++;
+
+    //just do the plotting to test
+    AnaCut::FillBeamdEdx(evtType, false);
 
     //---------- fill beam kinematics ----------
 
