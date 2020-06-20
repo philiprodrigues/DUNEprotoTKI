@@ -122,14 +122,9 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     //only checking after-selection distributions
     TLorentzVector *dummypi0 = 0x0;
     int dummycounter = -999;
-    if(gkFillBefore){
-      //print, no fill
-      AnaCut::GetNTrack(kPiZero, evtType, dummycounter, dummycounter, dummycounter, dummypi0, true, false);
-    }
-    else{
-      //print, fill
-      AnaCut::GetNTrack(kPiZero, evtType, dummycounter, dummycounter, dummycounter, dummypi0, true, true);
-    }
+    const bool kprint = false;
+    const bool kfill = !gkFillBefore;
+    AnaCut::GetNTrack(kPiZero, evtType, dummycounter, dummycounter, dummycounter, dummypi0, kprint, kfill);
     
      /*   
     //x. Beam dEdx cut shadowed by beam filtering

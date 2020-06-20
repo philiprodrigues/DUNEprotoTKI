@@ -70,17 +70,18 @@ not set
   /*
     est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -397725.603302 nhits 7 trackScore 0.016739 emScore 0.983240 michelScore 0.289565 sum 1.289545
   */
-  int ntracks = 0;
+  int ntrack = 0;
   nshower = 0;
   nmichel = 0;
   nproton = 0;
+  int nPFP = 0;
 
   //proton and pion array only keeps the leading one, ie, only [0] will be returned
   //vector<TLorentzVector> protonArray; 
   //vector<TLorentzVector> pionArray; //that is non-proton actually
   vector<TLorentzVector> showerArray;
 
-  static bool kPrintCutInfo = true;
+  //static bool kPrintCutInfo = true;
 
   for(int ii=0; ii<recsize; ii++){
 
@@ -153,11 +154,11 @@ not set
       if( (*AnaIO::reco_daughter_allTrack_ID)[ii]==-1 ){
         printf("bad track ID! %d\n", ii); exit(1);
       }
-      ntracks++;
+      ntrack++;
 
       //========== proton tagging now!
       //all signal protons have nhit below 260
-      const double cutNH = 260;
+      //const double cutNH = 260;
       //use the same selection for proton with Chi2 because of better data-MC consistency
       /*
       if(kpi0){
@@ -177,16 +178,18 @@ not set
       else{
       */
       const double cutCHI = 50;
-      if(Chi2NDF<cutCHI && nhits<cutNH){
+      if(Chi2NDF<cutCHI){// && nhits<cutNH){
         recParticleType = AnaUtils::gkProton;
       }
       else{
         recParticleType = AnaUtils::gkPiPlus;
       }
       
+      /*
       if(kPrintCutInfo){
         printf("check cut kpi0 %d proton tag Chi2NDF %.2f nhits %.0f\n", kpi0, cutCHI, cutNH);
       }
+      */
 
       if(recParticleType==AnaUtils::gkProton){
         nproton++;
@@ -261,7 +264,17 @@ not set
       }
     }
 
-    kPrintCutInfo = false;
+    //kPrintCutInfo = false;
+
+    nPFP++;
+  }
+
+  if(recsize!=nPFP){
+    printf("GetNTrack not looping all!! %d %d\n", recsize, nPFP);
+  }
+
+  if(kprint){
+    printf("GetNTrack PFP size %d nlooped %d ntrack %d nshower %d nmichel %d nproton %d\n", recsize, nPFP, ntrack, nshower, nmichel, nproton);
   }
 
   if(kpi0){
@@ -278,7 +291,7 @@ not set
     printf("\n\n");
   }
 
-  return ntracks;
+  return ntrack;
 }
 
 
@@ -289,14 +302,9 @@ bool CutTopology(const bool kpi0, const bool kFillBefore)
   int cutnmichel = 0;
   TLorentzVector * leadingPi0 = 0x0;  
 
-  if(kFillBefore){
-    //no print, fill
-    AnaIO::nTrack = GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, leadingPi0, false, true);
-  }
-  else{
-    //no print, no fill
-    AnaIO::nTrack = GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, leadingPi0, false, false);
-  }
+  const bool kprint = false;
+  const bool kfill = kFillBefore;
+  AnaIO::nTrack = GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, leadingPi0, kprint, kfill);
   
   const int filleventtype = AnaUtils::GetFillEventType();
   //----------- do cuts

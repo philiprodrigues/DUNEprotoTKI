@@ -65,6 +65,18 @@ void style::ScaleStack(THStack *stk, const double scale)
   }
 }
 
+double style::GetEntries(THStack *stk)
+{
+  double enttot = 0;
+  const TList * ll = stk->GetHists();
+  for(Int_t ii=0; ii<ll->GetEntries(); ii++){
+    TH1D *hh = (TH1D*)ll->At(ii);
+    enttot += hh->Integral(0,1000000);
+  }
+
+  return enttot;
+}
+
 TCanvas *style::DrawLegend(const vector<TString> &entries, const vector<TString>& htype, const int *tmpcol, const int * tmpmkr)
 {
   const int defcol[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
@@ -297,6 +309,8 @@ void style::Process2DHist(TList *lout)
 
 void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, const TString outdir, const TString tag, bool ktext, const bool kfast)
 {
+  const bool kprint = false;
+
   TCanvas * c1 = new TCanvas("c1"+tag, "", 1200, 800);
   style::PadSetup(c1);
   gPad->SetTopMargin(0.07);
@@ -313,7 +327,9 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
 
   for(int ii=0; ii<lout->GetSize(); ii++){
     const TString tag = lout->At(ii)->GetName();
-    printf("style::DrawHist Trying printing %s\n", tag.Data());
+    if(kprint){
+      printf("style::DrawHist Trying printing %s\n", tag.Data());
+    }
 
     TH1 * holay = 0x0;
     if(overlayList && !tag.Contains("_normalized")){
@@ -337,7 +353,9 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
     TH1 * hh = dynamic_cast<TH1*> (lout->At(ii));
     THStack * hstk = dynamic_cast<THStack *>(lout->At(ii));
     if(!hh && !hstk){
-      printf("style::DrawHist no hist or stack %s\n", tag.Data());
+      if(kprint){
+        printf("style::DrawHist no hist or stack %s\n", tag.Data());
+      }
       continue;
     }
 
@@ -347,23 +365,32 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
       if(h2d){
         //skip empty
         if(h2d->Integral(0, 10000, 0,10000)<EPSILON){
-          printf("style::DrawHist empty 2D %s\n", tag.Data());
+          if(kprint){
+            printf("style::DrawHist empty 2D %s\n", tag.Data());
+          }
           continue;
         }
 
         if(holay){
-          printf("style::DrawHist blocking2d %s\n", h2d->GetName()); 
+          if(kprint){
+            printf("style::DrawHist blocking2d %s\n", h2d->GetName()); 
+          }
           holay = 0x0;
         }
       }
       else{
         //skip empty
         if(hh->Integral(0,10000)<EPSILON){
-          printf("style::DrawHist empty 1D %s\n", tag.Data());
+          if(kprint){
+            printf("style::DrawHist empty 1D %s\n", tag.Data());
+          }
           continue;
         }
       }
     }
+
+    //print entries before scaling
+    printf("style::DrawHist Printing %s k2d %d kstk %d foundOverlay %d scale %f entries hh %f stk %f overlay %f\n", tag.Data(), h2d!=0x0, hstk!=0x0, holay!=0x0, plotscale,  hh?hh->GetEntries():-999, hstk?GetEntries(hstk):-999,  holay?holay->GetEntries():-999);
 
     if(holay){
       if(plotscale!=1){//avoid resetting hist maximum         
@@ -383,7 +410,6 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
 
     //===================
 
-    printf("style::DrawHist Printing %s k2d %d kstk %d foundOverlay %d scale %f entries %f %f\n", tag.Data(), h2d!=0x0, hstk!=0x0, holay!=0x0, plotscale, hsum?hsum->GetEntries():-999, holay?holay->GetEntries():-999);
 
     //--- ResetStyle
     if(h2d){
@@ -538,7 +564,9 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
     }
 
     if(holay){
-      printf("style::DrawHist drawing overlay %s\n", holay->GetName());
+      if(kprint){
+        printf("style::DrawHist drawing overlay %s\n", holay->GetName());
+      }
       ResetStyle(holay);
       //holay->SetMarkerStyle(20);
       holay->SetMarkerStyle(6);
