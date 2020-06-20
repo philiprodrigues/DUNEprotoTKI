@@ -499,6 +499,7 @@ void IniRecHist(TList * lout, const TString tag)
   const double countermin = -0.5;
   const double countermax = 9.5;
 
+  //NOH, STK are tags for style::Process2DHist
 
   hBeamThetaRes      = new TH2D("b000BeamThetaResNOH"+tag,"",      nbmTheta, bmThetamin, bmThetamax, 25, -20, 30); lout->Add(hBeamThetaRes);
   hProtonThetaRes    = new TH2D("b001ProtonThetaResNOH"+tag,"",    ndTheta, dThetamin, dThetamax, 25, -20, 30); lout->Add(hProtonThetaRes);

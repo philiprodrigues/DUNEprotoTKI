@@ -375,8 +375,10 @@ double GetThetaRef(const TVector3 &vold, const TVector3 &vreftmp)
 
  void getCommonTKI(const int targetA, const int targetZ, const TLorentzVector *neutrinofullp, const TLorentzVector *muonfullp, const TLorentzVector *baryonfullp, double & dalphat, double & dphit, double & dpt, double & neutronmomentum, double & muontheta, double & baryontheta)
 {
+  //
   //note that this is for general calculation, all particle energy is sqrt(p^2+m^2)!
-  //neutronmomentum ONLY valid for carbon, not argon!!!
+  //to-do: currently still using massless beam! Need to fix.
+  //
 
   const TVector3 unitneutrino= neutrinofullp->Vect().Unit();
 

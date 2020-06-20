@@ -303,7 +303,7 @@ bool CutTopology(const bool kpi0, const bool kFillBefore)
   
   const int filleventtype = AnaUtils::GetFillEventType();
 
-  //______________________________________________ Do cuts below, do not change ______________________________________________ 
+  //______________________________________________ Do cuts below ______________________________________________ 
 
   //1. nshower
   style::FillInRange(AnaIO::hCutnshower, cutnshower, filleventtype);
@@ -482,7 +482,7 @@ bool CutDataBeamPos()
 bool CutBeamAllInOne(const bool kmc)
 {
   //
-  //standard procedure from pion analyses, do not change
+  //standard procedure from pion analyses
   //
 
   //1. beam ID cut
@@ -531,6 +531,10 @@ bool CutBeamAllInOne(const bool kmc)
 
 bool CutBeamdEdx(const double varSignal)
 {
+  //
+  //for testing only, not in use
+  //
+
   vector<double> startE, lastE;
   AnaUtils::GetdEdx( *AnaIO::reco_beam_calibrated_dEdX, startE, lastE, 2);
   AnaIO::nBeamdEdxCls = startE.size();

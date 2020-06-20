@@ -97,6 +97,10 @@ TLorentzVector GetMomentumRefBeam(const bool isTruth, const int trackIndex, cons
 
 TLorentzVector * GetPiZero(const int truthEventType, const vector<TLorentzVector> & shws,  const bool kprint, const bool kfill)
 {
+  //
+  //combine shower-shower pair and return the most energetic one
+  //
+
   const int shsize = shws.size();
   if(kfill){
     style::FillInRange(AnaIO::hRecPi0Nshower, shsize, truthEventType);
@@ -188,9 +192,11 @@ int GetParticleType(const int pdg)
 
 vector<TLorentzVector> GetFSTruth(const bool kPiZero, int & protonIdx, int & piplusIdx, bool & tmpksig)
 {
-  //if kPiZero false, return 1piplus (1st and 2nd protons)
-  //if kPiZero true, return (1st PiZero) (1st and 2nd protons)
+  //
+  //if kPiZero false, return 1piplus and (1st and 2nd protons)
+  //if kPiZero true, return (1st PiZero) and (1st and 2nd protons)
   //only use kPiZero in the end at filling
+  //
 
   const vector<int> * pdg = AnaIO::true_beam_daughter_PDG;
   const vector<double> * px = AnaIO::true_beam_daughter_startPx;
@@ -328,6 +334,10 @@ vector<TLorentzVector> GetFSTruth(const bool kPiZero, int & protonIdx, int & pip
 
 void SetFullSignal(const bool kpi0)
 {
+  //
+  //p_leading 0.45-1, p_sublieading < 0.45, no cut on pi+
+  //
+
   int  protonIdx = -999, piplusIdx = -999;
   vector<TLorentzVector> vecPiP = GetFSTruth(kpi0, protonIdx, piplusIdx, AnaIO::kSignal);
   
@@ -345,10 +355,6 @@ void SetFullSignal(const bool kpi0)
   //if(!kpi0){
     //AnaIO::kSignal = AnaIO::kSignal && (AnaIO::finPimomentum>0.15);
   //}
-
-  //p_leading 0.45-1, p_sublieading < 0.45, no cut on pi+
-  //p-pi0: 242 events
-  //p-pi+: 220 events
 }
 
 double GetTruncatedMean(vector<double> array, const int nsample)
@@ -369,7 +375,15 @@ double GetTruncatedMean(vector<double> array, const int nsample)
 
 double GetTruncatedMean(const vector<double> &tmparr, const unsigned int nsample0, const unsigned int nsample1, const double lowerFrac, const double upperFrac)
 {
+  //
   //for proton Bragg peak use 0.4-0.95. Seen by CDF of startE using signal proton samples in drawTracking
+  //
+  //The Bethe-Bloch or the Bragg peak part of the dEdx distribution? That will determine the truncation fractions:
+  //Look at the dEdx distribution and choose a region of interest, say the 10-60% of the distribution, set the lower and upper fraction as 0.1 and 0.6.
+  //Need to be careful with what dEdx[] range to sample. The first two ([0, 1]) and last two ([last, last-1]) are not well defined/measured and therefore do not include them.
+  //Example: if Bethe-Bloch is the focus, do
+  //double tme = GetTruncatedMean(dedx_vector, 2, dedx_vector_size-5, 0.1, 0.6)
+  //
 
   if(nsample1>=tmparr.size()){
     return -999;
@@ -396,6 +410,10 @@ double GetTruncatedMean(const vector<double> &tmparr, const unsigned int nsample
 
 void GetdEdx(const vector<double> &arraydEdx, vector<double> &startE, vector<double> &endE, const unsigned int padding=0)
 {
+  //
+  //return a subset using non-0 padding
+  //
+
   const unsigned int ncls = arraydEdx.size();
 
   if(ncls<=padding){
@@ -427,6 +445,7 @@ double GetRecFromTruth(const int protonIdx, const vector<double> * mombyrange)
     if((*AnaIO::reco_daughter_PFP_true_byHits_ID)[ii] == truthID) {
       if((*AnaIO::reco_daughter_allTrack_ID)[ii] != -1) {//allTrack force reconstruction is successful assuming track
 
+        //that actually can happen, but not often
         if(counter){
           printf("rpm already set!! %f %f %d %d\n", rpm, (*mombyrange)[ii], counter, ievent); //exit(1);
         }

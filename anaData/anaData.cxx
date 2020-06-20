@@ -32,7 +32,7 @@ const int gkDataBit = 3;
 
 int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
-  //_____________________________________________________ basic settings, do not change _____________________________________________________ 
+  //_____________________________________________________ basic settings _____________________________________________________ 
 
   bool kMC = true;
   if(!finName.Contains("_mc_")){
@@ -180,7 +180,7 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
 
 void anaTruth(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
-  //_____________________________________________________ not for reconstruction, not cleaned up for the momentum  _____________________________________________________ 
+  //_____________________________________________________ basic settings _____________________________________________________ 
 
   if(!finName.Contains("_mc_")){
     printf("anaTruth _mc_ not found in file name! %s\n", finName.Data()); exit(1);
@@ -201,7 +201,8 @@ void anaTruth(TString finName, TList *lout, const TString tag, const int nEntryT
   TTree * tout = AnaIO::GetOutputTree(lout, tag);
   AnaIO::IniTruthHist(lout, tag);
 
-  //==============================================================================================================
+  //_____________________________________________________ loop  _____________________________________________________
+
   int ientry = 0;
   while(tree->GetEntry(ientry)){
     if(ientry%100000==0){
@@ -218,8 +219,9 @@ void anaTruth(TString finName, TList *lout, const TString tag, const int nEntryT
     //do it before the loop continues for any reason
     ientry++;
    
-    //===========================================================
+    //====================== get signal and save variables  ====================== 
 
+    //---------- beam cut ---------- 
     const int beamtype = AnaUtils::GetParticleType(AnaIO::true_beam_PDG);
     AnaIO::hbeamType->Fill(beamtype);
 
@@ -233,13 +235,16 @@ void anaTruth(TString finName, TList *lout, const TString tag, const int nEntryT
       continue;
     }
 
-    const TLorentzVector iniPiPlus(AnaIO::true_beam_endPx, AnaIO::true_beam_endPy, AnaIO::true_beam_endPz, AnaFunctions::PionMass());
+    //---------- get beam ---------- 
+    const TLorentzVector beamFullP(AnaIO::true_beam_endPx, AnaIO::true_beam_endPy, AnaIO::true_beam_endPz, AnaFunctions::PionMass());
 
-    AnaIO::iniPimomentum = iniPiPlus.P();
-    AnaIO::iniPitheta = iniPiPlus.Theta()*TMath::RadToDeg();
+    AnaIO::iniPimomentum = beamFullP.P();
+    AnaIO::iniPitheta = beamFullP.Theta()*TMath::RadToDeg();
 
+    //---------- get final state ----------
     int  protonIdx = -999, piplusIdx = -999;
     AnaIO::kSignal = false;
+    //return piplus, proton, proton
     vector<TLorentzVector> vecPiP = AnaUtils::GetFSTruth(kPiZero, protonIdx, piplusIdx, AnaIO::kSignal);
     AnaIO::hnexcl->Fill(AnaIO::kSignal);
 
@@ -247,7 +252,7 @@ void anaTruth(TString finName, TList *lout, const TString tag, const int nEntryT
     AnaIO::finProtonmomentum = vecPiP[1].P();
     AnaIO::fin2Pmom = vecPiP[2].P();
 
-     //signal truth
+    //---------- calculate TKI only for signal ----------
     if(AnaIO::kSignal){
       AnaIO::hnproton->Fill(AnaIO::nproton);
       AnaIO::hnneutron->Fill(AnaIO::nneutron);
@@ -256,7 +261,7 @@ void anaTruth(TString finName, TList *lout, const TString tag, const int nEntryT
       //re-calculate final pi p theta w.r.t. iniPi
       const int targetA = 40;
       const int targetZ = 18;
-      AnaFunctions::getCommonTKI(targetA, targetZ, &iniPiPlus, &(vecPiP[0]), &(vecPiP[1]), AnaIO::dalphat, AnaIO::dphit, AnaIO::dpt, AnaIO::pn, AnaIO::finPitheta, AnaIO::finProtontheta);
+      AnaFunctions::getCommonTKI(targetA, targetZ, &beamFullP, &(vecPiP[0]), &(vecPiP[1]), AnaIO::dalphat, AnaIO::dphit, AnaIO::dpt, AnaIO::pn, AnaIO::finPitheta, AnaIO::finProtontheta);
       
       AnaIO::hmomIniPi->Fill(AnaIO::iniPimomentum);
       AnaIO::hmomFinPi->Fill(AnaIO::finPimomentum);
@@ -267,6 +272,7 @@ void anaTruth(TString finName, TList *lout, const TString tag, const int nEntryT
       AnaIO::hpn->Fill(AnaIO::pn);
     }
 
+    //---------- get truth-matched reconstructed momentum ---------- 
     vector<double>* mombyrange = 0x0;
     double * recmomentum = 0x0;
     int recidx = -999;
@@ -289,6 +295,8 @@ void anaTruth(TString finName, TList *lout, const TString tag, const int nEntryT
       (*recmomentum) = AnaUtils::GetRecFromTruth(recidx, mombyrange);
       tout->Fill();
     }
+
+    //====================== end of loop ======================
   }
 
   cout<<"All entries "<<ientry<<endl;
@@ -304,7 +312,7 @@ int main(int argc, char * argv[])
     return 0;
   }
 
-  //_____________________________________________________ basic settings, do not change _____________________________________________________ 
+  //_____________________________________________________ basic settings _____________________________________________________ 
 
   gSystem->Load("libTree");
 
@@ -338,7 +346,6 @@ int main(int argc, char * argv[])
   double dataBeamCount = -999;
 
   //_____________________________________________________ Run truth only study or MC/data selection  _____________________________________________________
-  //for reconstruction performance and selection study, only anaRec is needed
 
   const TString mcfinName = "input/protoDUNE_mc_reco_flattree.root";
 
