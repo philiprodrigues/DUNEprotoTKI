@@ -1,4 +1,4 @@
-# protoDUNE_exclusive
+# DUNEprotoTKI: analysis tool for TKI analyses on protoDUNE data
 
 How-to's:
 
