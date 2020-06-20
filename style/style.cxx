@@ -610,7 +610,7 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
       holay->SetMarkerSize(1);
       holay->SetMarkerColor(kRed);
       holay->SetLineColor(kRed);
-      holay->SetLineWidth(2);
+      holay->SetLineWidth(1);
       holay->Draw(dOverlayOpt);
       psStatBox->Draw();
       c1->Update();
