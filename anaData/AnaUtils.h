@@ -95,11 +95,11 @@ TLorentzVector GetMomentumRefBeam(const bool isTruth, const int trackIndex, cons
 }
 
 
-TLorentzVector * GetPiZero(const int ksig, const vector<TLorentzVector> & shws,  const bool kprint, const bool kfill)
+TLorentzVector * GetPiZero(const int truthEventType, const vector<TLorentzVector> & shws,  const bool kprint, const bool kfill)
 {
   const int shsize = shws.size();
   if(kfill){
-    style::FillInRange(AnaIO::hRecPi0Nshower, shsize, !ksig);
+    style::FillInRange(AnaIO::hRecPi0Nshower, shsize, truthEventType);
   }
 
   vector<TLorentzVector> piarr;

@@ -5,17 +5,26 @@
       with NdEdx cut (6),  kPiZero 0 fullsig 224.0 signal 40.0 all 157.0 purity 25.5% eff 17.9% ep 4.5%
       with NdEdx cut (16), with ESC instead of chi2, kPiZero 0 fullsig 224.0 signal 32.0 all 97.0 purity 33.0% eff 14.3% ep 4.7%
       with NdEdx cut (16),                           kPiZero 0 fullsig 224.0 signal 34.0 all 103.0 purity 33.0% eff 15.2% ep 5.0%
-  (*) bug fix: moving proton in tracking counting:   kPiZero 0 fullsig 224.0 signal 34.0 all 103.0 purity 33.0% eff 15.2% ep 5.0%
+      bug fix: moving proton in tracking counting:   kPiZero 0 fullsig 224.0 signal 34.0 all 103.0 purity 33.0% eff 15.2% ep 5.0%
+      chi2 cut, no NdEdx cut:                        kPiZero 0 fullsig 224.0 signal 37.0 all 160.0 purity 23.1% eff 16.5% ep 3.8%
+  (*) chi2, no NdEdx, cut nhits>40 for track:        kPiZero 0 fullsig 224.0 signal 37.0 all 109.0 purity 33.9% eff 16.5% ep 5.6%
+      chi2, no NdEdx, nhits40track, trackSCore 0.3:  kPiZero 0 fullsig 224.0 signal 37.0 all 109.0 purity 33.9% eff 16.5% ep 5.6%
+ 
 
-
-
+      
       PiZero:  
       no NdEdx cut,        kPiZero 1 fullsig 246.0 signal 31.0 all 60.0 purity 51.7% eff 12.6% ep 6.5%
       with NdEdx cut (16), kPiZero 1 fullsig 246.0 signal 9.0 all 10.0 purity 90.0% eff 3.7% ep 3.3%
       with NdEdx cut (6), chi2 instead of ESC, kPiZero 1 fullsig 246.0 signal 27.0 all 50.0 purity 54.0% eff 11.0% ep 5.9%
       with NdEdx cut (6),                      kPiZero 1 fullsig 246.0 signal 29.0 all 50.0 purity 58.0% eff 11.8% ep 6.8%
-  (*) bug fix: moving proton in tracking cou:  kPiZero 1 fullsig 246.0 signal 29.0 all 52.0 purity 55.8% eff 11.8% ep 6.6%
+      bug fix: moving proton in tracking cou:  kPiZero 1 fullsig 246.0 signal 29.0 all 52.0 purity 55.8% eff 11.8% ep 6.6%
+      use same chi2 cut as for PiPlus:         kPiZero 1 fullsig 246.0 signal 27.0 all 51.0 purity 52.9% eff 11.0% ep 5.8%
+      chi2 cut, no NdEdx cut:                  kPiZero 1 fullsig 246.0 signal 32.0 all 67.0 purity 47.8% eff 13.0% ep 6.2%
+  (*) chi2, no NdEdx, cut nhits>40 for track:  kPiZero 1 fullsig 246.0 signal 33.0 all 55.0 purity 60.0% eff 13.4% ep 8.0%
+      chi2, no NdEdx, nhits40, trackSCore 0.3: kPiZero 1 fullsig 246.0 signal 30.0 all 47.0 purity 63.8% eff 12.2% ep 7.8%
  
+
+
 
 //old initial MC, also wrong Score variables below: 
 

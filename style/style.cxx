@@ -337,6 +337,7 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
     TH1 * hh = dynamic_cast<TH1*> (lout->At(ii));
     THStack * hstk = dynamic_cast<THStack *>(lout->At(ii));
     if(!hh && !hstk){
+      printf("style::DrawHist no hist or stack %s\n", tag.Data());
       continue;
     }
 
@@ -346,15 +347,19 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
       if(h2d){
         //skip empty
         if(h2d->Integral(0, 10000, 0,10000)<EPSILON){
+          printf("style::DrawHist empty 2D %s\n", tag.Data());
           continue;
         }
 
-        printf("style::DrawHist blocking2d %s\n", h2d->GetName()); 
-        holay = 0x0;
+        if(holay){
+          printf("style::DrawHist blocking2d %s\n", h2d->GetName()); 
+          holay = 0x0;
+        }
       }
       else{
         //skip empty
         if(hh->Integral(0,10000)<EPSILON){
+          printf("style::DrawHist empty 1D %s\n", tag.Data());
           continue;
         }
       }

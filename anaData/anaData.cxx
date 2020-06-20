@@ -22,7 +22,8 @@
 #include <vector>       // std::vector
 
 const bool gkOnlySignal = false;
-const int gkDataBit = 3;
+const bool gkFillBefore = false;//fill after all cuts;//0;//0 if gkOnlySignal true: only fill after all cuts
+const int gkDataBit = 3;//1;//1 is mc, 1 is data
 
 int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
@@ -74,6 +75,8 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
       AnaUtils::SetFullSignal(kPiZero);
     }
 
+    const int evtType =  AnaUtils::GetFillEventType();
+
     //for to see within signal
     if(gkOnlySignal){//====================================================== switch between signal sample and selected sample
       if(!AnaIO::kSignal){
@@ -81,20 +84,53 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
       }
     }
     else{
-    
       if(!AnaCut::CutBeamAllInOne(kMC)){
         continue;
       }
-      
-      //count beam after beam cut before topology cut
-      selBeamCount++;
-      
+    }
+    //count beam after beam cut before topology cut
+    selBeamCount++;
+    //___________________________ fill beam kinematics _________________________
+
+    const TVector3 recBeam = AnaUtils::GetRecBeamDir();//currently only use dir
+
+    if(kMC){
+      const TVector3 truthBeam = AnaUtils::GetTruthBeamFull();
+      const double beamthetaRes = (recBeam.Theta()-truthBeam.Theta())*TMath::RadToDeg();//use absolute difference 
+      style::FillInRange(AnaIO::hBeamThetaRes, truthBeam.Theta()*TMath::RadToDeg(), beamthetaRes);
+    }
+    
+    style::FillInRange(AnaIO::hRecBeamTheta, recBeam.Theta()*TMath::RadToDeg(), evtType);
+
+    //====== continue cut flow
+    if(!gkOnlySignal){  
       //3. n track daughter
-      if(!AnaCut::CutTopology(kPiZero)){
+      if(!AnaCut::CutTopology(kPiZero, gkFillBefore)){
         continue;
       }   
     }//====================================================== switch between signal sample and selected sample
 
+    //____________________________________________________________________________________________________
+    //==============  after ALL cuts !!! =========================
+
+    if(kMC){
+      AnaIO::hTruthBeamType->Fill(TruthBeamType);
+      AnaIO::hTruthSignal->Fill(AnaIO::kSignal);
+    }
+
+    //===================================================
+    //only checking after-selection distributions
+    TLorentzVector *dummypi0 = 0x0;
+    int dummycounter = -999;
+    if(gkFillBefore){
+      //print, no fill
+      AnaCut::GetNTrack(kPiZero, evtType, dummycounter, dummycounter, dummycounter, dummypi0, true, false);
+    }
+    else{
+      //print, fill
+      AnaCut::GetNTrack(kPiZero, evtType, dummycounter, dummycounter, dummycounter, dummypi0, true, true);
+    }
+    
      /*   
     //x. Beam dEdx cut shadowed by beam filtering
     AnaIO::hBeamLen->Fill(AnaIO::reco_beam_len);
@@ -103,16 +139,6 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
       continue;
     }
     */
-
-    //____________________________________________________________________________________________________
-
-    //============== Benchmark after ALL cuts !!! =========================
-    //benchmark
-
-    if(kMC){
-      AnaIO::hTruthBeamType->Fill(TruthBeamType);
-      AnaIO::hTruthSignal->Fill(AnaIO::kSignal);
-    }
 
     //======================= NO cuts below ========================
 

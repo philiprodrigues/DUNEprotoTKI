@@ -39,7 +39,7 @@ int GetTruthFromRec(const int recidx, int & pdg, TLorentzVector *& momRefBeam)
 
 
 //int GetNTrack(const bool kpi0, const bool ksig, int & nproton, int & nshower, int & nmichel, TLorentzVector * & leadingProton, TLorentzVector *& leadingPiplus, TLorentzVector *  & leadingPi0, const bool kprint=false, const bool kfill=false)
-int GetNTrack(const bool kpi0, const bool ksig, int & nproton, int & nshower, int & nmichel, TLorentzVector *  & leadingPi0, const bool kprint, const bool kfill)
+int GetNTrack(const bool kpi0, const int truthEventType, int & nproton, int & nshower, int & nmichel, TLorentzVector *  & leadingPi0, const bool kprint, const bool kfill)
 {
   /*
 root [11] beamana->Scan("reco_daughter_PFP_ID:reco_daughter_PFP_true_byHits_ID:reco_daughter_allTrack_ID:reco_daughter_allShower_ID:true_beam_daughter_ID:true_beam_daughter_reco_byHits_PFP_ID:true_beam_daughter_reco_byHits_allTrack_ID:true_beam_daughter_reco_byHits_allShower_ID")
@@ -114,15 +114,17 @@ not set
     if(kfill){
       style::FillInRange(AnaIO::hCutNdEdx, NdEdx, fillstktype);
     }
+    //not using ESC cut, so ndEdx cut is not a must
+    /*
     const int ndedxcut = kpi0 ? 6 : 16; //need E[3], at least 4 cls
     if(kPrintCutInfo){
       printf("check cut kpi0 %d ndedxcut %d\n", kpi0, ndedxcut);
     }
-
     if(NdEdx<ndedxcut){
       //do not count it as anything
       continue;
     }
+    */
     //<--- need to be done before any counting!!!
 
     //__________________________________________ Count without continue  __________________________________________
@@ -147,7 +149,7 @@ not set
     //michel is not found (all below 0.5, those above 0.5 are shower and other_type)
     int recParticleType = -999;
     const double trackScore  = (*AnaIO::reco_daughter_PFP_trackScore_collection)[ii];
-    if(trackScore>0.5 && (*AnaIO::reco_daughter_allTrack_ID)[ii]!=-1 ){
+    if(nhits > 40 && trackScore>0.5 && (*AnaIO::reco_daughter_allTrack_ID)[ii]!=-1 ){
       if( (*AnaIO::reco_daughter_allTrack_ID)[ii]==-1 ){
         printf("bad track ID! %d\n", ii); exit(1);
       }
@@ -156,6 +158,8 @@ not set
       //========== proton tagging now!
       //all signal protons have nhit below 260
       const double cutNH = 260;
+      //use the same selection for proton with Chi2 because of better data-MC consistency
+      /*
       if(kpi0){
         //all signal protons have startE3 > 9
         //with Chi2NDF cut  44/191 = 23% purity; without 46/197 = 23% purity, slightly higher efficiency
@@ -171,17 +175,17 @@ not set
         }
       }
       else{
-        const double cutCHI = 50;
-        if(Chi2NDF<cutCHI && nhits<cutNH){
-          recParticleType = AnaUtils::gkProton;
-        }
-        else{
-          recParticleType = AnaUtils::gkPiPlus;
-        }
-
-        if(kPrintCutInfo){
-          printf("check cut kpi0 %d proton tag Chi2NDF %.2f nhits %.0f\n", kpi0, cutCHI, cutNH);
-        }
+      */
+      const double cutCHI = 50;
+      if(Chi2NDF<cutCHI && nhits<cutNH){
+        recParticleType = AnaUtils::gkProton;
+      }
+      else{
+        recParticleType = AnaUtils::gkPiPlus;
+      }
+      
+      if(kPrintCutInfo){
+        printf("check cut kpi0 %d proton tag Chi2NDF %.2f nhits %.0f\n", kpi0, cutCHI, cutNH);
       }
 
       if(recParticleType==AnaUtils::gkProton){
@@ -219,7 +223,7 @@ not set
 
     //__________________________________________ Print and Fill  __________________________________________
     if(kprint){
-      printf("test sig %d rii %d/%d tii %4d pdg %4d sE2 %6.1f sE3 %6.1f lE2 %6.1f lE3 %6.1f nhi %4d tkS %6.1f emS %6.1f miS %6.1f sum %6.1f chf %6.1f\n", ksig, ii, recsize, trueidx, pdg, startE2, startE3, lastE2, lastE3, nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore, Chi2NDF);
+      printf("test sig %d rii %d/%d tii %4d pdg %4d sE2 %6.1f sE3 %6.1f lE2 %6.1f lE3 %6.1f nhi %4d tkS %6.1f emS %6.1f miS %6.1f sum %6.1f chf %6.1f\n", truthEventType, ii, recsize, trueidx, pdg, startE2, startE3, lastE2, lastE3, nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore, Chi2NDF);
     }
 
     if(kfill){
@@ -260,8 +264,15 @@ not set
     kPrintCutInfo = false;
   }
 
-  //only fill nshowers when doing fill
-  leadingPi0 = AnaUtils::GetPiZero(ksig, showerArray, false, kfill);
+  if(kpi0){
+    //only fill histnshowers when doing fill
+    leadingPi0 = AnaUtils::GetPiZero(truthEventType, showerArray, false, kfill);
+
+    //for gkOnlySignal=true, this might be null due to non-reconstruction of shower    
+    if(kfill && leadingPi0){
+      style::FillInRange(AnaIO::hCutMpi0, leadingPi0->M(), truthEventType);
+    }
+  }
 
   if(kprint){
     printf("\n\n");
@@ -271,14 +282,13 @@ not set
 }
 
 
-bool CutTopology(const bool kpi0)
+bool CutTopology(const bool kpi0, const bool kFillBefore)
 {
   int cutnproton = 0;
   int cutnshower = 0;
   int cutnmichel = 0;
   TLorentzVector * leadingPi0 = 0x0;  
 
-  const bool kFillBefore = true;
   if(kFillBefore){
     //no print, fill
     AnaIO::nTrack = GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, leadingPi0, false, true);
@@ -334,29 +344,6 @@ bool CutTopology(const bool kpi0)
   style::FillInRange(AnaIO::hCutnproton, cutnproton, filleventtype);
   if(cutnproton!=1){
     return false;
-  }
-  
-  //===================================================
-  //only checking after-selection distributions
-  if(kpi0){
-    if(leadingPi0){
-      style::FillInRange(AnaIO::hCutMpi0, leadingPi0->M(), filleventtype);
-    }
-    else{
-      printf("leadingpi0 null!!\n"); exit(1);
-    }
-  }
-  
-  TLorentzVector *dummypi0 = 0x0;
-  //no getting of pizero
-  if(kFillBefore){
-    //print, no fill
-    GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, dummypi0, true, false);
-  }
-  else{
-    //debug mode: major background is -999 shower mocking protons, no efficient cut variables found
-    //print, fill
-    GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, dummypi0, true, true);
   }
   
   return true;
@@ -528,19 +515,7 @@ bool CutBeamAllInOne(const bool kmc)
     return false;
   }
   //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
-
-  //___________________________ fill beam kinematics _________________________
-
-  const TVector3 recBeam = AnaUtils::GetRecBeamDir();//currently only use dir
-
-  if(kmc){
-    const TVector3 truthBeam = AnaUtils::GetTruthBeamFull();
-    const double beamthetaRes = (recBeam.Theta()-truthBeam.Theta())*TMath::RadToDeg();//use absolute difference 
-    style::FillInRange(AnaIO::hBeamThetaRes, truthBeam.Theta()*TMath::RadToDeg(), beamthetaRes);
-  }
-
-  style::FillInRange(AnaIO::hRecBeamTheta, recBeam.Theta()*TMath::RadToDeg(), filleventtype);
-
+  
   return true;
 }
 
