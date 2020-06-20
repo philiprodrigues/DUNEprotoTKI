@@ -1,4 +1,4 @@
-# DUNEprotoTKI: analysis tool for TKI analyses on protoDUNE data
+# DUNEprotoTKI: tools for TKI analyses on protoDUNE data
 
 How-to's:
 
