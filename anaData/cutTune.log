@@ -90,4 +90,27 @@
       
       <-- //p_leading 0.45-1, p_sublieading < 0.45, no cut on pi+
       <-- //p-pi0: 242 events
+
+
+AOB:
+
+ /*
+root [11] beamana->Scan("reco_daughter_PFP_ID:reco_daughter_PFP_true_byHits_ID:reco_daughter_allTrack_ID:reco_daughter_allShower_ID:true_beam_daughter_ID:true_beam_daughter_reco_byHits_PFP_ID:true_beam_daughter_reco_byHits_allTrack_ID:true_beam_daughter_reco_byHits_allShower_ID")
+***********************************************************************************************************************
+*    Row   * Instance * reco_daug * reco_daug * reco_daug * reco_daug * true_beam * true_beam * true_beam * true_beam *
+***********************************************************************************************************************
+*       13 *        0 *        86 *     40841 *        86 *        86 *     40800 *           *           *           *
+*       13 *        1 *       226 *     40855 *       225 *       225 *     40841 *           *           *           *
+
+So
+(reco_daughter_PFP_ID = reco_daughter_allTrack_ID = reco_daughter_allShower_ID)
+                             !=
+ (reco_daughter_PFP_true_byHits_ID = true_beam_daughter_ID)
+
+All 
+true_beam_daughter_reco_byHits_PFP_ID:
+true_beam_daughter_reco_byHits_allTrack_ID:
+true_beam_daughter_reco_byHits_allShower_ID
+not set
+   */
      

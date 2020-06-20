@@ -38,28 +38,13 @@ int GetTruthFromRec(const int recidx, int & pdg, TLorentzVector *& momRefBeam)
 }
 
 
-//int GetNTrack(const bool kpi0, const bool ksig, int & nproton, int & nshower, int & nmichel, TLorentzVector * & leadingProton, TLorentzVector *& leadingPiplus, TLorentzVector *  & leadingPi0, const bool kprint=false, const bool kfill=false)
 int GetNTrack(const bool kpi0, const int truthEventType, int & nproton, int & nshower, int & nmichel, TLorentzVector *  & leadingPi0, const bool kprint, const bool kfill)
 {
-  /*
-root [11] beamana->Scan("reco_daughter_PFP_ID:reco_daughter_PFP_true_byHits_ID:reco_daughter_allTrack_ID:reco_daughter_allShower_ID:true_beam_daughter_ID:true_beam_daughter_reco_byHits_PFP_ID:true_beam_daughter_reco_byHits_allTrack_ID:true_beam_daughter_reco_byHits_allShower_ID")
-***********************************************************************************************************************
-*    Row   * Instance * reco_daug * reco_daug * reco_daug * reco_daug * true_beam * true_beam * true_beam * true_beam *
-***********************************************************************************************************************
-*       13 *        0 *        86 *     40841 *        86 *        86 *     40800 *           *           *           *
-*       13 *        1 *       226 *     40855 *       225 *       225 *     40841 *           *           *           *
-
-So
-(reco_daughter_PFP_ID = reco_daughter_allTrack_ID = reco_daughter_allShower_ID)
-                             !=
- (reco_daughter_PFP_true_byHits_ID = true_beam_daughter_ID)
-
-All 
-true_beam_daughter_reco_byHits_PFP_ID:
-true_beam_daughter_reco_byHits_allTrack_ID:
-true_beam_daughter_reco_byHits_allShower_ID
-not set
-   */
+  //
+  //to-do: need to pass out the proton and piplus
+  //Example event (old print out):
+  //rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -397725.603302 nhits 7 trackScore 0.016739 emScore 0.983240 michelScore 0.289565 sum 1.289545
+  //
 
   const int recsize = AnaIO::reco_daughter_PFP_ID->size();
   const int mbr     = AnaIO::reco_daughter_allTrack_momByRange_proton->size();
@@ -67,18 +52,18 @@ not set
     printf("recsize != mbr %d %d\n", recsize, mbr); exit(1); 
   }
 
-  /*
-    est rec 1/2 trueID 15 pdg 22 truemomentum 0.002512 recp -999.000000 resolution -397725.603302 nhits 7 trackScore 0.016739 emScore 0.983240 michelScore 0.289565 sum 1.289545
-  */
   int ntrack = 0;
   nshower = 0;
   nmichel = 0;
   nproton = 0;
   int nPFP = 0;
 
+  /* to-do:
   //proton and pion array only keeps the leading one, ie, only [0] will be returned
   //vector<TLorentzVector> protonArray; 
   //vector<TLorentzVector> pionArray; //that is non-proton actually
+  */
+
   vector<TLorentzVector> showerArray;
 
   //static bool kPrintCutInfo = true;
@@ -107,7 +92,7 @@ not set
       fillstktype = 3;
     }
 
-    //__________________________________________ Cut PFP before counting  __________________________________________
+    //__________________________________________ Cut PFP before counting -> no cut any more  __________________________________________
 
     //---> need to be done before any counting!!!
     const vector<double>  dedxarray = (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii];
@@ -128,7 +113,7 @@ not set
     */
     //<--- need to be done before any counting!!!
 
-    //__________________________________________ Count without continue  __________________________________________
+    //__________________________________________ Count without "continue"  __________________________________________
 
     const int nhits          = (*AnaIO::reco_daughter_PFP_nHits)[ii];
     /*//they are indeed different: 236 80
@@ -156,9 +141,10 @@ not set
       }
       ntrack++;
 
-      //========== proton tagging now!
-      //all signal protons have nhit below 260
+      //========== proton tagging now! <<<
+      //all signal protons have nhit below 260 <- only true for Pi0 analysis
       //const double cutNH = 260;
+
       //use the same selection for proton with Chi2 because of better data-MC consistency
       /*
       if(kpi0){
@@ -177,8 +163,11 @@ not set
       }
       else{
       */
+      //no nhit 260 cut any more, better e*p
+      // && nhits<cutNH){
+
       const double cutCHI = 50;
-      if(Chi2NDF<cutCHI){// && nhits<cutNH){
+      if(Chi2NDF<cutCHI){ 
         recParticleType = AnaUtils::gkProton;
       }
       else{
@@ -194,7 +183,7 @@ not set
       if(recParticleType==AnaUtils::gkProton){
         nproton++;
       }
-      //========== proton tagging done!
+      //========== proton tagging done! >>>
     }
 
     const double emScore     = (*AnaIO::reco_daughter_PFP_emScore_collection)[ii];
@@ -277,9 +266,11 @@ not set
     printf("GetNTrack PFP size %d nlooped %d ntrack %d nshower %d nmichel %d nproton %d\n", recsize, nPFP, ntrack, nshower, nmichel, nproton);
   }
 
+  //leading pi0 is event-level info
   if(kpi0){
     //only fill histnshowers when doing fill
-    leadingPi0 = AnaUtils::GetPiZero(truthEventType, showerArray, false, kfill);
+    const bool kprint = false;
+    leadingPi0 = AnaUtils::GetPiZero(truthEventType, showerArray, kprint, kfill);
 
     //for gkOnlySignal=true, this might be null due to non-reconstruction of shower    
     if(kfill && leadingPi0){
@@ -297,6 +288,10 @@ not set
 
 bool CutTopology(const bool kpi0, const bool kFillBefore)
 {
+  //
+  //number of particles defined in GetNTrack needs to be optimized
+  //
+
   int cutnproton = 0;
   int cutnshower = 0;
   int cutnmichel = 0;
@@ -307,8 +302,10 @@ bool CutTopology(const bool kpi0, const bool kFillBefore)
   AnaIO::nTrack = GetNTrack(kpi0, AnaIO::kSignal, cutnproton, cutnshower, cutnmichel, leadingPi0, kprint, kfill);
   
   const int filleventtype = AnaUtils::GetFillEventType();
-  //----------- do cuts
-  
+
+  //______________________________________________ Do cuts below, do not change ______________________________________________ 
+
+  //1. nshower
   style::FillInRange(AnaIO::hCutnshower, cutnshower, filleventtype);
   if(kpi0){
     if(cutnshower<2){
@@ -321,6 +318,7 @@ bool CutTopology(const bool kpi0, const bool kFillBefore)
     }
   }
   
+  //2. nmichel
   style::FillInRange(AnaIO::hCutnmichel, cutnmichel, filleventtype);
   if(kpi0){
     if(cutnmichel>0){
@@ -336,9 +334,9 @@ bool CutTopology(const bool kpi0, const bool kFillBefore)
     */
   }
   
+  //3. ntrack
   style::FillInRange(AnaIO::hCutntrack, AnaIO::nTrack, filleventtype);
   if(kpi0){
-    //with this 56% purity, without 45%
     if(AnaIO::nTrack!=1){
       return false;
     }
@@ -348,7 +346,8 @@ bool CutTopology(const bool kpi0, const bool kFillBefore)
         return false;
     }
   }
-  
+
+  //4. nproton  
   style::FillInRange(AnaIO::hCutnproton, cutnproton, filleventtype);
   if(cutnproton!=1){
     return false;
@@ -482,8 +481,13 @@ bool CutDataBeamPos()
 
 bool CutBeamAllInOne(const bool kmc)
 {
-  //0. true beam particle //"In data the beam Instrumentation is able to filter for these events but is not inside the MC" so read data file has this
+  //
+  //standard procedure from pion analyses, do not change
+  //
+
+  //1. beam ID cut
   if(kmc){
+    //"In data the beam Instrumentation is able to filter for these events but is not inside the MC" 
     const bool mc_beampass =(AnaIO::true_beam_PDG == 211 || AnaIO::true_beam_PDG == -13);
     style::FillInRange(AnaIO::hCutbeamID, mc_beampass);
     if(!mc_beampass){
@@ -500,29 +504,25 @@ bool CutBeamAllInOne(const bool kmc)
 
   const int filleventtype = AnaUtils::GetFillEventType();
 
-  //for pi+ it is worse to include this pion-ana-cut (e*p: 6.7->6.3%), for pi0 it is the same e*p, better purity, worse efficiency.
-  //x. primary beam type 
+  //2. primary beam type cut
   style::FillInRange(AnaIO::hCutBeamType, AnaIO::reco_beam_type, filleventtype);
-  //no effect, shadowed by TMeanStart cut
   if(AnaIO::reco_beam_type!=13){//13: Pandora "track like"
     return false;
   }
   
-  //1. beam position MC cut, need MC truth, how is it possible in analysis?
+  //3. beam position cut
   const bool kBeamPosPass = kmc ? CutMCBeamPos() : CutDataBeamPos();
   style::FillInRange(AnaIO::hCutBeamPosPass, kBeamPosPass, filleventtype);
   if(!kBeamPosPass){
     return false;
   }
-  //-> now signal purity 138/3537 = 3.9%, 2283 pi+ bea, 801 e+ beam
   
-  //2. APA3 
+  //4. APA3 cut
   style::FillInRange(AnaIO::hCutBeamEndZ, AnaIO::reco_beam_endZ, filleventtype);
   style::FillInRange(AnaIO::hCutBeamEndZPass, !(AnaIO::reco_beam_endZ>=226), filleventtype);
   if(AnaIO::reco_beam_endZ>=226){
     return false;
   }
-  //-> now signal purity 135/3143 = 4.3%, 2102 pi+ beam, 801 e+ beam
   
   return true;
 }

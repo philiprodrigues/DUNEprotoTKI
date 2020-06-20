@@ -21,12 +21,19 @@
 #include <algorithm>    // std::sort
 #include <vector>       // std::vector
 
+//if true, use MC signal and bypass all cuts; otherwise full data set will go through cuts
 const bool gkOnlySignal = false;
-const bool gkFillBefore = false;//fill after all cuts;//0;//0 if gkOnlySignal true: only fill after all cuts
-const int gkDataBit = 3;//1;//1 is mc, 1 is data
+
+//if true, observables will be filled before cuts; otherwise after. "false" if gkOnlySignal "true": only fill after all cuts
+const bool gkFillBefore = false;
+
+//1 is mc, 2 is data, 3 is both
+const int gkDataBit = 3;
 
 int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
+  //_____________________________________________________ basic settings, do not change _____________________________________________________ 
+
   bool kMC = true;
   if(!finName.Contains("_mc_")){
     kMC = false;
@@ -43,11 +50,12 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
 
   cout<<"\n\n                       Running anaRec kMC "<<kMC<<" kPiZero "<<kPiZero<<" TrackingProton "<<kTrackingProton<<endl<<endl;
 
+  //initialise input and output
   TTree * tree = AnaIO::GetInputTree(fin, "pionana/beamana");
   TTree * tout = AnaIO::GetOutputTree(lout, tag);  
   AnaIO::IniRecHist(lout, tag);
 
-  //____________________________________________________________________________________________________
+  //_____________________________________________________ event loop with cuts _____________________________________________________
 
   int ientry = 0;
   int selBeamCount = 0;
@@ -66,7 +74,7 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     //do it before the loop continues for any reason
     ientry++;
    
-    //____________________________________________________________________________________________________
+    //====================== Extract truth information ======================
 
     //calculate before any cuts! Only filled after ALL cuts!
     int TruthBeamType = -999;
@@ -77,8 +85,10 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
 
     const int evtType =  AnaUtils::GetFillEventType();
 
-    //for to see within signal
-    if(gkOnlySignal){//====================================================== switch between signal sample and selected sample
+    //====================== Do cuts ======================
+
+    //gkOnlySignal=true: use MC signal and no cuts
+    if(gkOnlySignal){
       if(!AnaIO::kSignal){
         continue;
       }
@@ -88,9 +98,10 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
         continue;
       }
     }
-    //count beam after beam cut before topology cut
+    //count beam after beam cut before other cuts
     selBeamCount++;
-    //___________________________ fill beam kinematics _________________________
+
+    //---------- fill beam kinematics ----------
 
     const TVector3 recBeam = AnaUtils::GetRecBeamDir();//currently only use dir
 
@@ -102,30 +113,28 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     
     style::FillInRange(AnaIO::hRecBeamTheta, recBeam.Theta()*TMath::RadToDeg(), evtType);
 
-    //====== continue cut flow
+    //---------- continue cut flow ----------
     if(!gkOnlySignal){  
-      //3. n track daughter
       if(!AnaCut::CutTopology(kPiZero, gkFillBefore)){
         continue;
       }   
-    }//====================================================== switch between signal sample and selected sample
+    }
 
-    //____________________________________________________________________________________________________
-    //==============  after ALL cuts !!! =========================
+    //====================== No cuts any more ======================
 
     if(kMC){
       AnaIO::hTruthBeamType->Fill(TruthBeamType);
       AnaIO::hTruthSignal->Fill(AnaIO::kSignal);
     }
 
-    //===================================================
-    //only checking after-selection distributions
+    //Filling after-selection distributions
     TLorentzVector *dummypi0 = 0x0;
     int dummycounter = -999;
     const bool kprint = false;
     const bool kfill = !gkFillBefore;
     AnaCut::GetNTrack(kPiZero, evtType, dummycounter, dummycounter, dummycounter, dummypi0, kprint, kfill);
     
+    //--- to test
      /*   
     //x. Beam dEdx cut shadowed by beam filtering
     AnaIO::hBeamLen->Fill(AnaIO::reco_beam_len);
@@ -133,29 +142,30 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     if(!cutBeamdEdx(AnaIO::kSignal)){
       continue;
     }
-    */
 
-    //======================= NO cuts below ========================
-
-    //--- to test
     //Fill kSignal vs variable; the reason for kSignal but not kBeam is the signal is interacting pion, not all pions. Directly choose matrix to optimize for it
     //AnaIO::hSigAfterVsLen->Fill(AnaIO::reco_beam_len, AnaIO::kSignal);
+    */
 
-    //============= done loop
+    //====================== end of loop ======================
     
     tout->Fill();
   }
 
   cout<<"All entries "<<ientry<<endl;
 
+  //_____________________________________________________ Automatically handling histograms and reporting  _____________________________________________________ 
   style::Process2DHist(lout);
 
   if(kMC){
     /*
-seeana010.log:kPiZero 0 signal 224.0 all 224.0 purity 100.0%
-seeana110.log:kPiZero 1 signal 246.0 all 246.0 purity 100.0%
-     */
+    //from pionana_mc_1GeV_6_15_20.root
+    seeana010.log:kPiZero 0 signal 224.0 all 224.0 purity 100.0%
+    seeana110.log:kPiZero 1 signal 246.0 all 246.0 purity 100.0%
+    */
+    //only valid for pionana_mc_1GeV_6_15_20.root
     const double nfullsig = kPiZero? 246.0 : 224.0;
+
     const double nsig = AnaIO::hTruthSignal->GetBinContent(2);
     const double nbk = AnaIO::hTruthSignal->GetBinContent(1);
     const double nall = nsig+nbk;
@@ -170,6 +180,8 @@ seeana110.log:kPiZero 1 signal 246.0 all 246.0 purity 100.0%
 
 void anaTruth(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
+  //_____________________________________________________ not for reconstruction, not cleaned up for the momentum  _____________________________________________________ 
+
   if(!finName.Contains("_mc_")){
     printf("anaTruth _mc_ not found in file name! %s\n", finName.Data()); exit(1);
   }
@@ -292,6 +304,8 @@ int main(int argc, char * argv[])
     return 0;
   }
 
+  //_____________________________________________________ basic settings, do not change _____________________________________________________ 
+
   gSystem->Load("libTree");
 
   style::SetGlobalStyle();
@@ -322,8 +336,10 @@ int main(int argc, char * argv[])
 
   double mcBeamCount = -999;
   double dataBeamCount = -999;
-  //=======================================================================================
-  //------------------------- MC
+
+  //_____________________________________________________ Run truth only study or MC/data selection  _____________________________________________________
+  //for reconstruction performance and selection study, only anaRec is needed
+
   const TString mcfinName = "input/protoDUNE_mc_reco_flattree.root";
 
   if(kTruth){
@@ -339,23 +355,33 @@ int main(int argc, char * argv[])
       dataBeamCount = anaRec(datafinName, datalout, tag);
     }
   }
-  //------------------------- Data
-  //=======================================================================================
+
+  //_____________________________________________________ Draw and save  _____________________________________________________
+
+  //normalise MC plots to Data by beam count ratio
   const double plotscale = dataBeamCount/mcBeamCount;
 
   printf("anaRec beamcount data: %.0f mc: %.0f plotscale %f\n", dataBeamCount, mcBeamCount, plotscale);
 
-  const bool kfast = true;
+  //kfast=true: only png will be save; otherwise eps, pdf, png all saved
+  const bool kfast = false;
+
+  //ktext=true: some histograms will be drawn with additional option of "text"
+  const bool ktext = true;
+
   if(mclout){
     if(datalout){
-      style::DrawHist(mclout, plotscale, datalout, "output", tag, true, kfast);
+      //overlay MC and data
+      style::DrawHist(mclout, plotscale, datalout, "output", tag, ktext, kfast);
     }
     else{
-      style::DrawHist(mclout, 1, 0x0, "output", tag, true, kfast);
+      //MC plots only
+      style::DrawHist(mclout, 1, 0x0, "output", tag, ktext, kfast);
     }
   }
   else if(datalout){
-    style::DrawHist(datalout, 1, 0x0, "output", tag, true, kfast);
+    //data plots only
+    style::DrawHist(datalout, 1, 0x0, "output", tag, ktext, kfast);
   }
 
   TFile * fout = new TFile(Form("output/outanaData_%s.root", tag.Data()),"recreate");
