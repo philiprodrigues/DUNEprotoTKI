@@ -16,6 +16,11 @@
 
 TString setX(const TString var, const bool kPiZero, int &nbin, double &xmin, double &xmax, double &lxoff)
 {
+  //
+  //define plotting elements
+  //lxoff is legend x coordinate offset
+  //
+
   TString vn;
   lxoff = 0;
   const double xr = 0.5;
@@ -112,21 +117,37 @@ TString getUnit(const TString tit)
 
 void drawTKI(const TString var, TList *lout, const TString pretag, const bool kPScut, const bool kSLcut, const double ppthres)
 {
+  //_____________________________________________________ basic settings _____________________________________________________ 
+
   const bool kPiZero = pretag.Contains("MPiZero");
   cout<<"\n\n                       Running kPiZero "<<kPiZero<<endl<<endl;
  
-  TTree * tree = (TTree*)gDirectory->Get("tree");
+  TTree * tree = (TTree*)gDirectory->Get("mc/tree");
   if(!tree){
     cout<<"no tree!"<<endl;
     exit(1);
   }
 
+  //_____________________________________________________ define plotting elements and cuts _____________________________________________________
+
+  //====================== all plotting stuff ====================== 
   int nbin=-999;
   double xmin=-999, xmax=-999, lxoff=-999;
   const TString vn = setX(var, kPiZero, nbin, xmin, xmax, lxoff);
   const TString xunit = getUnit(vn);
 
   printf("var %s vn %s nbin %d xmin %f xmax %f\n", var.Data(), vn.Data(), nbin, xmin, xmax);
+
+  THStack * stk = new THStack("s"+var,var); lout->Add(stk);
+  TLegend * lg = new TLegend(lxoff+0.15, 0.65, lxoff+0.5, 0.9);
+  style::ResetStyle(lg);
+
+  //need system color
+  //const int col[]={kGray, kRed, kBlue, kOrange, kGreen+3};
+  const int col[]={kOrange,  1014, 1011, 1007,  kOrange, 1009, kOrange, 1003, 1008, 1002, kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
+  const TString tag = Form("%s_%s_ppthres%.0fPScut%dSLcut%d", var.Data(), pretag.Data(), ppthres*1E3, kPScut, kSLcut);
+
+  //====================== define cuts for topology decomposition to form a stack ======================
 
   vector<TString> cuts;//need to match cns
   cuts.push_back("1");
@@ -135,7 +156,7 @@ void drawTKI(const TString var, TList *lout, const TString pretag, const bool kP
   cuts.push_back("nproton==1 && nneutron!=0");
   cuts.push_back("nproton!=1 && nneutron!=0");
 
-  TString PScut = Form("&& (finProtonmomentum > %f && finProtonmomentum < 1)", ppthres);
+  const TString PScut = Form("&& (finProtonmomentum > %f && finProtonmomentum < 1)", ppthres);
   //no phase cut for pi+, need to investigate using Michel electron
   /*
   if(!kPiZero){
@@ -150,14 +171,7 @@ void drawTKI(const TString var, TList *lout, const TString pretag, const bool kP
   cns.push_back("1pMn");
   cns.push_back("NpMn");
 
-  THStack * stk = new THStack("s"+var,var); lout->Add(stk);
-  TLegend * lg = new TLegend(lxoff+0.15, 0.65, lxoff+0.5, 0.9);
-  style::ResetStyle(lg);
-
-  //need system color
-  //const int col[]={kGray, kRed, kBlue, kOrange, kGreen+3};
-  const int col[]={kOrange,  1014, 1011, 1007,  kOrange, 1009, kOrange, 1003, 1008, 1002, kRed, kBlue, kGray, kOrange, kGreen+3, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
-  const TString tag = Form("%s_%s_ppthres%.0fPScut%dSLcut%d", var.Data(), pretag.Data(), ppthres*1E3, kPScut, kSLcut);
+  //_____________________________________________________ draw each cut and add non-all to stack  _____________________________________________________
 
   double ntotall = -999;
   for(unsigned int ii=0; ii<cuts.size(); ii++){
@@ -178,7 +192,8 @@ void drawTKI(const TString var, TList *lout, const TString pretag, const bool kP
     }
 
     const int nev = tree->Draw(darg, dcut);
-    printf("ntmp %s ii %d darg %s cut %s nev %d underflow %f overflow %f integral %f\n\n", ntmp.Data(), ii, darg.Data(), dcut.Data(), nev, htmp->GetBinContent(0), htmp->GetBinContent(nbin+1), htmp->Integral(0, 1000));
+    //print out drawing detail
+    printf("ntmp %s ii %d darg %s cut: \"%s\" nev: %d underflow %f overflow %f integral %f\n", ntmp.Data(), ii, darg.Data(), dcut.Data(), nev, htmp->GetBinContent(0), htmp->GetBinContent(nbin+1), htmp->Integral(0, 1000));
 
     htmp->Scale(1,"width");
     if(cns[ii]!="all"){
@@ -190,6 +205,8 @@ void drawTKI(const TString var, TList *lout, const TString pretag, const bool kP
       ntotall = htmp->Integral(0,1000,"width");
     }
   }
+
+  //_____________________________________________________ detailed drawing _____________________________________________________
 
   TCanvas * c1=new TCanvas("c1","", 600, 400);
   style::PadSetup(c1);
@@ -230,6 +247,8 @@ void drawTKI(const TString var, TList *lout, const TString pretag, const bool kP
 
 int main(int argc, char* argv[])
 {
+  //_____________________________________________________ basic settings _____________________________________________________ 
+
   if(argc!=2){
     cout<<"argc!=2 !"<<argc<<endl;
     return 0;
@@ -244,14 +263,20 @@ int main(int argc, char* argv[])
 
   TList * lout= new TList;
 
+  //_____________________________________________________ draw MC signal distributions  _____________________________________________________
+
   TFile *fin = new TFile(Form("../anaData/output/outanaData_%s_TrackingProton_anaTruth.root", tag.Data()));
   if(!fin->IsOpen()){
     cout<<"fin not open!"<<endl;
     exit(1);
   }
 
+  //draw different observables one by one
   const TString vars[]={"dalphat","dphit","dpt","pn", "iniPimomentum", "finPimomentum", "finProtonmomentum", "iniPitheta", "finPitheta", "finProtontheta", "fin2Pmom"};
   for(unsigned int ii=0; ii<sizeof(vars)/sizeof(TString); ii++){
+    //void drawTKI(const TString var, TList *lout, const TString pretag, const bool kPScut, const bool kSLcut, const double ppthres)
+    //draw different phase space cuts
+
     //0.45 -> 100 MeV K.E.
     drawTKI(vars[ii], lout, tag,  0, 0, 0.45);
     drawTKI(vars[ii], lout, tag,  1, 0, 0.45);
@@ -260,6 +285,8 @@ int main(int argc, char* argv[])
     drawTKI(vars[ii], lout, tag,  1, 0, 0.25);
     drawTKI(vars[ii], lout, tag,  1, 1, 0.25);
   }
+
+  //_____________________________________________________ saving _____________________________________________________
 
   TFile * fout= new TFile(Form("output/outdrawTKI_%s.root", tag.Data()),"recreate");
   lout->Write();
