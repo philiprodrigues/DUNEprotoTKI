@@ -11,8 +11,9 @@ How-to's:
    * Go to style/ and compile by executing do.sh only if style is changed
 3) * Go to anaData/, drawTKI/, drawTracking/ and executing do.sh
    - for truth signal distributions: anaData with kTruth=1 + drawTKI
-   - for efficiency, momentum resolution, and dEdx: anaData with kTruth=0 -> drawTracking
-   - for event selection: anaData with kTruth=0
+   - for efficiency, momentum resolution, and dEdx: anaData with kTruth=0 + drawTracking
+   - for event selection: anaData with kTruth=0 alone
+
 
 
 
