@@ -182,7 +182,7 @@ void style::GetHist(const TString var, const TString xtit, const TString ytit, T
 
   const TString cut = hist->GetTitle();
   const TString hname = hist->GetName();
-  printf("style::GetHist Drawing %s %s %s\n", var.Data(), hname.Data(), cut.Data());
+  printf("style::GetHist Drawing var: %s hname: %s cut: \"%s\"\n", var.Data(), hname.Data(), cut.Data());
   tree->Draw(var+">>"+hname, cut);
 
   hist->SetXTitle(xtit);
