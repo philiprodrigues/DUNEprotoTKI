@@ -88,6 +88,7 @@ using namespace std;
 class style
 {
  public:
+  static double PrintStat(const TString tag, TH1 *hh, const double val0, const double val1, const double oldsel=-999);
   static void FillInRange(TH1 * hh,  double xx, const double yy=-999);
   static void ScaleStack(THStack *stk, const double scale);
   static double GetEntries(THStack *stk);

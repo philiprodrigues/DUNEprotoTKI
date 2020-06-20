@@ -157,6 +157,21 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
   //_____________________________________________________ Automatically handling histograms and reporting  _____________________________________________________ 
   style::Process2DHist(lout);
 
+  //print cut flow statistics:
+  int icut = 0;
+  double nsel = -999;
+  nsel = style::PrintStat(tag+Form(" %d. Beam ID",  icut++), AnaIO::hCutbeamID, 1, 1, ientry);
+  nsel = style::PrintStat(tag+Form(" %d. Pandora beam type",  icut++), AnaIO::hCutBeamType, 13, 13, nsel);
+  nsel = style::PrintStat(tag+Form(" %d. Beam Pos",  icut++), AnaIO::hCutBeamPosPass, 1, 1, nsel);
+  nsel = style::PrintStat(tag+Form(" %d. APA3",  icut++), AnaIO::hCutBeamEndZPass, 1, 1, nsel);
+  nsel = style::PrintStat(tag+Form(" %d. Nshower",  icut++), AnaIO::hCutnshower, kPiZero?2:0, kPiZero?100000:0, nsel);
+  if(kPiZero){
+    nsel = style::PrintStat(tag+Form(" %d. Nmichel",  icut++), AnaIO::hCutnmichel, 0, 0, nsel);
+  }
+  nsel = style::PrintStat(tag+Form(" %d. Ntrack",  icut++), AnaIO::hCutntrack, kPiZero?1:2, kPiZero?1:2, nsel);
+  nsel = style::PrintStat(tag+Form(" %d. Nproton", icut++), AnaIO::hCutnproton, 1, 1, nsel);
+  printf("End of %d cuts: %.1f selected\n", icut, nsel);
+
   if(kMC){
     /*
     //from pionana_mc_1GeV_6_15_20.root

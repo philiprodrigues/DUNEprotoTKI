@@ -34,6 +34,33 @@ const TString gTagEFF="EFF";
 const TString gTagNOH="NOH";
 const TString gTagSTK="STK";
 
+double style::PrintStat(const TString tag, TH1 *hh, const double val0, const double val1, const double oldsel)
+{
+  const double newall = hh->Integral(0,100000);
+  if(oldsel!=-999){
+    if( fabs(newall-oldsel)>EPSILON ){
+      printf("style::PrintStat newall != oldsel %f %f\n", newall, oldsel); exit(1);
+    }
+  }
+
+  double nsel = -999;
+  TH2 * h2d = dynamic_cast<TH2*>(hh);
+  if(h2d){
+    TAxis *ax = h2d->GetXaxis();
+    const int xbin0 = ax->FindBin(val0);
+    const int xbin1 = ax->FindBin(val1);
+    nsel = h2d->Integral(xbin0, xbin1, 0, 100000);
+  }
+  else{
+    const int xbin0 = hh->FindBin(val0);
+    const int xbin1 = hh->FindBin(val1);
+    nsel = hh->Integral(xbin0, xbin1);
+  }
+
+  printf("%-70s: all %10.1f selected %10.1f %s\n", tag.Data(), newall, nsel, hh->GetName());
+  return nsel;
+}
+
 void style::FillInRange(TH1 * hh,  double xx, const double yy)
 {
   const double xmin = hh->GetXaxis()->GetBinLowEdge(1);
