@@ -57,7 +57,7 @@ double style::PrintStat(const TString tag, TH1 *hh, const double val0, const dou
     nsel = hh->Integral(xbin0, xbin1);
   }
 
-  printf("%-70s: all %10.1f selected %10.1f %s\n", tag.Data(), newall, nsel, hh->GetName());
+  printf("%-70s: all %10.1f selected %10.1f fraction %.1f%% %s \n", tag.Data(), newall, nsel, nsel/newall*100, hh->GetName());
   return nsel;
 }
 

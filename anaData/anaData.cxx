@@ -25,10 +25,13 @@
 const bool gkOnlySignal = false;
 
 //if true, observables will be filled before cuts; otherwise after. "false" if gkOnlySignal "true": only fill after all cuts
-const bool gkFillBefore = false;
+const bool gkFillBefore = true;//false;
 
 //1 is mc, 2 is data, 3 is both
 const int gkDataBit = 3;
+
+//gkFast=true: only png will be save; otherwise eps, pdf, png all saved
+const bool gkFast = false;
 
 int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
@@ -385,25 +388,22 @@ int main(int argc, char * argv[])
 
   printf("anaRec beamcount data: %.0f mc: %.0f plotscale %f\n", dataBeamCount, mcBeamCount, plotscale);
 
-  //kfast=true: only png will be save; otherwise eps, pdf, png all saved
-  const bool kfast = false;
-
   //ktext=true: some histograms will be drawn with additional option of "text"
   const bool ktext = true;
 
   if(mclout){
     if(datalout){
       //overlay MC and data
-      style::DrawHist(mclout, plotscale, datalout, "output", tag, ktext, kfast);
+      style::DrawHist(mclout, plotscale, datalout, "output", tag, ktext, gkFast);
     }
     else{
       //MC plots only
-      style::DrawHist(mclout, 1, 0x0, "output", tag, ktext, kfast);
+      style::DrawHist(mclout, 1, 0x0, "output", tag, ktext, gkFast);
     }
   }
   else if(datalout){
     //data plots only
-    style::DrawHist(datalout, 1, 0x0, "output", tag, ktext, kfast);
+    style::DrawHist(datalout, 1, 0x0, "output", tag, ktext, gkFast);
   }
 
   TFile * fout = new TFile(Form("output/outanaData_%s.root", tag.Data()),"recreate");
