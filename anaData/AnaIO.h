@@ -173,20 +173,26 @@ namespace AnaIO
   TH2D * hBeamThetaRes = 0x0;
 
   TH2D * hProtonThetaRes = 0x0;
-  TH2D * hPiThetaRes = 0x0;
+  TH2D * hPiplusThetaRes = 0x0;
 
   TH2D * hProtonMomentumRes = 0x0;
-  TH2D * hPiMomentumRes = 0x0;
+  TH2D * hPiplusMomentumRes = 0x0;
 
   TH2D * hRecBeamTheta = 0x0;
 
   TH2D * hRecProtonMomentum = 0x0;
   TH2D * hRecProtonTheta = 0x0;
-  TH2D * hRecProtonLastE2 = 0x0;
-  TH2D * hRecProtonLastE3 = 0x0;
 
   TH2D * hRecPiplusMomentum = 0x0;
   TH2D * hRecPiplusTheta = 0x0;
+
+  TH2D * hRecProtonStartE2 = 0x0;
+  TH2D * hRecProtonStartE3 = 0x0;
+  TH2D * hRecPiplusStartE2 = 0x0;
+  TH2D * hRecPiplusStartE3 = 0x0;
+
+  TH2D * hRecProtonLastE2 = 0x0;
+  TH2D * hRecProtonLastE3 = 0x0;
   TH2D * hRecPiplusLastE2 = 0x0;
   TH2D * hRecPiplusLastE3 = 0x0;
 
@@ -504,19 +510,23 @@ void IniRecHist(TList * lout, const TString tag)
   hBeamThetaRes      = new TH2D("b000BeamThetaResNOH"+tag,"",      nbmTheta, bmThetamin, bmThetamax, 25, -20, 30); lout->Add(hBeamThetaRes);
   hProtonThetaRes    = new TH2D("b001ProtonThetaResNOH"+tag,"",    ndTheta, dThetamin, dThetamax, 25, -20, 30); lout->Add(hProtonThetaRes);
   hProtonMomentumRes = new TH2D("b002ProtonMomentumResNOH"+tag,"", nmomentum, momentummin, momentummax, nres, -0.2, 0.2); lout->Add(hProtonMomentumRes);
-  hPiThetaRes        = new TH2D("b003PiThetaResNOH"+tag,"",        ndTheta, dThetamin, dThetamax, 25, -20, 30); lout->Add(hPiThetaRes);
-  hPiMomentumRes     = new TH2D("b004PiMomentumResNOH"+tag,"",     nmomentum, momentummin, momentummax, nres, resmin, resmax); lout->Add(hPiMomentumRes);
+  hPiplusThetaRes    = new TH2D("b003PiplusThetaResNOH"+tag,"",        ndTheta, dThetamin, dThetamax, 25, -20, 30); lout->Add(hPiplusThetaRes);
+  hPiplusMomentumRes = new TH2D("b004PiplusMomentumResNOH"+tag,"",     nmomentum, momentummin, momentummax, nres, resmin, resmax); lout->Add(hPiplusMomentumRes);
 
   hRecBeamTheta       = new TH2D("b010bRecBeamThetaSTK"+tag,"",       nbmTheta, bmThetamin, bmThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecBeamTheta);
-  hRecProtonMomentum  = new TH2D("b011bRecProtonMomentumSTK"+tag,"",  nmomentum, momentummin, momentummax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonMomentum);
-  hRecProtonTheta     = new TH2D("b012bRecProtonThetaSTK"+tag,"",     ndTheta, dThetamin, dThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonTheta);
-  hRecPiplusMomentum  = new TH2D("b013bRecPiplusMomentumSTK"+tag,"",  nmomentum, momentummin, momentummax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusMomentum);
-  hRecPiplusTheta     = new TH2D("b014bRecPiplusThetaSTK"+tag,"",     ndTheta, dThetamin, dThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusTheta);
+  hRecProtonTheta     = new TH2D("b011bRecProtonThetaSTK"+tag,"",     ndTheta, dThetamin, dThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonTheta);
+  hRecProtonMomentum  = new TH2D("b012bRecProtonMomentumSTK"+tag,"",  nmomentum, momentummin, momentummax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonMomentum);
+  hRecPiplusTheta     = new TH2D("b013bRecPiplusThetaSTK"+tag,"",     ndTheta, dThetamin, dThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusTheta);
+  hRecPiplusMomentum  = new TH2D("b014bRecPiplusMomentumSTK"+tag,"",  nmomentum, momentummin, momentummax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusMomentum);
 
   hRecProtonLastE2    = new TH2D("b020RecProtonLastE2STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonLastE2);
   hRecProtonLastE3    = new TH2D("b021RecProtonLastE3STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonLastE3);
   hRecPiplusLastE2    = new TH2D("b022RecPiplusLastE2STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusLastE2);
   hRecPiplusLastE3    = new TH2D("b023RecPiplusLastE3STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusLastE3);
+  hRecProtonStartE2   = new TH2D("b024RecProtonStartE2STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonStartE2);
+  hRecProtonStartE3   = new TH2D("b025RecProtonStartE3STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonStartE3);
+  hRecPiplusStartE2   = new TH2D("b026RecPiplusStartE2STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusStartE2);
+  hRecPiplusStartE3   = new TH2D("b027RecPiplusStartE3STK"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusStartE3);
 
   hRecPi0Nshower      = new TH2D("b030bRecPi0NshowerSTK"+tag,"",      ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPi0Nshower);
 

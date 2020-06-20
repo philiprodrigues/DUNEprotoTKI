@@ -220,13 +220,16 @@ int GetNTrack(const bool kpi0, const int truthEventType, int & nproton, int & ns
 
     if(kfill){
       style::FillInRange(AnaIO::hCutnHits, nhits, fillstktype);
-      style::FillInRange(AnaIO::hCutChi2NDF, Chi2NDF, fillstktype);
       style::FillInRange(AnaIO::hCuttrackScore, trackScore, fillstktype);
       style::FillInRange(AnaIO::hCutemScore, emScore, fillstktype);
       style::FillInRange(AnaIO::hCutmichelScore, michelScore, fillstktype);
 
-      style::FillInRange(AnaIO::hCutstartE2, startE2, fillstktype);
-      style::FillInRange(AnaIO::hCutstartE3, startE3, fillstktype);
+      //only fill these for selected proton or piplus 
+      if(recParticleType!=-999){
+        style::FillInRange(AnaIO::hCutChi2NDF, Chi2NDF, fillstktype);
+        style::FillInRange(AnaIO::hCutstartE2, startE2, fillstktype);
+        style::FillInRange(AnaIO::hCutstartE3, startE3, fillstktype);
+      }
 
       const double momentumRes = truthMomRefBeam? recMomRefBeam.P()/truthMomRefBeam->P()-1 : -999;
       const double thetaRes    = truthMomRefBeam? (recMomRefBeam.Theta()-truthMomRefBeam->Theta())*TMath::RadToDeg() : -999;
@@ -238,16 +241,20 @@ int GetNTrack(const bool kpi0, const int truthEventType, int & nproton, int & ns
         }
         style::FillInRange(AnaIO::hRecProtonMomentum, recMomRefBeam.P(), fillstktype);
         style::FillInRange(AnaIO::hRecProtonTheta, recMomRefBeam.Theta()*TMath::RadToDeg(), fillstktype);
+        style::FillInRange(AnaIO::hRecProtonStartE2, startE2, fillstktype);
+        style::FillInRange(AnaIO::hRecProtonStartE3, startE3, fillstktype);
         style::FillInRange(AnaIO::hRecProtonLastE2, lastE2, fillstktype);
         style::FillInRange(AnaIO::hRecProtonLastE3, lastE3, fillstktype);
       }
       else if(recParticleType==AnaUtils::gkPiPlus){
         if(pdg==211){
-          style::FillInRange(AnaIO::hPiMomentumRes, truthMomRefBeam->P(), momentumRes);
-          style::FillInRange(AnaIO::hPiThetaRes, truthMomRefBeam->Theta()*TMath::RadToDeg(), thetaRes);
+          style::FillInRange(AnaIO::hPiplusMomentumRes, truthMomRefBeam->P(), momentumRes);
+          style::FillInRange(AnaIO::hPiplusThetaRes, truthMomRefBeam->Theta()*TMath::RadToDeg(), thetaRes);
         }
         style::FillInRange(AnaIO::hRecPiplusMomentum, recMomRefBeam.P(), fillstktype);
         style::FillInRange(AnaIO::hRecPiplusTheta, recMomRefBeam.Theta()*TMath::RadToDeg(), fillstktype);
+        style::FillInRange(AnaIO::hRecPiplusStartE2, startE2, fillstktype);
+        style::FillInRange(AnaIO::hRecPiplusStartE3, startE3, fillstktype);
         style::FillInRange(AnaIO::hRecPiplusLastE2, lastE2, fillstktype);
         style::FillInRange(AnaIO::hRecPiplusLastE3, lastE3, fillstktype);
       }
