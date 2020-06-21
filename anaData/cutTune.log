@@ -10,7 +10,8 @@
       chi2, no NdEdx, nhits40track, trackSCore 0.3:  kPiZero 0 fullsig 224.0 signal 37.0 all 109.0 purity 33.9% eff 16.5% ep 5.6%
       chi2, no NdEdx, cut nhits>40 for track:        kPiZero 0 fullsig 224.0 signal 37.0 all 109.0 purity 33.9% eff 16.5% ep 5.6%
       chi2, noNdEdx, nhits40, no nhits260 for proton:kPiZero 0 fullsig 224.0 signal 41.0 all 118.0 purity 34.7% eff 18.3% ep 6.4%
-  (*) chi2, noNdE, nhi40, no nhi260, lastTME>3.5 p:  kPiZero 0 fullsig 224.0 signal 44.0 all 126.0 purity 34.9% eff 19.6% ep 6.9%
+      PiPlus: chi2, noNdE, nhi40, no260, lTME3.5 p:  kPiZero 0 fullsig 224.0 signal 44.0 all 126.0 purity 34.9% eff 19.6% ep 6.9%
+  (*) PiPlus: chi2, noNdE, nhi40, no260, l3.5, noME: kPiZero 0 fullsig 224.0 signal 44.0 all 126.0 purity 34.9% eff 19.6% ep 6.9%
 
 
       
@@ -25,7 +26,7 @@
       chi2, no NdEdx, nhits40, trackSCore 0.3: kPiZero 1 fullsig 246.0 signal 30.0 all 47.0 purity 63.8% eff 12.2% ep 7.8%
       chi2, no NdEdx, cut nhits>40 for track:  kPiZero 1 fullsig 246.0 signal 33.0 all 55.0 purity 60.0% eff 13.4% ep 8.0%
       chi2, noNdEdx, nhits40, no nhits260:     kPiZero 1 fullsig 246.0 signal 35.0 all 60.0 purity 58.3% eff 14.2% ep 8.3%
-  (*) chi2, noNdE, nhi40, no nhi260, lTM>3.5 p:kPiZero 1 fullsig 246.0 signal 39.0 all 68.0 purity 57.4% eff 15.9% ep 9.1%
+  (*) PiZero: chi2, noNdE, nhi40, no260, lT3.5:kPiZero 1 fullsig 246.0 signal 39.0 all 68.0 purity 57.4% eff 15.9% ep 9.1%
 
 
 //old initial MC, also wrong Score variables below: 

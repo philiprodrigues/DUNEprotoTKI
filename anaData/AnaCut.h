@@ -472,25 +472,16 @@ bool CutTopology(const bool kpi0, const bool kFillBefore)
     }
   }
   else{
-    if(cutnshower>0){
+    if(cutnshower!=0){
       return false;
     }
   }
   
   //2. nmichel
   style::FillInRange(AnaIO::hCutnmichel, cutnmichel, filleventtype);
-  if(kpi0){
-    if(cutnmichel>0){
-      return false;
-    }
-  }
-  else{
-    //not found in signal, need Michel to tell 2-proton events from p-pi; ignore michel count for the momentum, things will change after implementing it.
-    /*
-      if(cutnmichel!=1){
-      continue;
-      }
-    */
+  //not found in signal, cut for both channels
+  if(cutnmichel!=0){
+    return false;
   }
   
   //3. npiplus
