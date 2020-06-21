@@ -693,7 +693,7 @@ void PrintLegend()
   vector<TString> evtType;
   evtType.push_back("signal");
   evtType.push_back("background");
-  evtType.push_back("#mu^{+} beam");
+  evtType.push_back("non-#pi^{+} beam");
   evtType.push_back("data");
 
   vector<TString> htype;
