@@ -251,10 +251,9 @@ int main(int argc, char* argv[])
   //_____________________________________________________ Automatically handling histograms and saving _____________________________________________________
 
   style::Process2DHist(lout);
-  const bool ktext = false;
   const bool kfast = false;
   //no MC scaling because of no overlay from data
-  style::DrawHist(lout, 1, 0x0, "output", tag, ktext, kfast);
+  style::DrawHist(lout, 1, 0x0, "output", tag, kfast);
 
   TFile * fout= new TFile(Form("output/outdrawTracking_%s.root", tag.Data()),"recreate");
   lout->Write();
