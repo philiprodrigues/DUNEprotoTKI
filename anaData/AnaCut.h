@@ -140,7 +140,8 @@ bool IsShower(const int ii, vector<TLorentzVector> & showerArray, const bool kfi
 }
  
 
-bool IsTrack(const int ii, const bool kfill, const int truthParticleType)
+bool IsTrack(const int ii, const bool kfill, const int truthParticleType=-999,
+             const double startE2=-999, const double startE3=-999, const double lastTME=-999)
 {
   //
   //common for IsProton and IsPiplus
@@ -178,19 +179,16 @@ bool IsTrack(const int ii, const bool kfill, const int truthParticleType)
   if(kfill){
     const double Chi2NDF = AnaUtils::GetChi2NDF(ii);
 
-    const vector<double> dedxarr = (*AnaIO::reco_daughter_allTrack_calibrated_dEdX_SCE)[ii];
-    const double startE2 = dedxarr.size()<3? -999 : dedxarr[2];
-    const double startE3 = dedxarr.size()<4? -999 : dedxarr[3];
-
     style::FillInRange(AnaIO::hCutChi2NDF, Chi2NDF, truthParticleType);
     style::FillInRange(AnaIO::hCutstartE2, startE2, truthParticleType);
     style::FillInRange(AnaIO::hCutstartE3, startE3, truthParticleType);
+    style::FillInRange(AnaIO::hCutlastTME, lastTME, truthParticleType);
   }
 
   return true;
 }
 
-bool IsProton(const int ii, const bool kfill, const int truthParticleType, 
+bool IsProton(const int ii, const bool kfill, const int truthParticleType, const TLorentzVector * truthMomRefBeam, 
               const double startE2, const double startE3, const double startTME, 
               const double lastE2, const double lastE3, const double lastTME)
 {
@@ -198,7 +196,7 @@ bool IsProton(const int ii, const bool kfill, const int truthParticleType,
   //proton identification
   //
 
-  if(!IsTrack(ii, kfill, truthParticleType)){
+  if(!IsTrack(ii, kfill, truthParticleType, startE2, startE3, lastTME)){
     return false;
   }
  
@@ -209,14 +207,38 @@ bool IsProton(const int ii, const bool kfill, const int truthParticleType,
     return false;
   }
 
-  //------ no cuts any more, fill for selected protons
+  //====================== no cuts any more, fill for selected protons
+
   if(kfill){
+
+    //------ fill cut info
+
     style::FillInRange(AnaIO::hRecProtonStartE2, startE2, truthParticleType);
     style::FillInRange(AnaIO::hRecProtonStartE3, startE3, truthParticleType);
     style::FillInRange(AnaIO::hRecProtonStartTME, startTME, truthParticleType);
     style::FillInRange(AnaIO::hRecProtonLastE2, lastE2, truthParticleType);
     style::FillInRange(AnaIO::hRecProtonLastE3, lastE3, truthParticleType);
     style::FillInRange(AnaIO::hRecProtonLastTME, lastTME, truthParticleType);
+
+    //------ fill recon info
+
+    //TLorentzVector GetMomentumRefBeam(const bool isTruth, const int trackIndex, const bool kProton)
+    const TLorentzVector recMomRefBeam = AnaUtils::GetMomentumRefBeam(false, ii, true);
+    style::FillInRange(AnaIO::hRecProtonMomentum, recMomRefBeam.P(), truthParticleType);
+    style::FillInRange(AnaIO::hRecProtonTheta, recMomRefBeam.Theta()*TMath::RadToDeg(), truthParticleType);
+
+    //------ fill truth-matched info
+
+    if(truthParticleType == AnaUtils::gkProton){
+
+      //if type set, then truthMomRefBeam must exist
+      const double momentumRes = truthMomRefBeam? recMomRefBeam.P()/truthMomRefBeam->P()-1 : -999;
+      const double thetaRes    = truthMomRefBeam? (recMomRefBeam.Theta()-truthMomRefBeam->Theta())*TMath::RadToDeg() : -999;
+
+      style::FillInRange(AnaIO::hProtonMomentumRes, truthMomRefBeam->P(), momentumRes);
+      style::FillInRange(AnaIO::hProtonThetaRes, truthMomRefBeam->Theta()*TMath::RadToDeg(), thetaRes);
+    } 
+
   }
 
   return true;
@@ -249,7 +271,7 @@ bool IsProton(const int ii, const bool kfill, const int truthParticleType,
 
 }
 
-bool IsPiplus(const int ii, const bool kfill, const int truthParticleType,
+bool IsPiplus(const int ii, const bool kfill, const int truthParticleType, const TLorentzVector * truthMomRefBeam, 
               const double startE2, const double startE3, const double startTME, 
               const double lastE2, const double lastE3, const double lastTME)
 {
@@ -258,7 +280,7 @@ bool IsPiplus(const int ii, const bool kfill, const int truthParticleType,
   //
 
   //already filled in IsProton, so not here
-  if(!IsTrack(ii, false, -999)){
+  if(!IsTrack(ii, false)){
     return false;
   }
 
@@ -269,14 +291,37 @@ bool IsPiplus(const int ii, const bool kfill, const int truthParticleType,
     return false;
   }
 
-  //------ not cuts any more, fill for selected piplus
+  //====================== no cuts any more, fill for selected piplus
+
   if(kfill){
+
+    //----- fill cut info
+
     style::FillInRange(AnaIO::hRecPiplusStartE2, startE2, truthParticleType);
     style::FillInRange(AnaIO::hRecPiplusStartE3, startE3, truthParticleType);
     style::FillInRange(AnaIO::hRecPiplusStartTME, startTME, truthParticleType);
     style::FillInRange(AnaIO::hRecPiplusLastE2, lastE2, truthParticleType);
     style::FillInRange(AnaIO::hRecPiplusLastE3, lastE3, truthParticleType);
     style::FillInRange(AnaIO::hRecPiplusLastTME, lastTME, truthParticleType);
+
+    //------ fill recon info
+
+    //TLorentzVector GetMomentumRefBeam(const bool isTruth, const int trackIndex, const bool kProton)
+    const TLorentzVector recMomRefBeam = AnaUtils::GetMomentumRefBeam(false, ii, false);
+    style::FillInRange(AnaIO::hRecPiplusMomentum, recMomRefBeam.P(), truthParticleType);
+    style::FillInRange(AnaIO::hRecPiplusTheta, recMomRefBeam.Theta()*TMath::RadToDeg(), truthParticleType);
+  
+    //------ fill truth-matched info
+
+    if(truthParticleType == AnaUtils::gkPiPlus){
+
+      const double momentumRes = truthMomRefBeam? recMomRefBeam.P()/truthMomRefBeam->P()-1 : -999;
+      const double thetaRes    = truthMomRefBeam? (recMomRefBeam.Theta()-truthMomRefBeam->Theta())*TMath::RadToDeg() : -999;
+      
+      style::FillInRange(AnaIO::hPiplusMomentumRes, truthMomRefBeam->P(), momentumRes);
+      style::FillInRange(AnaIO::hPiplusThetaRes, truthMomRefBeam->Theta()*TMath::RadToDeg(), thetaRes);
+    }
+
   }
 
   return true;
@@ -333,12 +378,12 @@ void CountPFP(const bool kpi0, const int truthEventType, int & nproton, int & np
 
     int recParticleType = -999;
 
-    if(IsProton(ii, kfill, truthParticleType, startE2, startE3, startTME, lastE2, lastE3, lastTME)){
+    if(IsProton(ii, kfill, truthParticleType, truthMomRefBeam, startE2, startE3, startTME, lastE2, lastE3, lastTME)){
       recParticleType = AnaUtils::gkProton;
       nproton++;
     }
 
-    if(IsPiplus(ii, kfill, truthParticleType, startE2, startE3, startTME, lastE2, lastE3, lastTME)){
+    if(IsPiplus(ii, kfill, truthParticleType, truthMomRefBeam, startE2, startE3, startTME, lastE2, lastE3, lastTME)){
       if(recParticleType!=-999){
         printf("particle already identified!! %d\n", recParticleType); exit(1);
       }
@@ -355,37 +400,11 @@ void CountPFP(const bool kpi0, const int truthEventType, int & nproton, int & np
       nmichel++;
     }
    
-    //__________________________________________ Get Reco kinematics  __________________________________________
-    const TLorentzVector recMomRefBeam = AnaUtils::GetMomentumRefBeam(false, ii, recParticleType==AnaUtils::gkProton);
-
-    //__________________________________________ Print and Fill  __________________________________________
+    //__________________________________________ Print __________________________________________
     if(kprint){
       //printf("test sig %d rii %d/%d tii %4d pdg %4d sE2 %6.1f sE3 %6.1f lE2 %6.1f lE3 %6.1f nhi %4d tkS %6.1f emS %6.1f miS %6.1f sum %6.1f chf %6.1f\n", truthEventType, ii, recsize, trueidx, pdg, startE2, startE3, lastE2, lastE3, nhits, trackScore, emScore, michelScore, trackScore+emScore+michelScore, Chi2NDF);
     }
 
-    if(kfill){
-      const double momentumRes = truthMomRefBeam? recMomRefBeam.P()/truthMomRefBeam->P()-1 : -999;
-      const double thetaRes    = truthMomRefBeam? (recMomRefBeam.Theta()-truthMomRefBeam->Theta())*TMath::RadToDeg() : -999;
- 
-      if(recParticleType==AnaUtils::gkProton){
-        if(truthParticleType == AnaUtils::gkProton){
-          style::FillInRange(AnaIO::hProtonMomentumRes, truthMomRefBeam->P(), momentumRes);
-          style::FillInRange(AnaIO::hProtonThetaRes, truthMomRefBeam->Theta()*TMath::RadToDeg(), thetaRes);
-        }
-        style::FillInRange(AnaIO::hRecProtonMomentum, recMomRefBeam.P(), truthParticleType);
-        style::FillInRange(AnaIO::hRecProtonTheta, recMomRefBeam.Theta()*TMath::RadToDeg(), truthParticleType);
-      
-      }
-      else if(recParticleType==AnaUtils::gkPiPlus){
-        if(truthParticleType == AnaUtils::gkPiPlus){
-          style::FillInRange(AnaIO::hPiplusMomentumRes, truthMomRefBeam->P(), momentumRes);
-          style::FillInRange(AnaIO::hPiplusThetaRes, truthMomRefBeam->Theta()*TMath::RadToDeg(), thetaRes);
-        }
-        style::FillInRange(AnaIO::hRecPiplusMomentum, recMomRefBeam.P(), truthParticleType);
-        style::FillInRange(AnaIO::hRecPiplusTheta, recMomRefBeam.Theta()*TMath::RadToDeg(), truthParticleType);
-      }
-    }
-    
     //kPrintCutInfo = false;
 
     nPFP++;
@@ -407,7 +426,7 @@ void CountPFP(const bool kpi0, const int truthEventType, int & nproton, int & np
 
     //for gkOnlySignal=true, this might be null due to non-reconstruction of shower    
     if(kfill && leadingPi0){
-      style::FillInRange(AnaIO::hCutMpi0, leadingPi0->M(), truthEventType);
+      style::FillInRange(AnaIO::hRecMpi0, leadingPi0->M(), truthEventType);
     }
   }
 
@@ -658,106 +677,6 @@ bool CutBeamAllInOne(const bool kmc)
   }
   
   return true;
-}
-
-bool GetBeamdEdx(const int evtType)
-{
-  //
-  //calculate all beam dEdx
-  //
-
-  vector<double> startE, lastE;
-  AnaUtils::GetdEdx( *AnaIO::reco_beam_calibrated_dEdX, startE, lastE, 2);
-
-  AnaIO::beamNdEdx = startE.size();
-  style::FillInRange(AnaIO::hBeamNdEdx, AnaIO::beamNdEdx, evtType);
-
-  const bool kfailN = (AnaIO::beamNdEdx<6);
-  if(kfailN){
-    return false;
-  }
-
-  //no bragg peak
-  AnaIO::beamStartE0 = kfailN ? -999 : startE[0];
-  AnaIO::beamStartE1 = kfailN ? -999 : startE[1];
-  AnaIO::beamStartE2 = kfailN ? -999 : startE[2];
-  AnaIO::beamStartE3 = kfailN ? -999 : startE[3];
-  AnaIO::beamStartE4 = kfailN ? -999 : startE[4];
-  AnaIO::beamStartE5 = kfailN ? -999 : startE[5];
-  
-  //has Bragg Peak
-  AnaIO::beamLastE0 = kfailN ? -999 : lastE[0];
-  AnaIO::beamLastE1 = kfailN ? -999 : lastE[1];
-  AnaIO::beamLastE2 = kfailN ? -999 : lastE[2];
-  AnaIO::beamLastE3 = kfailN ? -999 : lastE[3];
-  AnaIO::beamLastE4 = kfailN ? -999 : lastE[4];
-  AnaIO::beamLastE5 = kfailN ? -999 : lastE[5];
-
-  //double GetTruncatedMean(const vector<double> &tmparr, const unsigned int nsample0, const unsigned int nsample1, const double lowerFrac, const double upperFrac)
-  AnaIO::beamStartTME = AnaUtils::GetTruncatedMean(startE, 0, AnaIO::beamNdEdx-6-1, 0.05, 0.6);
-  AnaIO::beamLastTME  = AnaUtils::GetTruncatedMean(lastE,  0, 5,                    0.4,  0.95);
-
-  return true;
-}
-
-void FillBeamdEdx(const int evtType, const bool kBefore)
-{
-  //
-  //
-  //
-  if(kBefore){
-
-    GetBeamdEdx(evtType);
-
-    //only for ndEdx>=6, otherwise a huge peak at underflow (0)
-    if(AnaIO::beamNdEdx>=6){
-      style::FillInRange(AnaIO::hBeamStartTME, AnaIO::beamStartTME, evtType);
-      style::FillInRange(AnaIO::hBeamLastTME, AnaIO::beamLastTME, evtType);
-      
-      style::FillInRange(AnaIO::hBeamStartE0, AnaIO::beamStartE0, evtType);
-      style::FillInRange(AnaIO::hBeamStartE1, AnaIO::beamStartE1, evtType);
-      style::FillInRange(AnaIO::hBeamStartE2, AnaIO::beamStartE2, evtType);
-      style::FillInRange(AnaIO::hBeamStartE3, AnaIO::beamStartE3, evtType);
-      style::FillInRange(AnaIO::hBeamStartE4, AnaIO::beamStartE4, evtType);
-      style::FillInRange(AnaIO::hBeamStartE5, AnaIO::beamStartE5, evtType);
-      
-      style::FillInRange(AnaIO::hBeamLastE0, AnaIO::beamLastE0, evtType);
-      style::FillInRange(AnaIO::hBeamLastE1, AnaIO::beamLastE1, evtType);
-      style::FillInRange(AnaIO::hBeamLastE2, AnaIO::beamLastE2, evtType);
-      style::FillInRange(AnaIO::hBeamLastE3, AnaIO::beamLastE3, evtType);
-      style::FillInRange(AnaIO::hBeamLastE4, AnaIO::beamLastE4, evtType);
-      style::FillInRange(AnaIO::hBeamLastE5, AnaIO::beamLastE5, evtType);
-    }
-  }
-  else{
-    //fill all event even ndEdx<6
-    //PC = Post-Cut
-    style::FillInRange(AnaIO::hBeamPCStartTME,AnaIO::beamStartTME, evtType);
-    style::FillInRange(AnaIO::hBeamPCLastTME, AnaIO::beamLastTME, evtType);
-    
-    style::FillInRange(AnaIO::hBeamPCStartE0, AnaIO::beamStartE0, evtType);
-    style::FillInRange(AnaIO::hBeamPCStartE1, AnaIO::beamStartE1, evtType);
-    style::FillInRange(AnaIO::hBeamPCStartE2, AnaIO::beamStartE2, evtType);
-    style::FillInRange(AnaIO::hBeamPCStartE3, AnaIO::beamStartE3, evtType);
-    style::FillInRange(AnaIO::hBeamPCStartE4, AnaIO::beamStartE4, evtType);
-    style::FillInRange(AnaIO::hBeamPCStartE5, AnaIO::beamStartE5, evtType);
-    
-    style::FillInRange(AnaIO::hBeamPCLastE0, AnaIO::beamLastE0, evtType);
-    style::FillInRange(AnaIO::hBeamPCLastE1, AnaIO::beamLastE1, evtType);
-    style::FillInRange(AnaIO::hBeamPCLastE2, AnaIO::beamLastE2, evtType);
-    style::FillInRange(AnaIO::hBeamPCLastE3, AnaIO::beamLastE3, evtType);
-    style::FillInRange(AnaIO::hBeamPCLastE4, AnaIO::beamLastE4, evtType);
-    style::FillInRange(AnaIO::hBeamPCLastE5, AnaIO::beamLastE5, evtType);
-  }
-
-  //old code
-  /*
-//both need to tune for different energy
-  //it is so clean that no need to cut on last since there is no Bragg peak form proton any more
-  if(AnaIO::beamStartTME>2.8){
-    return false;
-  }
-   */
 }
 
 //end of namespace

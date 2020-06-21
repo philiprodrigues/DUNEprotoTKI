@@ -90,7 +90,7 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
 
     //====================== Do cuts ======================
     //just do the plotting to test
-    AnaCut::FillBeamdEdx(evtType, true);
+    AnaUtils::FillBeamdEdx(evtType, true);
 
     //gkOnlySignal=true: use MC signal and no cuts
     if(gkOnlySignal){
@@ -107,7 +107,7 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     selBeamCount++;
 
     //just do the plotting to test
-    AnaCut::FillBeamdEdx(evtType, false);
+    AnaUtils::FillBeamdEdx(evtType, false);
 
     //---------- fill beam kinematics ----------
 
@@ -393,22 +393,19 @@ int main(int argc, char * argv[])
 
   printf("anaRec beamcount data: %.0f mc: %.0f plotscale %f\n", dataBeamCount, mcBeamCount, plotscale);
 
-  //ktext=true: some histograms will be drawn with additional option of "text"
-  const bool ktext = true;
-
   if(mclout){
     if(datalout){
       //overlay MC and data
-      style::DrawHist(mclout, plotscale, datalout, "output", tag, ktext, gkFast);
+      style::DrawHist(mclout, plotscale, datalout, "output", tag, gkFast);
     }
     else{
       //MC plots only
-      style::DrawHist(mclout, 1, 0x0, "output", tag, ktext, gkFast);
+      style::DrawHist(mclout, 1, 0x0, "output", tag, gkFast);
     }
   }
   else if(datalout){
     //data plots only
-    style::DrawHist(datalout, 1, 0x0, "output", tag, ktext, gkFast);
+    style::DrawHist(datalout, 1, 0x0, "output", tag, gkFast);
   }
 
   TFile * fout = new TFile(Form("output/outanaData_%s.root", tag.Data()),"recreate");
