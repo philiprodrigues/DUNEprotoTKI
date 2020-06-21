@@ -188,6 +188,16 @@ bool IsTrack(const int ii, const bool kfill, const int truthParticleType=-999,
   return true;
 }
 
+bool PassProtonSubPID(const int ii, const double lastTME)
+{
+  const double Chi2NDF    = AnaUtils::GetChi2NDF(ii);
+
+  if(Chi2NDF<50 || lastTME > 3.5){
+    return true;
+  }
+  return false;
+}
+
 bool IsProton(const int ii, const bool kfill, const int truthParticleType, const TLorentzVector * truthMomRefBeam, 
               const double startE2, const double startE3, const double startTME, 
               const double lastE2, const double lastE3, const double lastTME)
@@ -200,10 +210,10 @@ bool IsProton(const int ii, const bool kfill, const int truthParticleType, const
     return false;
   }
  
-  const double Chi2NDF    = AnaUtils::GetChi2NDF(ii);
+
 
   //use the same selection for proton with Chi2 because of better data-MC consistency
-  if(Chi2NDF>=50){
+  if( !PassProtonSubPID(ii, lastTME) ){
     return false;
   }
 
@@ -284,10 +294,7 @@ bool IsPiplus(const int ii, const bool kfill, const int truthParticleType, const
     return false;
   }
 
-  const double Chi2NDF    = AnaUtils::GetChi2NDF(ii);
-
-  //proton and piplus should be exactly complementary within track
-  if(Chi2NDF<50){
+  if( PassProtonSubPID(ii, lastTME) ){
     return false;
   }
 
