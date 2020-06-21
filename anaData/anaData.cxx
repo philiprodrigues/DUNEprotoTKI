@@ -31,7 +31,7 @@ const bool gkFillBefore = true;//false;
 const int gkDataBit = 3;
 
 //gkFast=true: only png will be save; otherwise eps, pdf, png all saved
-const bool gkFast = false;
+const bool gkFast = 1;//false;
 
 int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
@@ -140,7 +140,7 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     int dummycounter = -999;
     const bool kprint = false;
     const bool kfill = !gkFillBefore;
-    AnaCut::GetNTrack(kPiZero, evtType, dummycounter, dummycounter, dummycounter, dummypi0, kprint, kfill);
+    AnaCut::CountPFP(kPiZero, evtType, dummycounter, dummycounter, dummycounter, dummycounter, dummypi0, kprint, kfill);
     
     //--- to test
      /*   
@@ -176,7 +176,7 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
   if(kPiZero){
     nsel = style::PrintStat(tag+Form(" %d. Nmichel",  icut++), AnaIO::hCutnmichel, 0, 0, nsel);
   }
-  nsel = style::PrintStat(tag+Form(" %d. Ntrack",  icut++), AnaIO::hCutntrack, kPiZero?1:2, kPiZero?1:2, nsel);
+  nsel = style::PrintStat(tag+Form(" %d. Npiplus",  icut++), AnaIO::hCutnpiplus, kPiZero?0:1, kPiZero?0:1, nsel);
   nsel = style::PrintStat(tag+Form(" %d. Nproton", icut++), AnaIO::hCutnproton, 1, 1, nsel);
   printf("End of %d cuts: %.1f selected\n", icut, nsel);
 

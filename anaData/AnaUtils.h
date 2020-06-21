@@ -37,9 +37,24 @@ enum{
   //14
   gkNucleus,
 
-  //15
-  gkNotCaredType
+  //15, experimental
+  gkShower,
+
+  //16
+  gkOthers
 };
+
+double GetChi2NDF(const int ii)
+{
+  const double chi2       = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
+  const double ndof       = (*AnaIO::reco_daughter_allTrack_Chi2_ndof)[ii];
+
+  const double chnf = chi2/(ndof+1E-10);
+
+  //printf("testtest %f %f %f\n", chi2, ndof, chnf); exit(1);
+
+  return chnf;
+}
 
 TVector3 GetRecBeamDir()
 {
@@ -183,7 +198,6 @@ int GetParticleType(const int pdg)
   }
   else{
     cout<<"getParticleType unknown pdg "<<pdg<<endl; exit(1);
-    //type = gkNotCaredType;
   }
 
   return type;
@@ -446,17 +460,17 @@ int GetFSdEdx(const unsigned int ii, double & startE2, double & startE3, double 
 
   vector<double> startEarray, lastEarray;
   //full range, no padding
-  const int ndEdx = AnaUtils::GetdEdx(recodEdxarray, startEarray, lastEarray);
+  const int ndEdx = GetdEdx(recodEdxarray, startEarray, lastEarray);
 
   startE2 = ndEdx<3? -999: startEarray[2];
   startE3 = ndEdx<4? -999 :startEarray[3];
   lastE2 = ndEdx<3? -999: lastEarray[2];
   lastE3 = ndEdx<4? -999 :lastEarray[3];
   //has Bragg peak
-  startTME = AnaUtils::GetTruncatedMean(startEarray, 2, 6, 0.4,  0.95);
+  startTME = GetTruncatedMean(startEarray, 2, 6, 0.4,  0.95);
 
   //no Bragg peak
-  lastTME  = AnaUtils::GetTruncatedMean(lastEarray,  2, ndEdx-8, 0.05, 0.6);
+  lastTME  = GetTruncatedMean(lastEarray,  2, ndEdx-8, 0.05, 0.6);
 
   return ndEdx;
 }

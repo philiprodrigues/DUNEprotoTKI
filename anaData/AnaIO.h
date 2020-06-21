@@ -45,7 +45,7 @@ namespace AnaIO
   double chi2;
   double ndof;
 
-  Int_t           nTrack; 
+  //Int_t           nTrack; 
 
   //not used, keep in case ->
   //--- beam related
@@ -213,7 +213,7 @@ namespace AnaIO
   TH2D * hCutChi2NDF = 0x0;
 
   TH2D * hCutnproton = 0x0;
-  TH2D * hCutntrack = 0x0;
+  TH2D * hCutnpiplus = 0x0;
   TH2D * hCutnshower = 0x0;
   TH2D * hCutnmichel = 0x0;
   TH2D * hCutMpi0 = 0x0;
@@ -329,7 +329,7 @@ TTree * GetOutputTree(TList * lout, const TString tag)
   //save input info
   tout->Branch("true_beam_PDG",&true_beam_PDG);
   tout->Branch("reco_beam_len",&reco_beam_len);
-  tout->Branch("nTrack",&nTrack);
+  //tout->Branch("nTrack",&nTrack);
 
   return tout;
 }
@@ -432,9 +432,9 @@ void IniRecHist(TList * lout, const TString tag)
   hTruthBeamType = new TH1I("a0TruthBeamType"+tag,  "", 20, -0.5, 19.5); lout->Add(hTruthBeamType);
   hTruthSignal = new TH1I("a1TruthSignal"+tag,  "",  nPass, Passmin, Passmax); lout->Add(hTruthSignal);
 
-  const int nevtType = 10;
+  const int nevtType = 20;
   const double evtTypemin = -0.5;
-  const double evtTypemax = 9.5;
+  const double evtTypemax = 19.5;
 
   const int nE = 50;
   const double Emin = 0;
@@ -560,7 +560,7 @@ void IniRecHist(TList * lout, const TString tag)
 
   hCutnshower      = new TH2D("c101CutnshowerSTK"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnshower);
   hCutnmichel      = new TH2D("c102CutnmichelSTK"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnmichel);
-  hCutntrack       = new TH2D("c103CutntrackSTK"+tag,"",  ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutntrack);
+  hCutnpiplus      = new TH2D("c103CutnpiplusSTK"+tag,"",  ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnpiplus);
   hCutnproton      = new TH2D("c104CutnprotonSTK"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnproton);
   hCutMpi0         = new TH2D("c105CutMpi0STK"+tag,"", 15, 0, 0.3, nevtType, evtTypemin, evtTypemax); lout->Add(hCutMpi0);
 }
