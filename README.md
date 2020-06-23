@@ -8,8 +8,8 @@ How-to's:
    * A print out of the data structure can be found in doc.
 2) * Setup ROOT and then do
      source setup.sh
-   * Go to style/ and compile by executing do.sh only if style is changed
-3) * Go to anaData/, drawTKI/, drawTracking/ and executing do.sh
+3) * Go to style/, anaData/, drawTKI/, drawTracking/ and executing do.sh
+     - style is the lower level tool for all other programmes, needed for histogram manipulation
      - for truth signal distributions: anaData with kTruth=1 + drawTKI
      - for efficiency, momentum resolution, and dEdx: anaData with kTruth=1 + drawTracking
      - for event selection: anaData with kTruth=0 alone
