@@ -4,7 +4,7 @@
 
 1. The symbolic link in 
    ```
-   anaData/input/
+anaData/input/
    ```
    needs to be unlinked and then relinked (ln -s) to the actual path of the data. (Do not push root files to repository!)
 
