@@ -3,7 +3,9 @@
 How-to's:
 
 # The symbolic link in 
-> anaData/input/
+```
+anaData/input/
+```
 needs to be unlinked and then relinked (ln -s) to the actual path of the data. (Do not push root files to repository!)
 ## A print out of the data structure can be found in doc.
 # Setup ROOT and then do
