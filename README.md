@@ -19,15 +19,16 @@
    ```
    - style/ is the lower level tool for all other programs, needed for histogram manipulation.
 
-4. Go to anaData/, and then drawTKI/, drawTracking/ if needed:
-   - for truth signal distributions: anaData/ with kTruth=1 + drawTKI/
-   - for efficiency, momentum resolution, and dEdx: anaData/ with kTruth=1 + drawTracking/
-   - for event selection: anaData/ with kTruth=0 alone
-   run
-   ```
-   ./do.sh
-   ```
-   and all output will be in the ./output/ sub-directories with all printout in see*.log.
+4. Go to anaData/,
+   - and then drawTKI/, drawTracking/ if needed:
+     - for truth signal distributions: anaData/ with kTruth=1 + drawTKI/
+     - for efficiency, momentum resolution, and dEdx: anaData/ with kTruth=1 + drawTracking/
+     - for event selection: anaData/ with kTruth=0 alone
+   - run
+     ```
+     ./do.sh
+     ```
+     and all output will be in the ./output/ sub-directories with all printout in see*.log.
 
 
 
