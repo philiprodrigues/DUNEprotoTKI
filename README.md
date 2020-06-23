@@ -15,11 +15,21 @@
    source setup.sh
    ```
 
-3. Go to style/, anaData/, drawTKI/, drawTracking/ and execute do.sh
-   - style/ is the lower level tool for all other programmes, needed for histogram manipulation
-   - for truth signal distributions: anaData/ with kTruth=1 + drawTKI
+3. Go to style/ and compile with 
+   ```
+   ./do.sh
+   ```
+   - style/ is the lower level tool for all other programmes, needed for histogram manipulation.
+
+4. Go to anaData/, and then drawTKI/, drawTracking/ if needed:
+   - for truth signal distributions: anaData/ with kTruth=1 + drawTKI/
    - for efficiency, momentum resolution, and dEdx: anaData/ with kTruth=1 + drawTracking/
    - for event selection: anaData/ with kTruth=0 alone
+   execute with
+   ```
+   ./do.sh
+   ```
+   and all output will be in the ./output/ subdirectories with all print-out in see*.log.
 
 
 
