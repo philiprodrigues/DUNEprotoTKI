@@ -1,7 +1,5 @@
 # DUNEprotoTKI: tools for TKI analyses on protoDUNE data
 
-## How-to's:
-
 1. The symbolic links in 
    ```
    anaData/input/
