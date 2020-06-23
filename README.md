@@ -22,8 +22,8 @@
 
 4. Go to anaData/,
    - and then drawTKI/, drawTracking/ if needed:
-     - for truth signal distributions: anaData/ with kTruth=1 + drawTKI/
-     - for efficiency, momentum resolution, and dEdx: anaData/ with kTruth=1 + drawTracking/
+     - for truth signal distributions: anaData/ with kTruth=1, followed by drawTKI/
+     - for efficiency, momentum resolution, and dEdx: anaData/ with kTruth=1, followed by drawTracking/
      - for event selection: anaData/ with kTruth=0 alone
    - run
      ```
