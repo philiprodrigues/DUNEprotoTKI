@@ -2,13 +2,13 @@
 
 ## How-to's:
 
-1. The symbolic link in 
+1. The symbolic links in 
    ```
    anaData/input/
    ```
-   needs to be unlinked and then relinked (ln -s) to the actual path of the data. (Do not push root files to repository!)
+   need to be unlinked (unlink) and then relinked (ln -s) to the actual path of the data. (Do not push root files to repository!)
 
-   - A print out of the data structure can be found in doc/.
+   - A printout of the data structure can be found in doc/.
 
 2. Setup ROOT and then do
    ```
@@ -29,7 +29,7 @@
    ```
    ./do.sh
    ```
-   and all output will be in the ./output/ subdirectories with all print-out in see*.log.
+   and all output will be in the ./output/ subdirectories with all printout in see*.log.
 
 
 
