@@ -11,7 +11,9 @@ needs to be unlinked and then relinked (ln -s) to the actual path of the data. (
    - A print out of the data structure can be found in doc.
 
 2. Setup ROOT and then do
-> source setup.sh
+```
+source setup.sh
+```
 
 3. Go to style/, anaData/, drawTKI/, drawTracking/ and executing do.sh
    - style is the lower level tool for all other programmes, needed for histogram manipulation
