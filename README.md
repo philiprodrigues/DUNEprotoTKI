@@ -12,6 +12,7 @@
    ```
    source setup.sh
    ```
+   - Currently only ROOT 5 is tested.
 
 3. Go to style/ and compile 
    ```
