@@ -4,8 +4,8 @@
    ```
    anaData/input/
    ```
-   need to be unlinked (unlink) and then relinked (ln -s) to the actual paths of the data. ***Do not push root files to repository.***
-
+   need to be unlinked (unlink) and then relinked (ln -s) to the actual paths of the data. 
+   - ***Do not push root files to repository.***
    - Printouts of the data structure can be found in doc/.
 
 2. Setup ROOT and then do
