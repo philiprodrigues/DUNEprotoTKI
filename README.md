@@ -17,7 +17,7 @@
    ```
    ./do.sh
    ```
-   - style/ is the lower level tool for all other programmes, needed for histogram manipulation.
+   - style/ is the lower level tool for all other programs, needed for histogram manipulation.
 
 4. Go to anaData/, and then drawTKI/, drawTracking/ if needed:
    - for truth signal distributions: anaData/ with kTruth=1 + drawTKI/
@@ -27,7 +27,7 @@
    ```
    ./do.sh
    ```
-   and all output will be in the ./output/ subdirectories with all printout in see*.log.
+   and all output will be in the ./output/ sub-directories with all printout in see*.log.
 
 
 
