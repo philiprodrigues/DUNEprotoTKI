@@ -6,16 +6,16 @@
    ```
    anaData/input/
    ```
-   need to be unlinked (unlink) and then relinked (ln -s) to the actual path of the data. (Do not push root files to repository!)
+   need to be unlinked (unlink) and then relinked (ln -s) to the actual paths of the data. (Do not push root files to repository!)
 
-   - A printout of the data structure can be found in doc/.
+   - Printouts of the data structure can be found in doc/.
 
 2. Setup ROOT and then do
    ```
    source setup.sh
    ```
 
-3. Go to style/ and compile with 
+3. Go to style/ and compile 
    ```
    ./do.sh
    ```
@@ -25,7 +25,7 @@
    - for truth signal distributions: anaData/ with kTruth=1 + drawTKI/
    - for efficiency, momentum resolution, and dEdx: anaData/ with kTruth=1 + drawTracking/
    - for event selection: anaData/ with kTruth=0 alone
-   execute with
+   run
    ```
    ./do.sh
    ```
