@@ -1,2 +1,2 @@
-which compile_lib.sh
-compile_lib.sh style
+which mklib.sh
+mklib.sh style
