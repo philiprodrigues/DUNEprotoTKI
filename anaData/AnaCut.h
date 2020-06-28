@@ -668,9 +668,10 @@ bool CutBeamAllInOne(const bool kmc)
   }
   
   //4. APA3 cut
+  const double endzcut = 226;
   style::FillInRange(AnaIO::hCutBeamEndZ, AnaIO::reco_beam_endZ, filleventtype);
-  style::FillInRange(AnaIO::hCutBeamEndZPass, !(AnaIO::reco_beam_endZ>=226), filleventtype);
-  if(AnaIO::reco_beam_endZ>=226){
+  style::FillInRange(AnaIO::hCutBeamEndZPass, !(AnaIO::reco_beam_endZ>=endzcut), filleventtype);
+  if(AnaIO::reco_beam_endZ>=endzcut){
     return false;
   }
   
