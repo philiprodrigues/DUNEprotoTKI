@@ -35,7 +35,8 @@ comm="g++ -shared -O3 -Wall -Werror $incpath $(root-config --libs) ${code}.o ${c
 echo $comm
 eval $comm
     
-rm -f  ${code}.o ${code}Dict.h ${code}Dict.cxx ${code}Dict.o 
+rm -f  ${code}.o ${code}Dict.h ${code}Dict.cxx ${code}Dict.o
+#${code}Dict_rdict.pcm #this is needed!
 
 echo
 echo "=========================     ${code} done!     ========================="
