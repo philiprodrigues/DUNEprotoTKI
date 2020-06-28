@@ -1,11 +1,11 @@
-which compile_exe.sh
+which mkexe.sh
 
 
 #####
 
 mkdir -p output
 
-compile_exe.sh anaData -lstyle -I../style  -L../style || return 1
+mkexe.sh anaData -lstyle -I../style  -L../style || return 1
 
 #make legend
 ./anaData ; 
