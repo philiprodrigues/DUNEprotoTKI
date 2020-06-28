@@ -197,7 +197,7 @@ void drawTKI(const TString var, TList *lout, const TString pretag, const bool kP
 
     htmp->Scale(1,"width");
     if(cns[ii]!="all"){
-      htmp->SetFillColor(col[ii]);
+      htmp->SetFillColor(style::GetColor(col[ii]));
       stk->Add(htmp);
       lg->AddEntry(htmp, cns[ii], "f");
     }
@@ -221,7 +221,7 @@ void drawTKI(const TString var, TList *lout, const TString pretag, const bool kP
   stk->GetYaxis()->SetTitle("Event/"+xunit);
   stk->SetTitle(Form("Total %.0f events", ntotall));
   stk->SetMinimum(0);
-  stk->Draw();
+  stk->Draw("hist");
 
   TString lheader("full phase space");
   if(kPScut){

@@ -1,14 +1,6 @@
-/******************************************************
-                                                      *
-                                                      *
-                  Author: Xianguo Lu                  *
-                                                      *
-                  xianguo.lu@physics.ox.ac.uk         *
-                  lu.xianguo@gmail.com                *
-                                                      *
-                                                      *
-                                                      *
-*******************************************************/
+//                  Author: Xianguo Lu                  
+//                  xianguo.lu@physics.ox.ac.uk         
+//                  lu.xianguo@gmail.com                
 
 #include "style.h"
 
@@ -21,6 +13,7 @@ Double_t style::fgkLabelOffset = 0.01;
 Double_t style::fgkXTitleOffset = 1.25;//1.1;//1.25;
 Double_t style::fgkYTitleOffset = 1.1;//1.2;
 Double_t style::fgkTickLength = 0.02;
+const int style::fgkColorBase = 1500;
 
 //ClassImp(style);
 
@@ -105,6 +98,16 @@ double style::GetEntries(THStack *stk)
   return enttot;
 }
 
+int style::GetColor(const int col)
+{
+  if(col>=1000){
+    return fgkColorBase+col-1000;
+  }
+  else{
+    return col;
+  }
+}
+
 TCanvas *style::DrawLegend(const vector<TString> &entries, const vector<TString>& htype, const int *tmpcol, const int * tmpmkr)
 {
   const int defcol[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
@@ -139,7 +142,7 @@ TCanvas *style::DrawLegend(const vector<TString> &entries, const vector<TString>
   for(int ii=0; ii<nent; ii++){
     TH1D * hh=new TH1D(Form("h%d",ii),"",1,0,1);
     ResetStyle(hh);
-    const int col = cols[ii];
+    const int col = GetColor(cols[ii]);
     hh->SetFillColor(col);
     hh->SetLineColor(col);
     hh->SetMarkerStyle(mkrs[ii]);
@@ -162,8 +165,16 @@ TLegend *style::ShowColor()
   ResetStyle(lg);
 
   for(int ii=0; ii<20; ii++){
+    const int col = GetColor(1000+ii);
+
+    TColor * tmpcol = gROOT->GetColor(col);
+    if(tmpcol){
+      if(ii==0) cout<<"\nstyle::IniColorCB()"<<endl;
+      tmpcol->Print();
+      if(ii==19) cout<<endl;
+    }
+    
     TH1D * hh=new TH1D(Form("h%d",ii),"",1,0,1);
-    const int col = 1000+ii;
     hh->SetFillColor(col);
     hh->SetLineColor(col);
     lg->AddEntry(hh, Form("%d", col), "f");
@@ -276,7 +287,8 @@ THStack * style::ConvertToStack(const TH2D * hh)
     }
 
     ResetStyle(htmp);
-    htmp->SetFillColor(col[colorcount++]);
+    const int icol = GetColor(col[colorcount++]);
+    htmp->SetFillColor(icol);
     htmp->SetLineColor(kBlack);
     htmp->SetMarkerSize(2);
     stk->Add(htmp);
@@ -997,7 +1009,7 @@ void style::SetStackColorCB(THStack * hh, const int *cbcol, const int lw)
   TList * hgstack = hh->GetHists();
   for(int ii=0; ii<hgstack->GetEntries(); ii++){
     TH1D * tmph=(TH1D*) hgstack->At(ii);
-    const int tmpcol = cbcol[ii];
+    const int tmpcol = GetColor(cbcol[ii]);
     printf("style::SetStackColorCB ii %d col %d\n", ii, tmpcol);
     tmph->SetFillColor(tmpcol);
     tmph->SetLineColor(tmpcol);
@@ -1007,9 +1019,17 @@ void style::SetStackColorCB(THStack * hh, const int *cbcol, const int lw)
 
 void style::IniColorCB()
 {
+  static bool kset = false;
+  if(kset){
+    printf("style::IniColorCB arleady set\n");
+    return;
+  }
+  else{
+    printf("style::IniColorCB creating new color\n");
+  }
+  
   //http://www.somersault1824.com/tips-for-designing-scientific-figures-for-color-blind-readers/
-  const Int_t ibase=1001;
-  Int_t id=ibase;
+  Int_t id=fgkColorBase+1;
   new TColor(id++, 0./255., 0./255., 0./255., "CB1_Black",1.0);
   new TColor(id++, 0./255., 73./255., 73./255., "CB2_Forest",1.0);
   new TColor(id++, 0./255., 146./255., 146./255., "CB3_Teal",1.0);
@@ -1026,16 +1046,7 @@ void style::IniColorCB()
   new TColor(id++, 36./255., 255./255., 36./255., "CB14_DayGleen",1.0);
   new TColor(id++, 255./255., 255./255., 109./255., "CB15_SunFlower",1.0);
 
-  /*
-  for(Int_t ii=0; ii<20; ii++){
-    TColor * tmpcol = gROOT->GetColor(ibase+ii);
-    if(tmpcol){
-      if(ii==0) cout<<"\nstyle::IniColorCB()"<<endl;
-      tmpcol->Print();
-      if(ii==19) cout<<endl;
-    }
-  }
-  */
+  kset = true;
 }
 
 TGraphAsymmErrors* style::ScaleGraph(const TGraphAsymmErrors * gin, const  TGraphAsymmErrors * gref)
@@ -1391,7 +1402,7 @@ double style::GetChi2(TH1D * rawdata, const TMatrixD rawcov, const int noff, con
     const int theorybin = rawtheory->FindBin(dataxx);
     const double theoryyy =  rawtheory->GetBinContent(theorybin)/unit;
 
-    diffMatrix[ii]=(datayy-theoryyy);
+    diffMatrix[ii][0]=(datayy-theoryyy);
   }
 
   //_______________________________________________________________________________________________________
@@ -1476,7 +1487,8 @@ TH1D * style::GetStackedSum(THStack *stk, const char * name, const int col, cons
     hout->Add((TH1D*)ll->At(ii));
   }
 
-  hout->SetLineColor(col);
+  const int icol = GetColor(col);
+  hout->SetLineColor(icol);
   hout->SetLineStyle(lsty);
   hout->SetLineWidth(lwid);
   hout->SetFillStyle(fsty);

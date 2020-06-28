@@ -1,14 +1,6 @@
-/******************************************************
-                                                      *
-                                                      *
-                  Author: Xianguo Lu                  *
-                                                      *
-                  xianguo.lu@physics.ox.ac.uk         *
-                  lu.xianguo@gmail.com                *
-                                                      *
-                                                      *
-                                                      *
-*******************************************************/
+//                  Author: Xianguo Lu                  
+//                  xianguo.lu@physics.ox.ac.uk         
+//                  lu.xianguo@gmail.com                
 
 #ifndef STYLE_H
 #define STYLE_H
@@ -18,10 +10,6 @@
 #include <fstream>
 #include <string>
 #include <iostream>
-
-#include "Math/Functor.h"
-#include "Math/Factory.h"
-#include "Math/Minimizer.h"
 
 //#include "TASImage.h"
 #include "TAxis.h"
@@ -88,6 +76,7 @@ using namespace std;
 class style
 {
  public:
+  static int GetColor(const int col);
   static double PrintStat(const TString tag, TH1 *hh, const double val0, const double val1, const double oldsel=-999);
   static void FillInRange(TH1 * hh,  double xx, const double yy=-999);
   static void ScaleStack(THStack *stk, const double scale);
@@ -153,6 +142,7 @@ class style
   static TGraphAsymmErrors * GetInverse(const TGraphAsymmErrors * graw);
   static TH1D * Func2Hist(TF1 * ff, const Bool_t klogx);
 
+  static const int fgkColorBase;
   static Double_t fgkTextSize;
   static Double_t fgkTitleSize;
   static Double_t fgkMarkerSize;

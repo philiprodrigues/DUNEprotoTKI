@@ -10,7 +10,8 @@ comm="g++ $incpath -fPIC -c ${code}.cxx -o ${code}.o"
 echo $comm
 eval $comm || exit 1
 
-comm="rootcint -f ${code}Dict.cxx -c $incpath  ${code}.h ${code}LinkDef.h"
+#comm="rootcint -f ${code}Dict.cxx -c $incpath  ${code}.h ${code}LinkDef.h"
+comm="rootcint -f ${code}Dict.cxx $incpath  ${code}.h ${code}LinkDef.h"
 echo $comm
 eval $comm  || exit 1
 
