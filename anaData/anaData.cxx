@@ -31,7 +31,7 @@ const bool gkFillBefore = true;//false;
 const int gkDataBit = 3;
 
 //gkFast=true: only png will be save; otherwise eps, pdf, png all saved
-const bool gkFast = false;
+const bool gkFast = 1;//false;
 
 int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
@@ -123,7 +123,7 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
 
     //---------- continue cut flow ----------
     if(!gkOnlySignal){  
-      if(!AnaCut::CutTopology(kPiZero, gkFillBefore)){
+      if(!AnaCut::CutTopology(kMC, kPiZero, gkFillBefore)){
         continue;
       }   
     }
@@ -140,7 +140,7 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     int dummycounter = -999;
     const bool kprint = false;
     const bool kfill = !gkFillBefore;
-    AnaCut::CountPFP(kPiZero, evtType, dummycounter, dummycounter, dummycounter, dummycounter, dummypi0, kprint, kfill);
+    AnaCut::CountPFP(kMC, kPiZero, evtType, dummycounter, dummycounter, dummycounter, dummycounter, dummypi0, kprint, kfill);
     
     //--- to test
      /*   

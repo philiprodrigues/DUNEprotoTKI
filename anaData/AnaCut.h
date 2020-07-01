@@ -6,52 +6,114 @@ using namespace std;
 namespace AnaCut
 {
 
+int GetTruthPDGFromID(const int inID, const vector<int> * idarray, const vector<int> * pdgarray, int & counter, int * trueidx=0x0)
+{
+  int outpdg = -999;
+  for(unsigned int ii = 0; ii<idarray->size(); ii++){
+    if(  (*idarray)[ii] == inID ){
+      if(counter){
+        printf("GetTruthIndedXFrom ID inID found again %d\n", inID); exit(1);
+      }
+
+      outpdg = (*pdgarray)[ii];
+      if(trueidx){
+        (*trueidx) = ii;
+      }
+      counter++;
+    }
+  }
+
+  return outpdg;
+}
+  
 int GetTruthFromRec(const int recidx, TLorentzVector *& momRefBeam)
 {
+  const int directPDG = (*AnaIO::reco_daughter_PFP_true_byHits_PDG)[recidx];
+
+  bool isPrimary = false;
   int pdg = -999;
   momRefBeam = 0x0;
-  int trueidx = -999;
 
-  if(AnaIO::reco_daughter_PFP_true_byHits_ID && AnaIO::reco_daughter_PFP_true_byHits_ID->size() ){//in data this Is size = 0 but not null
-
-    const int truthID = (*AnaIO::reco_daughter_PFP_true_byHits_ID)[recidx];
+  const vector<int> *trueIDarray = AnaIO::reco_daughter_PFP_true_byHits_ID;
+  if(trueIDarray && trueIDarray->size() ){//in data this Is size = 0 but not null
+    const int truthID = (*trueIDarray)[recidx];
     int counter = 0;
-    for(unsigned int ii = 0; ii<AnaIO::true_beam_daughter_ID->size(); ii++){
-      if(  (*AnaIO::true_beam_daughter_ID)[ii] == truthID ){
-        if(counter){
-          printf("GetTruthFromRec truthID found again %d %d\n", recidx, truthID); exit(1);
-        }
-        trueidx = ii;
-        counter++;
+
+    int trueidx = -999;
+
+    //--- first search direct daughter
+    pdg = GetTruthPDGFromID(truthID, AnaIO::true_beam_daughter_ID, AnaIO::true_beam_daughter_PDG, counter, &trueidx); 
+    if(pdg!=-999){//1. is daughter
+      if(pdg!=2212 && TMath::Abs(pdg)!=211 && TMath::Abs(pdg)!=11 && TMath::Abs(pdg)!=13 && TMath::Abs(pdg)!=22 && TMath::Abs(pdg)!=321 && pdg<1000000000){
+        printf("GetTruthFromRec reconstructed truth daughter not proton or pion! %d %d\n", pdg, directPDG); exit(1);
       }
-    }
-    
-    if(trueidx>=0){
-      pdg = (*AnaIO::true_beam_daughter_PDG)[trueidx];
       
+      isPrimary = true;
+      //only set for direct daughter
       momRefBeam = new TLorentzVector(AnaUtils::GetMomentumRefBeam(true, trueidx, pdg==2212));
     }
+    else{//1. not daughter
+
+      //--- then search pi0
+      pdg = GetTruthPDGFromID(truthID, AnaIO::true_beam_Pi0_decay_ID, AnaIO::true_beam_Pi0_decay_PDG, counter); 
+      if(pdg!=-999){//2. pi0 daughter
+        if(pdg!=22 && TMath::Abs(pdg)!=11){
+          printf("GetTruthFromRec Pi0 decay not to gamma! %d %d\n", pdg, directPDG); exit(1);
+        }
+        
+        //pi0 direct daughter also primary
+        isPrimary = true;
+      }
+      else{//2. not pi0 daughter
+
+        //--- then search grand daugher
+        pdg = GetTruthPDGFromID(truthID, AnaIO::true_beam_grand_daughter_ID, AnaIO::true_beam_grand_daughter_PDG, counter);
+        if(pdg!=-999){
+
+        }
+        else{
+          //--- lump great grand daughter here
+          if(TMath::Abs(directPDG)==11 || TMath::Abs(directPDG)==13 || TMath::Abs(directPDG)==22 || TMath::Abs(directPDG)==211 || directPDG==2212 || directPDG>1000000000){
+            pdg= directPDG;
+          }
+          else{
+            printf("GetTruthFromRec search not done! %d %d\n", recidx, directPDG); exit(1);
+          }
+        }
+      }
+      
+    }
     
   }
 
-
-  int truthParticleType = -999;
-  if(pdg==2212){//proton
-    truthParticleType = AnaUtils::gkProton;
-  }
-  else if(pdg==211){//pi+
-    truthParticleType = AnaUtils::gkPiPlus;
-  }
-  else if(pdg==22){//gamma 
-    truthParticleType = AnaUtils::gkOthers+1;
-  }
-  else if(pdg==-999){//shower no true
-    truthParticleType = AnaUtils::gkShower;
-  }
-  else{//all others
-    truthParticleType = AnaUtils::gkOthers;
+  if(directPDG!=pdg){
+    printf("GetTruthFromRec inconsistent PDG %d %d\n", pdg, directPDG); exit(1);
   }
 
+  int truthParticleType = AnaUtils::gkOthers;
+  if(isPrimary){
+    if(pdg==2212){//proton
+      truthParticleType = AnaUtils::gkProton;
+    }
+    else if(pdg==211){//pi+
+      truthParticleType = AnaUtils::gkPiPlus;
+    }
+    else if(pdg==22){//gamma
+      truthParticleType = AnaUtils::gkShower;
+    }
+  }
+  else{
+    if(pdg==2212){//proton
+      truthParticleType = AnaUtils::gkSecondaryProton;
+    }
+    else if(pdg==211){//pi+
+      truthParticleType = AnaUtils::gkSecondaryPiPlus;
+    }
+    else if(pdg==22){//gamma
+      truthParticleType = AnaUtils::gkSecondaryShower;
+    }
+  }
+        
   return truthParticleType;
 }
 
@@ -239,9 +301,9 @@ bool IsProton(const int ii, const bool kfill, const int truthParticleType, const
 
     //------ fill truth-matched info
 
-    if(truthParticleType == AnaUtils::gkProton){
+    if(truthParticleType == AnaUtils::gkProton && truthMomRefBeam){
 
-      //if type set, then truthMomRefBeam must exist
+      //proton might come from non direct daughter and therefore truthMom = 0x0
       const double momentumRes = truthMomRefBeam? recMomRefBeam.P()/truthMomRefBeam->P()-1 : -999;
       const double thetaRes    = truthMomRefBeam? (recMomRefBeam.Theta()-truthMomRefBeam->Theta())*TMath::RadToDeg() : -999;
 
@@ -320,7 +382,7 @@ bool IsPiplus(const int ii, const bool kfill, const int truthParticleType, const
   
     //------ fill truth-matched info
 
-    if(truthParticleType == AnaUtils::gkPiPlus){
+    if(truthParticleType == AnaUtils::gkPiPlus && truthMomRefBeam){
 
       const double momentumRes = truthMomRefBeam? recMomRefBeam.P()/truthMomRefBeam->P()-1 : -999;
       const double thetaRes    = truthMomRefBeam? (recMomRefBeam.Theta()-truthMomRefBeam->Theta())*TMath::RadToDeg() : -999;
@@ -334,7 +396,7 @@ bool IsPiplus(const int ii, const bool kfill, const int truthParticleType, const
   return true;
 }
 
-void CountPFP(const bool kpi0, const int truthEventType, int & nproton, int & npiplus, int & nshower, int & nmichel, TLorentzVector *  & leadingPi0, const bool kprint, const bool kfill)
+void CountPFP(const bool kMC, const bool kpi0, const int truthEventType, int & nproton, int & npiplus, int & nshower, int & nmichel, TLorentzVector *  & leadingPi0, const bool kprint, const bool kfill)
 {
   //
   //to-do: need to pass out the proton and piplus
@@ -370,7 +432,7 @@ void CountPFP(const bool kpi0, const int truthEventType, int & nproton, int & np
 
     //__________________________________________ Get Truth information __________________________________________
     TLorentzVector * truthMomRefBeam = 0x0;
-    const int truthParticleType = GetTruthFromRec(ii, truthMomRefBeam);
+    const int truthParticleType = kMC? GetTruthFromRec(ii, truthMomRefBeam) : -999;
 
     //__________________________________________ Cut PFP before counting -> no cut any more  __________________________________________
     //---> need to be done before any counting!!!
@@ -444,7 +506,7 @@ void CountPFP(const bool kpi0, const int truthEventType, int & nproton, int & np
 }
 
 
-bool CutTopology(const bool kpi0, const bool kFillBefore)
+bool CutTopology(const bool kMC, const bool kpi0, const bool kFillBefore)
 {
   //
   //number of particles defined in CountPFP needs to be optimized
@@ -458,7 +520,7 @@ bool CutTopology(const bool kpi0, const bool kFillBefore)
 
   const bool kprint = false;
   const bool kfill = kFillBefore;
-  CountPFP(kpi0, AnaIO::kSignal, cutnproton, cutnpiplus, cutnshower, cutnmichel, leadingPi0, kprint, kfill);
+  CountPFP(kMC, kpi0, AnaIO::kSignal, cutnproton, cutnpiplus, cutnshower, cutnmichel, leadingPi0, kprint, kfill);
   
   const int filleventtype = AnaUtils::GetFillEventType();
 

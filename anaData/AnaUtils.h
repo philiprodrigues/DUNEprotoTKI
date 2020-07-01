@@ -39,6 +39,9 @@ enum{
 
   //15, experimental
   gkShower,
+  gkSecondaryProton,
+  gkSecondaryPiPlus,
+  gkSecondaryShower,
 
   //16
   gkOthers
@@ -663,25 +666,65 @@ void PrintLegend()
 {
   TCanvas * c1 = 0x0;
 
-  //  int defcol[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
+  /*
+  gkProton = 1,
+  gkPiPlus,
+  gkShower,
+  gkSecondaryProton,
+  gkSecondaryPiPlus,
+  gkSecondaryShower,
+  gkOthers
 
+  int truthParticleType = AnaUtils::gkOthers;
+  if(isPrimary){
+    if(pdg==2212){//proton
+      truthParticleType = AnaUtils::gkProton;
+    }
+    else if(pdg==211){//pi+
+      truthParticleType = AnaUtils::gkPiPlus;
+    }
+    else if(pdg==22){//gamma
+      truthParticleType = AnaUtils::gkShower;
+    }
+  }
+  else{
+    if(pdg==2212){//proton
+      truthParticleType = AnaUtils::gkSecondaryProton;
+    }
+    else if(pdg==211){//pi+
+      truthParticleType = AnaUtils::gkSecondaryPiPlus;
+    }
+    else if(pdg==22){//gamma
+      truthParticleType = AnaUtils::gkSecondaryShower;
+    }
+  }
+        
+   */
+  
   {
   vector<TString> parType;
   parType.push_back("p");
   parType.push_back("#pi^{+}");
   parType.push_back("EM shower");
+  parType.push_back("2ry p");
+  parType.push_back("2ry #pi^{+}");
+  parType.push_back("2ry EM shower");
   parType.push_back("others");
   parType.push_back("data");
 
-  vector<TString> htype;
+  vector<TString> htype;//need to matcy parType
+  htype.push_back("f");
+  htype.push_back("f");
+  htype.push_back("f");
   htype.push_back("f");
   htype.push_back("f");
   htype.push_back("f");
   htype.push_back("f");
   htype.push_back("pl");
 
-  const int cols[]={1008, 1009, 1002, 1003, kRed};
-  const int mrks[]={1,1,1,1,6};
+  const int mrks[]={1,1,1,1,1,1,1,6};
+  int *cols=style::GetColorArray(8);
+  cols[7]=kBlack;
   c1 = style::DrawLegend(parType, htype, cols, mrks);
 
   c1->Print("output/legend_parType.eps");
@@ -702,7 +745,8 @@ void PrintLegend()
   htype.push_back("f");
   htype.push_back("pl");
 
-  const int cols[]={1008, 1009, 1002, kRed};
+  int *cols=style::GetColorArray(4);
+  cols[3]=kBlack;
   const int mrks[]={1,1,1,6};
   c1 = style::DrawLegend(evtType, htype, cols, mrks);
 

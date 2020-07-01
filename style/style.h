@@ -76,6 +76,7 @@ using namespace std;
 class style
 {
  public:
+  static int * GetColorArray(const int minsize=-999);
   static int GetColor(const int col);
   static double PrintStat(const TString tag, TH1 *hh, const double val0, const double val1, const double oldsel=-999);
   static void FillInRange(TH1 * hh,  double xx, const double yy=-999);

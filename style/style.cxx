@@ -108,9 +108,25 @@ int style::GetColor(const int col)
   }
 }
 
+int * style::GetColorArray(const int minsize)
+{
+  const int col[]={1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005};
+
+  const int nc = sizeof(col)/sizeof(int);
+  if(nc<minsize){
+    printf("style::GetColorArray too small size %d %d\n", nc, minsize); exit(1);
+  }
+  int *outcl = new int[nc];
+  for(int ii=0; ii<nc; ii++){
+    outcl[ii] = col[ii];
+  }
+
+  return outcl;
+}
+
 TCanvas *style::DrawLegend(const vector<TString> &entries, const vector<TString>& htype, const int *tmpcol, const int * tmpmkr)
 {
-  const int defcol[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
+  const int *defcol=GetColorArray();
   const int * cols=0x0;
   if(tmpcol){
     cols=tmpcol;
@@ -260,19 +276,18 @@ THStack * style::ConvertToStack(const TH2D * hh)
 
   const int ny = hh->GetNbinsY();
 
-  const double oldintegral = hh->Integral(0, 10000, 1, ny);
+  const int y0 = 0;
+  const int y1 = ny+1;
+  const double oldintegral = hh->Integral(0, 10000, y0, y1);
 
   double newintegral = 0;
   THStack * stk = new THStack(tag+"_stack", tag);
 
-  const int col[]={1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3, 1008, 1009, 1002, 1003, 1014, 1008, kOrange, 1007,  1011, 1003, 1002, kRed, kBlue, kGray, kOrange, kGreen+3};
-  const int ncol = sizeof(col)/sizeof(int);
-  if(ncol<ny){
-    printf("style::ConvertToStack not enough color %d %d\n", ncol, ny); exit(1);
-  }
+  const int *col=GetColorArray(ny);
 
   int colorcount=0;
-  for(int iy = 1; iy<=ny; iy++){
+  //need to take into account of overflow in y
+  for(int iy = y0; iy<=y1; iy++){
     const double toty = hh->Integral(0, 100000, iy, iy);
     if(toty<EPSILON){
       continue;

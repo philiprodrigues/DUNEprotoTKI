@@ -68,13 +68,19 @@ namespace AnaIO
 
   //======================================= tree in =======================================
   //--------------------------------------- anaTruth ---------------------------------------
-  vector<int>    *true_beam_daughter_PDG=0x0;
   vector<double> *true_beam_daughter_startPx=0x0;
   vector<double> *true_beam_daughter_startPy=0x0;
   vector<double> *true_beam_daughter_startPz=0x0;
 
+  vector<int>* true_beam_daughter_PDG = 0x0;
+  vector<int>* true_beam_Pi0_decay_PDG;
+  vector<int>* true_beam_grand_daughter_PDG;
+
   vector<int>* true_beam_daughter_ID = 0x0;
+  vector<int>* true_beam_Pi0_decay_ID;
+  vector<int>* true_beam_grand_daughter_ID;
   vector<int>* reco_daughter_PFP_true_byHits_ID = 0x0;
+  vector<int>* reco_daughter_PFP_true_byHits_PDG = 0x0;
   vector<int>* reco_daughter_allTrack_ID = 0x0;
 
   vector<vector<double> >* reco_daughter_allTrack_calibrated_dEdX_SCE = 0x0;
@@ -345,13 +351,18 @@ TTree * GetInputTree(TFile * fin, const TString tname)
   }
 
   //--------------------------------------- anaTruth ---------------------------------------
-  tree->SetBranchAddress("true_beam_daughter_PDG", &true_beam_daughter_PDG);
   tree->SetBranchAddress("true_beam_daughter_startPx", &true_beam_daughter_startPx);
   tree->SetBranchAddress("true_beam_daughter_startPy", &true_beam_daughter_startPy);
   tree->SetBranchAddress("true_beam_daughter_startPz", &true_beam_daughter_startPz);
 
+  tree->SetBranchAddress("true_beam_daughter_PDG", &true_beam_daughter_PDG);
+  tree->SetBranchAddress("true_beam_Pi0_decay_PDG", &true_beam_Pi0_decay_PDG);
+  tree->SetBranchAddress("true_beam_grand_daughter_PDG", &true_beam_grand_daughter_PDG);
   tree->SetBranchAddress("true_beam_daughter_ID", &true_beam_daughter_ID);
+  tree->SetBranchAddress("true_beam_Pi0_decay_ID", &true_beam_Pi0_decay_ID);
+  tree->SetBranchAddress("true_beam_grand_daughter_ID", &true_beam_grand_daughter_ID);
   tree->SetBranchAddress("reco_daughter_PFP_true_byHits_ID", &reco_daughter_PFP_true_byHits_ID);
+  tree->SetBranchAddress("reco_daughter_PFP_true_byHits_PDG", &reco_daughter_PFP_true_byHits_PDG);
   tree->SetBranchAddress("reco_daughter_allTrack_ID", &reco_daughter_allTrack_ID);
 
   tree->SetBranchAddress("reco_daughter_allTrack_calibrated_dEdX_SCE", &reco_daughter_allTrack_calibrated_dEdX_SCE);
@@ -433,9 +444,9 @@ void IniRecHist(TList * lout, const TString tag)
   hTruthBeamType = new TH1I("a0TruthBeamType"+tag,  "", 20, -0.5, 19.5); lout->Add(hTruthBeamType);
   hTruthSignal = new TH1I("a1TruthSignal"+tag,  "",  nPass, Passmin, Passmax); lout->Add(hTruthSignal);
 
-  const int nevtType = 20;
+  const int nevtType = 30;
   const double evtTypemin = -0.5;
-  const double evtTypemax = 19.5;
+  const double evtTypemax = 29.5;
 
   const int nE = 50;
   const double Emin = 0;
