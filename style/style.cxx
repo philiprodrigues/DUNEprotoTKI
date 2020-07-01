@@ -381,6 +381,7 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
   gStyle->SetStatStyle(0);
   gStyle->SetTitleX(0.55);
 
+  const int overlayColor = kBlack;
   for(int ii=0; ii<lout->GetSize(); ii++){
     const TString tag = lout->At(ii)->GetName();
     if(kprint){
@@ -523,7 +524,7 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
       psStatBox = (TPaveStats*)(tmpps->Clone("ovps"));
       TList *listOfLines = psStatBox->GetListOfLines();
       TText *tentry = psStatBox->GetLineWith("Entries");
-      tentry->SetTextColor(kRed);
+      tentry->SetTextColor(overlayColor);
    
       gStyle->SetOptStat(0);
     }
@@ -628,8 +629,8 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
       //holay->SetMarkerStyle(20);
       holay->SetMarkerStyle(6);
       holay->SetMarkerSize(holay->GetNbinsX()<=20?3:1);
-      holay->SetMarkerColor(kRed);
-      holay->SetLineColor(kRed);
+      holay->SetMarkerColor(overlayColor);
+      holay->SetLineColor(overlayColor);
       holay->SetLineWidth(1);
       holay->Draw(dOverlayOpt);
       psStatBox->Draw();
