@@ -124,7 +124,7 @@ int * style::GetColorArray(const int minsize)
   return outcl;
 }
 
-TCanvas *style::DrawLegend(const vector<TString> &entries, const vector<TString>& htype, const int *tmpcol, const int * tmpmkr)
+TCanvas *style::DrawLegend(const vector<TString> &entries, const vector<TString>& htype, const int *tmpcol, const int * tmpmkr, const int ncol)
 {
   const int *defcol=GetColorArray();
   const int * cols=0x0;
@@ -149,11 +149,11 @@ TCanvas *style::DrawLegend(const vector<TString> &entries, const vector<TString>
   const int nent = entries.size();
 
   SetGlobalStyle();
-  TCanvas * c1 = new TCanvas("c1","", 300, 50*nent);
+  TCanvas * c1 = new TCanvas("c1","", 300*(ncol+1)/2., 50*nent/((ncol+1)/2.));
   PadSetup(c1);
 
   TLegend * lg = new TLegend(0, 0, 1, 1);
-  ResetStyle(lg, -999, 20/nent);
+  ResetStyle(lg, 0.10*(ncol+1)/2., 20/nent*(ncol+1)/2.);
 
   for(int ii=0; ii<nent; ii++){
     TH1D * hh=new TH1D(Form("h%d",ii),"",1,0,1);
@@ -168,6 +168,8 @@ TCanvas *style::DrawLegend(const vector<TString> &entries, const vector<TString>
     lg->AddEntry(hh, entries[ii], htype[ii]);
   }
 
+  lg->SetNColumns(ncol);
+  
   lg->Draw();
 
   return c1;

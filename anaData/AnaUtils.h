@@ -760,7 +760,7 @@ void PrintLegend()
   const int mrks[]={1,1,1,1, 1,1,1,1,1,1, 1,6};
   int *cols=style::GetColorArray(parType.size());
   cols[parType.size()-1]=overlayColor;
-  c1 = style::DrawLegend(parType, htype, cols, mrks);
+  c1 = style::DrawLegend(parType, htype, cols, mrks, 5);
 
   c1->Print("output/legend_parType.eps");
   c1->Print("output/legend_parType.pdf");

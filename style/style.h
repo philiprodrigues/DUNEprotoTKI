@@ -82,7 +82,7 @@ class style
   static void FillInRange(TH1 * hh,  double xx, const double yy=-999);
   static void ScaleStack(THStack *stk, const double scale);
   static double GetEntries(THStack *stk);
-  static TCanvas *DrawLegend(const vector<TString> &entries, const vector<TString>& htype, const int *tmpcol=0x0, const int * tmpmkr=0x0);
+  static TCanvas *DrawLegend(const vector<TString> &entries, const vector<TString>& htype, const int *tmpcol=0x0, const int * tmpmkr=0x0, const int ncol = 1);
   static TLegend *ShowColor();
   static void GetHist(const TString var, const TString xtit, const TString ytit, TTree *tree, TH1 *hist);
   static TH1D * GetEff(const TH1D * ha, const TH1D *hb, const double hmax, TList * lout=0x0);
