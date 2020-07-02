@@ -110,7 +110,12 @@ int style::GetColor(const int col)
 
 int * style::GetColorArray(const int minsize)
 {
-  const int col[]={1008, 1009, 1002, kOrange, 1014, 1007, 1003, 1015, 1005, 1004, 1006, 1010, 1012, 1013, 1011, kGreen+3, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005};
+  const int col[]={
+                   1005, 1009, 1002, kOrange,
+                   1014, 1007, 1003, 1015,
+                   1008, 1004, 1006, 1010,
+                   1012, 1013, 1011, kGreen+3,
+                   1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005};
 
   const int nc = sizeof(col)/sizeof(int);
   if(nc<minsize){
@@ -309,7 +314,7 @@ THStack * style::ConvertToStack(const TH2D * hh)
 
     ResetStyle(htmp);
     //const int icol = GetColor(col[colorcount++]);
-    const int icol = GetColor(col[iy]);//need constant map between y and color
+    const int icol = GetColor(col[iy-y0]);//need constant map between y and color
     htmp->SetFillColor(icol);
     htmp->SetLineColor(kBlack);
     htmp->SetMarkerSize(2);
