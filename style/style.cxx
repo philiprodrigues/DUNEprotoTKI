@@ -247,7 +247,10 @@ THStack * style::NormalizeStack(THStack * hstk)
   THStack * hout = new THStack(tag+"_normalized", tag);
 
   const TH1D * hsum = GetStackedSum(hstk); 
-
+  const double sumintegral = hsum->Integral(0,1000000);
+  if(sumintegral<EPSILON){
+    printf("style::NormalizeStack sum integral 0 %e\n", sumintegral); exit(1);
+  }
   const TList * ll = hstk->GetHists();
   for(int ii=0; ii<ll->GetEntries(); ii++){
     const TH1D * hold=(TH1D*) ll->At(ii);
@@ -278,9 +281,10 @@ THStack * style::ConvertToStack(const TH2D * hh)
 
   const int ny = hh->GetNbinsY();
 
-  const int y0 = 0;
-  const int y1 = ny+1;
-  const double oldintegral = hh->Integral(0, 10000, y0, y1);
+  const double oldintegral = hh->Integral(0, 10000, 0, 1000000);
+
+  const int y0 = 1;
+  const int y1 = ny;
 
   double newintegral = 0;
   THStack * stk = new THStack(tag+"_stack", tag);
@@ -304,15 +308,19 @@ THStack * style::ConvertToStack(const TH2D * hh)
     }
 
     ResetStyle(htmp);
-    const int icol = GetColor(col[colorcount++]);
+    //const int icol = GetColor(col[colorcount++]);
+    const int icol = GetColor(col[iy]);//need constant map between y and color
     htmp->SetFillColor(icol);
     htmp->SetLineColor(kBlack);
     htmp->SetMarkerSize(2);
+    printf("style::ConvertToStack %s adding y %f with color %d\n", tag.Data(), hh->GetYaxis()->GetBinCenter(iy), icol);
     stk->Add(htmp);
   }
 
+  printf("style::ConvertToStack %s colorcount %d\n", tag.Data(), colorcount);
+  
   if(oldintegral!=newintegral){
-    printf("style::ConvertToStack integral not matched! old %f new %f\n", oldintegral, newintegral); exit(1);
+    printf("style::ConvertToStack integral not matched! %s old %f new %f\n", tag.Data(), oldintegral, newintegral); exit(1);
   }
 
   return stk;

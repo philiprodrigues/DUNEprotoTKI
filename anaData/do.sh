@@ -10,7 +10,7 @@ mkexe.sh anaData -lstyle -I../style  -L../style || return 1
 #make legend
 ./anaData ; 
 
-exit
+#exit
 
 
 for kPiZero in 0 1               

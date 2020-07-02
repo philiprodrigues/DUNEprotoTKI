@@ -446,9 +446,13 @@ void IniRecHist(TList * lout, const TString tag)
   hTruthBeamType = new TH1I("a0TruthBeamType"+tag,  "", 20, -0.5, 19.5); lout->Add(hTruthBeamType);
   hTruthSignal = new TH1I("a1TruthSignal"+tag,  "",  nPass, Passmin, Passmax); lout->Add(hTruthSignal);
 
-  const int nevtType = 30;
+  const int nparType = 11;
+  const double parTypemin = 0.5;
+  const double parTypemax = 11.5;
+  
+  const int nevtType = 3;
   const double evtTypemin = -0.5;
-  const double evtTypemax = 29.5;
+  const double evtTypemax = 2.5;
 
   const int nE = 50;
   const double Emin = 0;
@@ -534,26 +538,26 @@ void IniRecHist(TList * lout, const TString tag)
   hRecBeamTheta       = new TH2D("b025RecBeamThetaSTKTXT"+tag,"",       nbmTheta, bmThetamin, bmThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecBeamTheta);
 
   hProtonThetaRes     = new TH2D("b100ProtonThetaResNOHTXT"+tag,"",    ndTheta, dThetamin, dThetamax, 25, -20, 30); lout->Add(hProtonThetaRes);
-  hRecProtonTheta     = new TH2D("b101RecProtonThetaSTKTXT"+tag,"",     ndTheta, dThetamin, dThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonTheta);
+  hRecProtonTheta     = new TH2D("b101RecProtonThetaSTKTXT"+tag,"",     ndTheta, dThetamin, dThetamax, nparType, parTypemin, parTypemax); lout->Add(hRecProtonTheta);
   hProtonMomentumRes  = new TH2D("b102ProtonMomentumResNOHTXT"+tag,"", nmomentum, momentummin, momentummax, nres, -0.2, 0.2); lout->Add(hProtonMomentumRes);
-  hRecProtonMomentum  = new TH2D("b103RecProtonMomentumSTKTXT"+tag,"",  nmomentum, momentummin, momentummax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonMomentum);
-  hRecProtonLastE2    = new TH2D("b104RecProtonLastE2STKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonLastE2);
-  hRecProtonLastE3    = new TH2D("b104RecProtonLastE3STKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonLastE3);
-  hRecProtonLastTME   = new TH2D("b105RecProtonLastTMESTKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonLastTME);
-  hRecProtonStartE2   = new TH2D("b106RecProtonStartE2STKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonStartE2);
-  hRecProtonStartE3   = new TH2D("b106RecProtonStartE3STKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonStartE3);
-  hRecProtonStartTME  = new TH2D("b107RecProtonStartTMESTKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecProtonStartTME);
+  hRecProtonMomentum  = new TH2D("b103RecProtonMomentumSTKTXT"+tag,"",  nmomentum, momentummin, momentummax, nparType, parTypemin, parTypemax); lout->Add(hRecProtonMomentum);
+  hRecProtonLastE2    = new TH2D("b104RecProtonLastE2STKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nparType, parTypemin, parTypemax); lout->Add(hRecProtonLastE2);
+  hRecProtonLastE3    = new TH2D("b104RecProtonLastE3STKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nparType, parTypemin, parTypemax); lout->Add(hRecProtonLastE3);
+  hRecProtonLastTME   = new TH2D("b105RecProtonLastTMESTKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nparType, parTypemin, parTypemax); lout->Add(hRecProtonLastTME);
+  hRecProtonStartE2   = new TH2D("b106RecProtonStartE2STKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nparType, parTypemin, parTypemax); lout->Add(hRecProtonStartE2);
+  hRecProtonStartE3   = new TH2D("b106RecProtonStartE3STKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nparType, parTypemin, parTypemax); lout->Add(hRecProtonStartE3);
+  hRecProtonStartTME  = new TH2D("b107RecProtonStartTMESTKTXT"+tag,"",     ndedx, dedxmin, dedxmax, nparType, parTypemin, parTypemax); lout->Add(hRecProtonStartTME);
 
   hPiplusThetaRes     = new TH2D("b200PiplusThetaResNOHTXT"+tag,"",        ndTheta, dThetamin, dThetamax, 25, -20, 30); lout->Add(hPiplusThetaRes);
-  hRecPiplusTheta     = new TH2D("b201RecPiplusThetaSTKTXT"+tag,"",     ndTheta, dThetamin, dThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusTheta);
+  hRecPiplusTheta     = new TH2D("b201RecPiplusThetaSTKTXT"+tag,"",     ndTheta, dThetamin, dThetamax, nparType, parTypemin, parTypemax); lout->Add(hRecPiplusTheta);
   hPiplusMomentumRes  = new TH2D("b202PiplusMomentumResNOHTXT"+tag,"",     nmomentum, momentummin, momentummax, nres, resmin, resmax); lout->Add(hPiplusMomentumRes);
-  hRecPiplusMomentum  = new TH2D("b203RecPiplusMomentumSTKTXT"+tag,"",  nmomentum, momentummin, momentummax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusMomentum);
-  hRecPiplusLastE2    = new TH2D("b204RecPiplusLastE2STKTXT"+tag,"",     ndedx, dedxmin, dedxmax/3, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusLastE2);
-  hRecPiplusLastE3    = new TH2D("b204RecPiplusLastE3STKTXT"+tag,"",     ndedx, dedxmin, dedxmax/3, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusLastE3);
-  hRecPiplusLastTME   = new TH2D("b205RecPiplusLastTMESTKTXT"+tag,"",     ndedx, dedxmin, dedxmax/3, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusLastTME);
-  hRecPiplusStartE2   = new TH2D("b206RecPiplusStartE2STKTXT"+tag,"",     ndedx, dedxmin, dedxmax/2, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusStartE2);
-  hRecPiplusStartE3   = new TH2D("b206RecPiplusStartE3STKTXT"+tag,"",     ndedx, dedxmin, dedxmax/2, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusStartE3);
-  hRecPiplusStartTME  = new TH2D("b207RecPiplusStartTMESTKTXT"+tag,"",     ndedx, dedxmin, dedxmax/2, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPiplusStartTME);
+  hRecPiplusMomentum  = new TH2D("b203RecPiplusMomentumSTKTXT"+tag,"",  nmomentum, momentummin, momentummax, nparType, parTypemin, parTypemax); lout->Add(hRecPiplusMomentum);
+  hRecPiplusLastE2    = new TH2D("b204RecPiplusLastE2STKTXT"+tag,"",     ndedx, dedxmin, dedxmax/3, nparType, parTypemin, parTypemax); lout->Add(hRecPiplusLastE2);
+  hRecPiplusLastE3    = new TH2D("b204RecPiplusLastE3STKTXT"+tag,"",     ndedx, dedxmin, dedxmax/3, nparType, parTypemin, parTypemax); lout->Add(hRecPiplusLastE3);
+  hRecPiplusLastTME   = new TH2D("b205RecPiplusLastTMESTKTXT"+tag,"",     ndedx, dedxmin, dedxmax/3, nparType, parTypemin, parTypemax); lout->Add(hRecPiplusLastTME);
+  hRecPiplusStartE2   = new TH2D("b206RecPiplusStartE2STKTXT"+tag,"",     ndedx, dedxmin, dedxmax/2, nparType, parTypemin, parTypemax); lout->Add(hRecPiplusStartE2);
+  hRecPiplusStartE3   = new TH2D("b206RecPiplusStartE3STKTXT"+tag,"",     ndedx, dedxmin, dedxmax/2, nparType, parTypemin, parTypemax); lout->Add(hRecPiplusStartE3);
+  hRecPiplusStartTME  = new TH2D("b207RecPiplusStartTMESTKTXT"+tag,"",     ndedx, dedxmin, dedxmax/2, nparType, parTypemin, parTypemax); lout->Add(hRecPiplusStartTME);
 
   hRecPi0Nshower      = new TH2D("b300bRecPi0NshowerSTKTXT"+tag,"",      ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPi0Nshower);
   hRecMpi0            = new TH2D("b301RecMpi0STKTXT"+tag,"", 15, 0, 0.3, nevtType, evtTypemin, evtTypemax); lout->Add(hRecMpi0);
@@ -566,15 +570,15 @@ void IniRecHist(TList * lout, const TString tag)
   hCutBeamEndZ        = new TH2D("c003CutBeamEndZSTKTXT"+tag,"",50, 0, 500, nevtType, evtTypemin, evtTypemax); lout->Add(hCutBeamEndZ);
   hCutBeamEndZPass    = new TH2D("c004CutBeamEndZPassSTKTXT"+tag,"",4, -0.5, 3.5, nevtType, evtTypemin, evtTypemax); lout->Add(hCutBeamEndZPass);
 
-  hCutNdEdx           = new TH2D("c100CutNdEdxSTKTXT"+tag,"",          50, 0, 50, nevtType, evtTypemin, evtTypemax); lout->Add(hCutNdEdx);
-  hCuttrackScore      = new TH2D("c101CuttrackScoreSTKTXT"+tag,"",     nscore, scoremin, scoremax, nevtType, evtTypemin, evtTypemax); lout->Add(hCuttrackScore);
-  hCutemScore         = new TH2D("c102CutemScoreSTKTXT"+tag,"",        nscore, scoremin, scoremax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutemScore);
-  hCutmichelScore     = new TH2D("c103CutmichelScoreSTKTXT"+tag,"",    nscore, scoremin, scoremax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutmichelScore);
-  hCutnHits           = new TH2D("c104CutnHitsSTKTXT"+tag,"",          50, 0, 500, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnHits);
-  hCutChi2NDF         = new TH2D("c105CutChi2NDFSTKTXT"+tag,"",        30, 0, 500, nevtType, evtTypemin, evtTypemax); lout->Add(hCutChi2NDF);
-  hCutstartE2         = new TH2D("c106CutstartE2STKTXT"+tag,"",        ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutstartE2);
-  hCutstartE3         = new TH2D("c107CutstartE3STKTXT"+tag,"",        ndedx, dedxmin, dedxmax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutstartE3);
-  hCutlastTME         = new TH2D("c108CutlastTMESTKTXT"+tag,"",        ndedx, dedxmin, dedxmax/3, nevtType, evtTypemin, evtTypemax); lout->Add(hCutlastTME);
+  hCutNdEdx           = new TH2D("c100CutNdEdxSTKTXT"+tag,"",          50, 0, 50, nparType, parTypemin, parTypemax); lout->Add(hCutNdEdx);
+  hCuttrackScore      = new TH2D("c101CuttrackScoreSTKTXT"+tag,"",     nscore, scoremin, scoremax, nparType, parTypemin, parTypemax); lout->Add(hCuttrackScore);
+  hCutemScore         = new TH2D("c102CutemScoreSTKTXT"+tag,"",        nscore, scoremin, scoremax, nparType, parTypemin, parTypemax); lout->Add(hCutemScore);
+  hCutmichelScore     = new TH2D("c103CutmichelScoreSTKTXT"+tag,"",    nscore, scoremin, scoremax, nparType, parTypemin, parTypemax); lout->Add(hCutmichelScore);
+  hCutnHits           = new TH2D("c104CutnHitsSTKTXT"+tag,"",          50, 0, 500, nparType, parTypemin, parTypemax); lout->Add(hCutnHits);
+  hCutChi2NDF         = new TH2D("c105CutChi2NDFSTKTXT"+tag,"",        30, 0, 500, nparType, parTypemin, parTypemax); lout->Add(hCutChi2NDF);
+  hCutstartE2         = new TH2D("c106CutstartE2STKTXT"+tag,"",        ndedx, dedxmin, dedxmax, nparType, parTypemin, parTypemax); lout->Add(hCutstartE2);
+  hCutstartE3         = new TH2D("c107CutstartE3STKTXT"+tag,"",        ndedx, dedxmin, dedxmax, nparType, parTypemin, parTypemax); lout->Add(hCutstartE3);
+  hCutlastTME         = new TH2D("c108CutlastTMESTKTXT"+tag,"",        ndedx, dedxmin, dedxmax/3, nparType, parTypemin, parTypemax); lout->Add(hCutlastTME);
 
   hCutnshower         = new TH2D("c200CutnshowerSTKTXT"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnshower);
   hCutnmichel         = new TH2D("c201CutnmichelSTKTXT"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnmichel);

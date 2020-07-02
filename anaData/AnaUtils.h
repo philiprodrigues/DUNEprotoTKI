@@ -7,39 +7,16 @@ namespace AnaUtils
 {
 
 enum{
-  //1-2
-  gkProton = 1,
-  gkNeutron,
 
-  //3-5
+  //1-4
+  gkProton=1,
   gkPiPlus,
-  gkPiZero,
   gkPiMinus,
-
-  //6
   gkGamma,
+  //gkEplusEminus,
+  //gkMuon,
 
-  //7-12
-  gkEplusEminus,
-  gkElectron,
-  gkPositron,
-  gkMuon,
-  gkMuPlus,
-  gkMuMinus,
-
-  //13
-  gkKaon,
-
-  //14
-  gkNeutrino,
-
-  //15
-  gkHyperon,
-
-  //16
-  gkNucleus,
-
-  //17-22, 
+  //5-10
   gkSecondaryProton,
   gkSecondaryPiPlus,
   gkSecondaryPiMinus,
@@ -47,8 +24,28 @@ enum{
   gkSecondaryEplusEminus,
   gkSecondaryMuon,
 
-  //23
-  gkOthers
+  //11
+  gkOthers,
+
+  //12-17
+  gkNeutron,
+  gkPiZero,
+  gkElectron,
+  gkPositron,
+  gkMuPlus,
+  gkMuMinus,
+
+  //18
+  gkKaon,
+
+  //19
+  gkNeutrino,
+
+  //20
+  gkHyperon,
+
+  //21
+  gkNucleus
 };
 
 
@@ -670,48 +667,19 @@ void PrintLegend()
 {
   TCanvas * c1 = 0x0;
 
-  /*
-  int truthParticleType = AnaUtils::gkOthers;
-  if(isPrimary){
-    if(pdg==2212){//proton
-      truthParticleType = AnaUtils::gkProton;
-    }
-    else if(pdg==211){//pi+
-      truthParticleType = AnaUtils::gkPiPlus;
-    }
-    else if(pdg==-211){//pi-
-      truthParticleType = AnaUtils::gkPiMinus;
-    }
-    else if(pdg==22){//gamma
-      truthParticleType = AnaUtils::gkGamma;
-    }
-  }
-  else{
-    if(pdg==2212){//proton
-      truthParticleType = AnaUtils::gkSecondaryProton;
-    }
-    else if(pdg==211){//pi+
-      truthParticleType = AnaUtils::gkSecondaryPiPlus;
-    }
-    else if(pdg==-211){//pi-
-      truthParticleType = AnaUtils::gkSecondaryPiMinus;
-    }
-    else if(pdg==22){//gamma
-      truthParticleType = AnaUtils::gkSecondaryGamma;
-    }
-    else if(TMath::Abs(pdg)==11){//e+/-
-      truthParticleType = AnaUtils::gkSecondaryEplusEminus;
-    }
-    else if(TMath::Abs(pdg)==13){//mu+/-
-      truthParticleType = AnaUtils::gkSecondaryMuon;
-    }
-  }
+  const int overlayColor = kRed;
 
-  gkProton = 1,
+  {
+  /*
+  //1-4
+  gkProton=1,
   gkPiPlus,
   gkPiMinus,
   gkGamma,
+  //gkEplusEminus,
+  //gkMuon,
 
+  //5-10
   gkSecondaryProton,
   gkSecondaryPiPlus,
   gkSecondaryPiMinus,
@@ -719,12 +687,10 @@ void PrintLegend()
   gkSecondaryEplusEminus,
   gkSecondaryMuon,
 
+  //11
   gkOthers
   */
 
-  const int overlayColor = kRed;
-  
-  {
   vector<TString> parType;
   parType.push_back("p");
   parType.push_back("#pi^{+}");
@@ -760,7 +726,7 @@ void PrintLegend()
   const int mrks[]={1,1,1,1, 1,1,1,1,1,1, 1,6};
   int *cols=style::GetColorArray(parType.size());
   cols[parType.size()-1]=overlayColor;
-  c1 = style::DrawLegend(parType, htype, cols, mrks, 5);
+  c1 = style::DrawLegend(parType, htype, cols, mrks, 4);
 
   c1->Print("output/legend_parType.eps");
   c1->Print("output/legend_parType.pdf");

@@ -445,8 +445,8 @@ void CountPFP(const bool kMC, const bool kpi0, const int truthEventType, int & n
     //__________________________________________ Get Truth information __________________________________________
     TLorentzVector * truthMomRefBeam = 0x0;
     int pdg = -999;
-    const int truthParticleType = kMC? GetTruthFromRec(ii, truthMomRefBeam, pdg) : -999;
-    if(kfill){
+    const int truthParticleType = kMC? GetTruthFromRec(ii, truthMomRefBeam, pdg) : AnaUtils::gkOthers;
+    if(kfill && kMC){
       if(truthParticleType == AnaUtils::gkOthers){
         const int tmptype = AnaUtils::GetParticleType(pdg);  
         AnaIO::hRecOtherPDG->Fill(tmptype);
