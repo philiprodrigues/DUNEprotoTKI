@@ -110,7 +110,7 @@ int style::GetColor(const int col)
 
 int * style::GetColorArray(const int minsize)
 {
-  const int col[]={1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005};
+  const int col[]={1008, 1009, 1002, kOrange, 1014, 1007, 1003, 1015, 1005, 1004, 1006, 1010, 1012, 1013, 1011, kGreen+3, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005, 1008, 1009, 1002, 1011, 1014, 1007, 1003, 1015, 1005};
 
   const int nc = sizeof(col)/sizeof(int);
   if(nc<minsize){
@@ -381,7 +381,7 @@ void style::DrawHist(TList *lout, const double plotscale, TList * overlayList, c
   gStyle->SetStatStyle(0);
   gStyle->SetTitleX(0.55);
 
-  const int overlayColor = kBlack;
+  const int overlayColor = kRed;
   for(int ii=0; ii<lout->GetSize(); ii++){
     const TString tag = lout->At(ii)->GetName();
     if(kprint){

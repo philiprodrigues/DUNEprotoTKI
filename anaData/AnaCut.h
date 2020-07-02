@@ -25,13 +25,13 @@ int GetTruthPDGFromID(const int inID, const vector<int> * idarray, const vector<
 
   return outpdg;
 }
-  
-int GetTruthFromRec(const int recidx, TLorentzVector *& momRefBeam)
+
+int GetTruthFromRec(const int recidx, TLorentzVector *& momRefBeam, int & pdg)
 {
   const int directPDG = (*AnaIO::reco_daughter_PFP_true_byHits_PDG)[recidx];
 
   bool isPrimary = false;
-  int pdg = -999;
+  pdg = -999;
   momRefBeam = 0x0;
 
   const vector<int> *trueIDarray = AnaIO::reco_daughter_PFP_true_byHits_ID;
@@ -98,8 +98,11 @@ int GetTruthFromRec(const int recidx, TLorentzVector *& momRefBeam)
     else if(pdg==211){//pi+
       truthParticleType = AnaUtils::gkPiPlus;
     }
+    else if(pdg==-211){//pi-
+      truthParticleType = AnaUtils::gkPiMinus;
+    }
     else if(pdg==22){//gamma
-      truthParticleType = AnaUtils::gkShower;
+      truthParticleType = AnaUtils::gkGamma;
     }
   }
   else{
@@ -109,11 +112,20 @@ int GetTruthFromRec(const int recidx, TLorentzVector *& momRefBeam)
     else if(pdg==211){//pi+
       truthParticleType = AnaUtils::gkSecondaryPiPlus;
     }
+    else if(pdg==-211){//pi-
+      truthParticleType = AnaUtils::gkSecondaryPiMinus;
+    }
     else if(pdg==22){//gamma
-      truthParticleType = AnaUtils::gkSecondaryShower;
+      truthParticleType = AnaUtils::gkSecondaryGamma;
+    }
+    else if(TMath::Abs(pdg)==11){//e+/-
+      truthParticleType = AnaUtils::gkSecondaryEplusEminus;
+    }
+    else if(TMath::Abs(pdg)==13){//mu+/-
+      truthParticleType = AnaUtils::gkSecondaryMuon;
     }
   }
-        
+
   return truthParticleType;
 }
 
@@ -432,8 +444,14 @@ void CountPFP(const bool kMC, const bool kpi0, const int truthEventType, int & n
 
     //__________________________________________ Get Truth information __________________________________________
     TLorentzVector * truthMomRefBeam = 0x0;
-    const int truthParticleType = kMC? GetTruthFromRec(ii, truthMomRefBeam) : -999;
-
+    int pdg = -999;
+    const int truthParticleType = kMC? GetTruthFromRec(ii, truthMomRefBeam, pdg) : -999;
+    if(kfill){
+      if(truthParticleType == AnaUtils::gkOthers){
+        const int tmptype = AnaUtils::GetParticleType(pdg);  
+        AnaIO::hRecOtherPDG->Fill(tmptype);
+      }
+    }
     //__________________________________________ Cut PFP before counting -> no cut any more  __________________________________________
     //---> need to be done before any counting!!!
     if(!IsGoodPFP(ii, kfill, truthParticleType)){

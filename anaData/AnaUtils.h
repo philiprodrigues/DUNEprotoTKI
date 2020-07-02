@@ -15,35 +15,39 @@ enum{
   gkPiPlus,
   gkPiZero,
   gkPiMinus,
-  
-  //6-9
+
+  //6
+  gkGamma,
+
+  //7-12
+  gkEplusEminus,
   gkElectron,
   gkPositron,
+  gkMuon,
   gkMuPlus,
   gkMuMinus,
 
-  //10
+  //13
   gkKaon,
 
-  //11
-  gkGamma,
-
-  //12
+  //14
   gkNeutrino,
 
-  //13
+  //15
   gkHyperon,
 
-  //14
+  //16
   gkNucleus,
 
-  //15, experimental
-  gkShower,
+  //17-22, 
   gkSecondaryProton,
   gkSecondaryPiPlus,
-  gkSecondaryShower,
+  gkSecondaryPiMinus,
+  gkSecondaryGamma,
+  gkSecondaryEplusEminus,
+  gkSecondaryMuon,
 
-  //16
+  //23
   gkOthers
 };
 
@@ -667,14 +671,6 @@ void PrintLegend()
   TCanvas * c1 = 0x0;
 
   /*
-  gkProton = 1,
-  gkPiPlus,
-  gkShower,
-  gkSecondaryProton,
-  gkSecondaryPiPlus,
-  gkSecondaryShower,
-  gkOthers
-
   int truthParticleType = AnaUtils::gkOthers;
   if(isPrimary){
     if(pdg==2212){//proton
@@ -683,8 +679,11 @@ void PrintLegend()
     else if(pdg==211){//pi+
       truthParticleType = AnaUtils::gkPiPlus;
     }
+    else if(pdg==-211){//pi-
+      truthParticleType = AnaUtils::gkPiMinus;
+    }
     else if(pdg==22){//gamma
-      truthParticleType = AnaUtils::gkShower;
+      truthParticleType = AnaUtils::gkGamma;
     }
   }
   else{
@@ -694,21 +693,51 @@ void PrintLegend()
     else if(pdg==211){//pi+
       truthParticleType = AnaUtils::gkSecondaryPiPlus;
     }
+    else if(pdg==-211){//pi-
+      truthParticleType = AnaUtils::gkSecondaryPiMinus;
+    }
     else if(pdg==22){//gamma
-      truthParticleType = AnaUtils::gkSecondaryShower;
+      truthParticleType = AnaUtils::gkSecondaryGamma;
+    }
+    else if(TMath::Abs(pdg)==11){//e+/-
+      truthParticleType = AnaUtils::gkSecondaryEplusEminus;
+    }
+    else if(TMath::Abs(pdg)==13){//mu+/-
+      truthParticleType = AnaUtils::gkSecondaryMuon;
     }
   }
-        
-   */
+
+  gkProton = 1,
+  gkPiPlus,
+  gkPiMinus,
+  gkGamma,
+
+  gkSecondaryProton,
+  gkSecondaryPiPlus,
+  gkSecondaryPiMinus,
+  gkSecondaryGamma,
+  gkSecondaryEplusEminus,
+  gkSecondaryMuon,
+
+  gkOthers
+  */
+
+  const int overlayColor = kRed;
   
   {
   vector<TString> parType;
   parType.push_back("p");
   parType.push_back("#pi^{+}");
-  parType.push_back("EM shower");
+  parType.push_back("#pi^{#minus}");
+  parType.push_back("#gamma");
+  
   parType.push_back("2ry p");
   parType.push_back("2ry #pi^{+}");
-  parType.push_back("2ry EM shower");
+  parType.push_back("2ry #pi^{#minus}");
+  parType.push_back("2ry #gamma");
+  parType.push_back("2ry e^{#pm}");
+  parType.push_back("2ry #mu^{#pm}");
+  
   parType.push_back("others");
   parType.push_back("data");
 
@@ -717,14 +746,20 @@ void PrintLegend()
   htype.push_back("f");
   htype.push_back("f");
   htype.push_back("f");
+  
   htype.push_back("f");
   htype.push_back("f");
+  htype.push_back("f");
+  htype.push_back("f");
+  htype.push_back("f");
+  htype.push_back("f");
+  
   htype.push_back("f");
   htype.push_back("pl");
 
-  const int mrks[]={1,1,1,1,1,1,1,6};
-  int *cols=style::GetColorArray(8);
-  cols[7]=kBlack;
+  const int mrks[]={1,1,1,1, 1,1,1,1,1,1, 1,6};
+  int *cols=style::GetColorArray(parType.size());
+  cols[parType.size()-1]=overlayColor;
   c1 = style::DrawLegend(parType, htype, cols, mrks);
 
   c1->Print("output/legend_parType.eps");
@@ -746,7 +781,7 @@ void PrintLegend()
   htype.push_back("pl");
 
   int *cols=style::GetColorArray(4);
-  cols[3]=kBlack;
+  cols[3]=overlayColor;
   const int mrks[]={1,1,1,6};
   c1 = style::DrawLegend(evtType, htype, cols, mrks);
 

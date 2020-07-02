@@ -178,6 +178,8 @@ namespace AnaIO
 
   TH2D * hBeamThetaRes = 0x0;
 
+  TH1I * hRecOtherPDG = 0x0;
+
   TH2D * hProtonThetaRes = 0x0;
   TH2D * hPiplusThetaRes = 0x0;
 
@@ -555,6 +557,8 @@ void IniRecHist(TList * lout, const TString tag)
 
   hRecPi0Nshower      = new TH2D("b300bRecPi0NshowerSTKTXT"+tag,"",      ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPi0Nshower);
   hRecMpi0            = new TH2D("b301RecMpi0STKTXT"+tag,"", 15, 0, 0.3, nevtType, evtTypemin, evtTypemax); lout->Add(hRecMpi0);
+
+  hRecOtherPDG        = new TH1I("b400RecOtherPDGTXT"+tag,"", 25, -0.5, 24.5); lout->Add(hRecOtherPDG);
 
   hCutbeamID          = new TH1I("c000CutBeamIDTXT"+tag,"", 2, -0.5, 1.5); lout->Add(hCutbeamID);
   hCutBeamType        = new TH2D("c001CutBeamTypeSTKTXT"+tag,  "", 30, -4.5, 25.5, nevtType, evtTypemin, evtTypemax); lout->Add(hCutBeamType);
