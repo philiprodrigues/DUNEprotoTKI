@@ -177,7 +177,7 @@ bool IsMichel(const int ii, const bool kfill, const int truthParticleType)
   return true;
 }
 
-bool IsShower(const int ii, vector<TLorentzVector> & showerArray, const bool kfill, const int truthParticleType)
+bool IsShower(const bool kpi0, const int ii, vector<TLorentzVector> & showerArray, const bool kfill, const int truthParticleType)
 {
   //
   //shower identification using score only for the momentum
@@ -197,6 +197,20 @@ bool IsShower(const int ii, vector<TLorentzVector> & showerArray, const bool kfi
     return false;
   }
 
+  const TVector3 dist = AnaUtils::GetShowerVector(ii);
+  if(kfill){
+    style::FillInRange(AnaIO::hCutShowerTheta, dist.Theta()*TMath::RadToDeg(), truthParticleType);
+    style::FillInRange(AnaIO::hCutShowerPhi, dist.Phi()*TMath::RadToDeg(), truthParticleType);
+    style::FillInRange(AnaIO::hCutShowerDist, dist.Mag(), truthParticleType);
+  }
+
+  //this cut only improve pi0 channel!
+  if(kpi0){
+    if( dist.Mag()<3 ){
+      return false;
+    }
+  }
+  
   if(AnaIO::reco_daughter_allShower_energy){
     const TVector3 showerDir((*AnaIO::reco_daughter_allShower_dirX)[ii], 
                              (*AnaIO::reco_daughter_allShower_dirY)[ii], 
@@ -209,7 +223,7 @@ bool IsShower(const int ii, vector<TLorentzVector> & showerArray, const bool kfi
   else{
     printf("shower energy null!!\n"); exit(1);
   }
-  
+
   return true;
 }
  
@@ -248,7 +262,7 @@ bool IsTrack(const int ii, const bool kfill, const int truthParticleType=-999,
   if(nhits <= 40){
     return false;
   }
-
+  
   //fill before doing chi2, no matter 
   if(kfill){
     const double Chi2NDF = AnaUtils::GetChi2NDF(ii);
@@ -479,7 +493,7 @@ void CountPFP(const bool kMC, const bool kpi0, const int truthEventType, int & n
       npiplus++;
     }
 
-    if(IsShower(ii, showerArray, kfill, truthParticleType)){
+    if(IsShower(kpi0, ii, showerArray, kfill, truthParticleType)){
       nshower++;
     }
 

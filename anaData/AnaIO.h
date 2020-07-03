@@ -107,7 +107,10 @@ namespace AnaIO
   vector<double>  *reco_daughter_allShower_dirY=0x0;
   vector<double>  *reco_daughter_allShower_dirZ=0x0;
   vector<double>  *reco_daughter_allShower_energy=0x0;
-
+  vector<double>  *reco_daughter_allShower_startX = 0x0;
+  vector<double>  *reco_daughter_allShower_startY = 0x0;
+  vector<double>  *reco_daughter_allShower_startZ = 0x0;
+    
   vector<double>* reco_daughter_allTrack_momByRange_proton = 0x0;
   vector<double>* reco_daughter_allTrack_momByRange_muon = 0x0;
 
@@ -137,6 +140,8 @@ namespace AnaIO
   Double_t        true_beam_startDirY;
   Double_t        true_beam_startDirZ;
 
+  Double_t        reco_beam_endX;
+  Double_t        reco_beam_endY;
   Double_t        reco_beam_endZ;
   Double_t        reco_beam_interactingEnergy;
   Double_t        true_beam_interactingEnergy;
@@ -227,6 +232,9 @@ namespace AnaIO
   TH2D * hCutlastTME = 0x0;
   TH2D * hCuttrackScore = 0x0;
   TH2D * hCutemScore = 0x0;
+  TH2D * hCutShowerTheta = 0x0;
+  TH2D * hCutShowerPhi = 0x0;
+  TH2D * hCutShowerDist = 0x0;
   TH2D * hCutmichelScore = 0x0;
   TH2D * hCutChi2NDF = 0x0;
 
@@ -390,6 +398,9 @@ TTree * GetInputTree(TFile * fin, const TString tname)
   tree->SetBranchAddress("reco_daughter_allShower_dirY", &reco_daughter_allShower_dirY);
   tree->SetBranchAddress("reco_daughter_allShower_dirZ", &reco_daughter_allShower_dirZ);
   tree->SetBranchAddress("reco_daughter_allShower_energy", &reco_daughter_allShower_energy);
+  tree->SetBranchAddress("reco_daughter_allShower_startX", &reco_daughter_allShower_startX);
+  tree->SetBranchAddress("reco_daughter_allShower_startY", &reco_daughter_allShower_startY);
+  tree->SetBranchAddress("reco_daughter_allShower_startZ", &reco_daughter_allShower_startZ);
 
   tree->SetBranchAddress("reco_daughter_allTrack_momByRange_proton", &reco_daughter_allTrack_momByRange_proton);
   tree->SetBranchAddress("reco_daughter_allTrack_momByRange_muon", &reco_daughter_allTrack_momByRange_muon);
@@ -438,6 +449,8 @@ TTree * GetInputTree(TFile * fin, const TString tname)
   tree->SetBranchAddress("data_BI_nMomenta", &data_BI_nMomenta);
   tree->SetBranchAddress("data_BI_nTracks", &data_BI_nTracks);
 
+  tree->SetBranchAddress("reco_beam_endX", &reco_beam_endX);
+  tree->SetBranchAddress("reco_beam_endY", &reco_beam_endY);
   tree->SetBranchAddress("reco_beam_endZ", &reco_beam_endZ);
   tree->SetBranchAddress("reco_beam_interactingEnergy", &reco_beam_interactingEnergy);
   tree->SetBranchAddress("true_beam_interactingEnergy", &true_beam_interactingEnergy);
@@ -596,6 +609,9 @@ void IniRecHist(TList * lout, const TString tag)
   hCutstartE2         = new TH2D("c106CutstartE2STKTXT"+tag,"",        ndedx, dedxmin, dedxmax, nparType, parTypemin, parTypemax); lout->Add(hCutstartE2);
   hCutstartE3         = new TH2D("c107CutstartE3STKTXT"+tag,"",        ndedx, dedxmin, dedxmax, nparType, parTypemin, parTypemax); lout->Add(hCutstartE3);
   hCutlastTME         = new TH2D("c108CutlastTMESTKTXT"+tag,"",        ndedx, dedxmin, dedxmax/3, nparType, parTypemin, parTypemax); lout->Add(hCutlastTME);
+  hCutShowerTheta     = new TH2D("c109CutShowerThetaSTKTXT"+tag,"",    ndTheta, dThetamin, dThetamax, nparType, parTypemin, parTypemax); lout->Add(hCutShowerTheta);
+  hCutShowerPhi       = new TH2D("c109CutShowerPhiSTKTXT"+tag,"",      ndTheta, dThetamin, dThetamax, nparType, parTypemin, parTypemax); lout->Add(hCutShowerPhi);
+  hCutShowerDist      = new TH2D("c109CutShowerDistSTKTXT"+tag,"",     50, 0, 100, nparType, parTypemin, parTypemax); lout->Add(hCutShowerDist);
 
   hCutnshower         = new TH2D("c200CutnshowerSTKTXT"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnshower);
   hCutnmichel         = new TH2D("c201CutnmichelSTKTXT"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnmichel);

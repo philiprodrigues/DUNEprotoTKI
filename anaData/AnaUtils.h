@@ -151,7 +151,15 @@ TLorentzVector GetMomentumRefBeam(const bool isTruth, const int trackIndex, cons
   return momentumRefBeam;
 }
 
+TVector3 GetShowerVector(const int ii)
+{
+  const TVector3 vtx(AnaIO::reco_beam_endX, AnaIO::reco_beam_endY, AnaIO::reco_beam_endZ);
+  const TVector3 shw((*AnaIO::reco_daughter_allShower_startX)[ii], (*AnaIO::reco_daughter_allShower_startY)[ii], (*AnaIO::reco_daughter_allShower_startZ)[ii]);
 
+  const TVector3 dist=shw-vtx;
+  return dist;
+}
+  
 TLorentzVector * GetPiZero(const int truthEventType, const vector<TLorentzVector> & shws,  const bool kprint, const bool kfill)
 {
   //
