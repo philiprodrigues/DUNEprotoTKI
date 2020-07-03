@@ -138,6 +138,7 @@ namespace AnaIO
   Double_t        true_beam_startDirZ;
 
   Double_t        reco_beam_endZ;
+  Double_t        reco_beam_momByRange_muon;
 
   Double_t        data_BI_X;
   Double_t        data_BI_Y;
@@ -173,13 +174,14 @@ namespace AnaIO
   TH1I * hTruthBeamType = 0x0;
   TH1I * hTruthSignal = 0x0;
 
-  TH1I * hCutbeamID = 0x0;
+  TH1I * hCutBeamID = 0x0;
   TH2D * hCutBeamType = 0x0;
   TH2D * hCutBeamPosPass = 0x0;
   TH2D * hCutBeamEndZ = 0x0;
   TH2D * hCutBeamEndZPass = 0x0;
 
   TH2D * hBeamThetaRes = 0x0;
+  TH2D * hBeamMomentumRes = 0x0;
 
   TH1I * hRecOtherPDG = 0x0;
 
@@ -190,6 +192,7 @@ namespace AnaIO
   TH2D * hPiplusMomentumRes = 0x0;
 
   TH2D * hRecBeamTheta = 0x0;
+  TH2D * hRecBeamMomentum = 0x0;
 
   TH2D * hRecProtonMomentum = 0x0;
   TH2D * hRecProtonTheta = 0x0;
@@ -434,6 +437,7 @@ TTree * GetInputTree(TFile * fin, const TString tname)
   tree->SetBranchAddress("data_BI_nTracks", &data_BI_nTracks);
 
   tree->SetBranchAddress("reco_beam_endZ", &reco_beam_endZ);
+  tree->SetBranchAddress("reco_beam_momByRange_muon", &reco_beam_momByRange_muon);
 
   //to check the difference with _allTrack_
   tree->SetBranchAddress("reco_beam_len", &reco_beam_len);
@@ -542,7 +546,9 @@ void IniRecHist(TList * lout, const TString tag)
   //NOH, STK are tags for style::Process2DHist
 
   hBeamThetaRes       = new TH2D("b024BeamThetaResNOHTXT"+tag,"",      nbmTheta, bmThetamin, bmThetamax, 25, -20, 30); lout->Add(hBeamThetaRes);
-  hRecBeamTheta       = new TH2D("b025RecBeamThetaSTKTXT"+tag,"",       nbmTheta, bmThetamin, bmThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecBeamTheta);
+  hRecBeamTheta       = new TH2D("b025RecBeamThetaSTKTXT"+tag,"",      nbmTheta, bmThetamin, bmThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecBeamTheta);
+  hBeamMomentumRes    = new TH2D("b026BeamMomentumResNOHTXT"+tag,"",   nmomentum, momentummin, momentummax, nres, resmin, resmax); lout->Add(hBeamMomentumRes);
+  hRecBeamMomentum    = new TH2D("b027RecBeamMomentumSTKTXT"+tag,"",   nmomentum, momentummin, momentummax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecBeamMomentum);
 
   hProtonThetaRes     = new TH2D("b100ProtonThetaResNOHTXT"+tag,"",    ndTheta, dThetamin, dThetamax, 25, -20, 30); lout->Add(hProtonThetaRes);
   hRecProtonTheta     = new TH2D("b101RecProtonThetaSTKTXT"+tag,"",     ndTheta, dThetamin, dThetamax, nparType, parTypemin, parTypemax); lout->Add(hRecProtonTheta);
@@ -571,7 +577,7 @@ void IniRecHist(TList * lout, const TString tag)
 
   hRecOtherPDG        = new TH1I("b400RecOtherPDGTXT"+tag,"", 25, -0.5, 24.5); lout->Add(hRecOtherPDG);
 
-  hCutbeamID          = new TH1I("c000CutBeamIDTXT"+tag,"", 2, -0.5, 1.5); lout->Add(hCutbeamID);
+  hCutBeamID          = new TH1I("c000CutBeamIDTXT"+tag,"", 2, -0.5, 1.5); lout->Add(hCutBeamID);
   hCutBeamType        = new TH2D("c001CutBeamTypeSTKTXT"+tag,  "", 30, -4.5, 25.5, nevtType, evtTypemin, evtTypemax); lout->Add(hCutBeamType);
   hCutBeamPosPass     = new TH2D("c002CutBeamPosPassSTKTXT"+tag, "", 4, -0.5, 3.5, nevtType, evtTypemin, evtTypemax); lout->Add(hCutBeamPosPass);
   hCutBeamEndZ        = new TH2D("c003CutBeamEndZSTKTXT"+tag,"",50, 0, 500, nevtType, evtTypemin, evtTypemax); lout->Add(hCutBeamEndZ);

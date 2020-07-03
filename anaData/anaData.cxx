@@ -111,15 +111,20 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
 
     //---------- fill beam kinematics ----------
 
-    const TVector3 recBeam = AnaUtils::GetRecBeamDir();//currently only use dir
+    const TVector3 recBeamFull = AnaUtils::GetRecBeamFull();
 
     if(kMC){
       const TVector3 truthBeam = AnaUtils::GetTruthBeamFull();
-      const double beamthetaRes = (recBeam.Theta()-truthBeam.Theta())*TMath::RadToDeg();//use absolute difference 
-      style::FillInRange(AnaIO::hBeamThetaRes, truthBeam.Theta()*TMath::RadToDeg(), beamthetaRes);
+
+      const double beamthetaRes    = (recBeamFull.Theta()-truthBeam.Theta())*TMath::RadToDeg();//use absolute difference 
+      const double beammomentumRes = recBeamFull.Mag()/truthBeam.Mag()-1;
+
+      style::FillInRange(AnaIO::hBeamThetaRes,    truthBeam.Theta()*TMath::RadToDeg(), beamthetaRes);
+      style::FillInRange(AnaIO::hBeamMomentumRes, truthBeam.Mag(),                     beammomentumRes);
     }
     
-    style::FillInRange(AnaIO::hRecBeamTheta, recBeam.Theta()*TMath::RadToDeg(), evtType);
+    style::FillInRange(AnaIO::hRecBeamTheta,    recBeamFull.Theta()*TMath::RadToDeg(), evtType);
+    style::FillInRange(AnaIO::hRecBeamMomentum, recBeamFull.Mag(),                     evtType);
 
     //---------- continue cut flow ----------
     if(!gkOnlySignal){  
@@ -168,7 +173,7 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
   //print cut flow statistics:
   int icut = 0;
   double nsel = -999;
-  nsel = style::PrintStat(tag+Form(" %d. Beam ID",  icut++), AnaIO::hCutbeamID, 1, 1, ientry);
+  nsel = style::PrintStat(tag+Form(" %d. Beam ID",  icut++), AnaIO::hCutBeamID, 1, 1, ientry);
   nsel = style::PrintStat(tag+Form(" %d. Pandora beam type",  icut++), AnaIO::hCutBeamType, 13, 13, nsel);
   nsel = style::PrintStat(tag+Form(" %d. Beam Pos",  icut++), AnaIO::hCutBeamPosPass, 1, 1, nsel);
   nsel = style::PrintStat(tag+Form(" %d. APA3",  icut++), AnaIO::hCutBeamEndZPass, 1, 1, nsel);

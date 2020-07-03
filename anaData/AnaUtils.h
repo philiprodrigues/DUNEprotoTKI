@@ -61,22 +61,23 @@ double GetChi2NDF(const int ii)
   return chnf;
 }
 
-TVector3 GetRecBeamDir()
+TVector3 GetRecBeamFull()
 {
   const int version = -1;
 
   static bool kprint = false;
 
   if(!kprint){
-    printf("AnaUtils::GetRecBeamDir using version %d\n", version);
+    printf("AnaUtils::GetRecBeamFull using version %d\n", version);
     kprint = true;
   }
 
+  TVector3 beamdir;
+
   if(version==-1){
-    const TVector3 tmpbeam(AnaIO::reco_beam_trackEndDirX, 
+    beamdir.SetXYZ(AnaIO::reco_beam_trackEndDirX, 
                            AnaIO::reco_beam_trackEndDirY, 
                            AnaIO::reco_beam_trackEndDirZ );
-    return tmpbeam;
   }
   else{
     /*
@@ -92,11 +93,14 @@ TVector3 GetRecBeamDir()
       [3] fourth element: unit vector from 3D line fit of first/last 4 points (start/end direction)
      */
 
-    const TVector3 tmpbeam((*AnaIO::reco_beam_calo_endDirX)[version], 
+    beamdir.SetXYZ((*AnaIO::reco_beam_calo_endDirX)[version], 
                            (*AnaIO::reco_beam_calo_endDirY)[version], 
                            (*AnaIO::reco_beam_calo_endDirZ)[version] );
-    return tmpbeam;
   }
+
+  const TVector3 fullbeam = beamdir.Unit()*AnaIO::reco_beam_momByRange_muon;
+  
+  return fullbeam;
 }
 
 
@@ -128,7 +132,7 @@ TVector3 GetTruthTrackVectLab(const int ii)
 
 TLorentzVector GetMomentumRefBeam(const bool isTruth, const int trackIndex, const bool kProton)
 {
-  const TVector3 tmpBeam = isTruth ? GetTruthBeamFull() : GetRecBeamDir();
+  const TVector3 tmpBeam = isTruth ? GetTruthBeamFull() : GetRecBeamFull();
 
   const TVector3 vecLab = isTruth ? GetTruthTrackVectLab(trackIndex) : GetRecTrackVectLab(trackIndex, kProton);
 

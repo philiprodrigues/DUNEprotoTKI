@@ -719,14 +719,14 @@ bool CutBeamAllInOne(const bool kmc)
   if(kmc){
     //"In data the beam Instrumentation is able to filter for these events but is not inside the MC" 
     const bool mc_beampass =(AnaIO::true_beam_PDG == 211 || AnaIO::true_beam_PDG == -13);
-    style::FillInRange(AnaIO::hCutbeamID, mc_beampass);
+    style::FillInRange(AnaIO::hCutBeamID, mc_beampass);
     if(!mc_beampass){
       return false;
     }
   }
   else{
     const bool data_beamID = CutBeamID((*AnaIO::data_BI_PDG_candidates));
-    style::FillInRange(AnaIO::hCutbeamID, data_beamID);
+    style::FillInRange(AnaIO::hCutBeamID, data_beamID);
     if(!data_beamID){
       return false;
     }
