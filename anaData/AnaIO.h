@@ -127,6 +127,9 @@ namespace AnaIO
   Double_t        reco_beam_trackEndDirX;
   Double_t        reco_beam_trackEndDirY;
   Double_t        reco_beam_trackEndDirZ;
+  vector<double>  *reco_beam_calo_endDirX;
+  vector<double>  *reco_beam_calo_endDirY;
+  vector<double>  *reco_beam_calo_endDirZ;
   Double_t        true_beam_startX;
   Double_t        true_beam_startY;
   Double_t        true_beam_startZ;
@@ -406,6 +409,10 @@ TTree * GetInputTree(TFile * fin, const TString tname)
   tree->SetBranchAddress("reco_beam_trackEndDirY", &reco_beam_trackEndDirY);
   tree->SetBranchAddress("reco_beam_trackEndDirZ", &reco_beam_trackEndDirZ);
 
+  tree->SetBranchAddress("reco_beam_calo_endDirX", &reco_beam_calo_endDirX);
+  tree->SetBranchAddress("reco_beam_calo_endDirY", &reco_beam_calo_endDirY);
+  tree->SetBranchAddress("reco_beam_calo_endDirZ", &reco_beam_calo_endDirZ);
+  
   tree->SetBranchAddress("reco_beam_startX", &reco_beam_startX);
   tree->SetBranchAddress("true_beam_startX", &true_beam_startX);
   tree->SetBranchAddress("true_beam_startDirX", &true_beam_startDirX);

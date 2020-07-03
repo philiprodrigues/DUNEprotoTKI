@@ -63,10 +63,40 @@ double GetChi2NDF(const int ii)
 
 TVector3 GetRecBeamDir()
 {
-  const TVector3 tmpbeam(AnaIO::reco_beam_trackEndDirX, 
-                         AnaIO::reco_beam_trackEndDirY, 
-                         AnaIO::reco_beam_trackEndDirZ );
-  return tmpbeam;
+  const int version = -1;
+
+  static bool kprint = false;
+
+  if(!kprint){
+    printf("AnaUtils::GetRecBeamDir using version %d\n", version);
+    kprint = true;
+  }
+
+  if(version==-1){
+    const TVector3 tmpbeam(AnaIO::reco_beam_trackEndDirX, 
+                           AnaIO::reco_beam_trackEndDirY, 
+                           AnaIO::reco_beam_trackEndDirZ );
+    return tmpbeam;
+  }
+  else{
+    /*
+    const int dirsize = AnaIO::reco_beam_calo_endDirX->size();
+    printf("testtest %d\n", dirsize); exit(1);
+    */
+    //size = 4, [version]
+    /*
+      The direction variables are vectors with a few calculations of direction:
+      [0] first element: unit vector between first and end points
+      [1] second element: unit vector between first 2 points (start direction) and last 2 points (end direction)
+      [2] third element: unit vector from 3D line fit of first/last 3 points (start/end direction)
+      [3] fourth element: unit vector from 3D line fit of first/last 4 points (start/end direction)
+     */
+
+    const TVector3 tmpbeam((*AnaIO::reco_beam_calo_endDirX)[version], 
+                           (*AnaIO::reco_beam_calo_endDirY)[version], 
+                           (*AnaIO::reco_beam_calo_endDirZ)[version] );
+    return tmpbeam;
+  }
 }
 
 
