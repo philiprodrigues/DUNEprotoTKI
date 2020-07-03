@@ -98,7 +98,10 @@ TVector3 GetRecBeamFull()
                            (*AnaIO::reco_beam_calo_endDirZ)[version] );
   }
 
-  const TVector3 fullbeam = beamdir.Unit()*AnaIO::reco_beam_momByRange_muon;
+  const double mpi = AnaFunctions::PionMass();
+  const double ke = AnaIO::reco_beam_interactingEnergy/1E3;//tested, endP highly consistent with AnaIO::true_beam_interactingEnergy/1E3;//
+  const double pionEndP = TMath::Sqrt(ke*ke+2*ke*mpi);
+  const TVector3 fullbeam = beamdir.Unit()*pionEndP;
   
   return fullbeam;
 }

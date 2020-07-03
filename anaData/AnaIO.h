@@ -138,7 +138,9 @@ namespace AnaIO
   Double_t        true_beam_startDirZ;
 
   Double_t        reco_beam_endZ;
-  Double_t        reco_beam_momByRange_muon;
+  Double_t        reco_beam_interactingEnergy;
+  Double_t        true_beam_interactingEnergy;
+  Double_t        new_true_beam_interactingEnergy;
 
   Double_t        data_BI_X;
   Double_t        data_BI_Y;
@@ -437,7 +439,9 @@ TTree * GetInputTree(TFile * fin, const TString tname)
   tree->SetBranchAddress("data_BI_nTracks", &data_BI_nTracks);
 
   tree->SetBranchAddress("reco_beam_endZ", &reco_beam_endZ);
-  tree->SetBranchAddress("reco_beam_momByRange_muon", &reco_beam_momByRange_muon);
+  tree->SetBranchAddress("reco_beam_interactingEnergy", &reco_beam_interactingEnergy);
+  tree->SetBranchAddress("true_beam_interactingEnergy", &true_beam_interactingEnergy);
+  tree->SetBranchAddress("new_true_beam_interactingEnergy", &new_true_beam_interactingEnergy);
 
   //to check the difference with _allTrack_
   tree->SetBranchAddress("reco_beam_len", &reco_beam_len);
