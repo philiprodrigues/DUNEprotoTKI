@@ -625,7 +625,7 @@ void IniRecHist(TList * lout, const TString tag)
   hCutlastTME         = new TH2D("c108CutlastTMESTKTXT"+tag,"",        ndedx, dedxmin, dedxmax/3, nparType, parTypemin, parTypemax); lout->Add(hCutlastTME);
   hCutShowerTheta     = new TH2D("c109CutShowerThetaSTKTXT"+tag,"",    ndTheta, dThetamin, dThetamax, nparType, parTypemin, parTypemax); lout->Add(hCutShowerTheta);
   hCutShowerPhi       = new TH2D("c109CutShowerPhiSTKTXT"+tag,"",      ndTheta, dThetamin, dThetamax, nparType, parTypemin, parTypemax); lout->Add(hCutShowerPhi);
-  hCutShowerDist      = new TH2D("c109CutShowerDistSTKTXT"+tag,"",     50, 0, 100, nparType, parTypemin, parTypemax); lout->Add(hCutShowerDist);
+  hCutShowerDist      = new TH2D("c109CutShowerDistSTKTXT"+tag,"",     31, 0, 93, nparType, parTypemin, parTypemax); lout->Add(hCutShowerDist);
 
   hCutnshower         = new TH2D("c200CutnshowerSTKTXT"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnshower);
   hCutnmichel         = new TH2D("c201CutnmichelSTKTXT"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnmichel);

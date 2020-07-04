@@ -206,7 +206,7 @@ bool IsShower(const bool kpi0, const int ii, vector<TLorentzVector> & showerArra
 
   //this cut only improve pi0 channel!
   if(kpi0){
-    if( dist.Mag()<3 ){
+    if( dist.Mag()<3 || dist.Mag()>90 ){
       return false;
     }
   }

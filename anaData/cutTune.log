@@ -16,10 +16,10 @@
       chi2, noNdEdx, nhits40, no nhits260 for proton:kPiZero 0 fullsig 224.0 signal 41.0 all 118.0 purity 34.7% eff 18.3% ep 6.4%
       PiPlus: chi2, noNdE, nhi40, no260, lTME3.5 p:  kPiZero 0 fullsig 224.0 signal 44.0 all 126.0 purity 34.9% eff 19.6% ep 6.9%
       PiPlus: chi2, noNdE, nhi40, no260, l3.5, noME: kPiZero 0 fullsig 224.0 signal 44.0 all 126.0 purity 34.9% eff 19.6% ep 6.9%
-      chi2, noNdE, nhi40, no260, l3.5, noMichel, showerdis<5 is shower: kPiZero 0 fullsig 224.0 signal 45.0 all 143.0 purity 31.5% eff 20.1% ep 6.3%
-      chi2, noNdE, nhi40, no260, l3.5, noMichel, showerdis<3 is shower: kPiZero 0 fullsig 224.0 signal 45.0 all 140.0 purity 32.1% eff 20.1% ep 6.5%
-      chi2, noNdE, nhi40, no260, l3.5, noMichel, showerdis<2 is shower: kPiZero 0 fullsig 224.0 signal 44.0 all 131.0 purity 33.6% eff 19.6% ep 6.6%
-      chi2, noNdE, nhi40, no260, l3.5, noMichel, showerdis<1 is shower: kPiZero 0 fullsig 224.0 signal 44.0 all 127.0 purity 34.6% eff 19.6% ep 6.8%
+      chi2, noNdE, nhi40, no260, l3.5, noMichel, showerdis>5 is shower: kPiZero 0 fullsig 224.0 signal 45.0 all 143.0 purity 31.5% eff 20.1% ep 6.3%
+      chi2, noNdE, nhi40, no260, l3.5, noMichel, showerdis>3 is shower: kPiZero 0 fullsig 224.0 signal 45.0 all 140.0 purity 32.1% eff 20.1% ep 6.5%
+      chi2, noNdE, nhi40, no260, l3.5, noMichel, showerdis>2 is shower: kPiZero 0 fullsig 224.0 signal 44.0 all 131.0 purity 33.6% eff 19.6% ep 6.6%
+      chi2, noNdE, nhi40, no260, l3.5, noMichel, showerdis>1 is shower: kPiZero 0 fullsig 224.0 signal 44.0 all 127.0 purity 34.6% eff 19.6% ep 6.8%
    ++ PiPlus: chi2, noNdE, nhi40, no260, l3.5, noMichel, no showerdist: kPiZero 0 fullsig 224.0 signal 44.0 all 126.0 purity 34.9% eff 19.6% ep 6.9%
       
       PiZero:  
@@ -30,20 +30,25 @@
       bug fix: moving proton in tracking cou:  kPiZero 1 fullsig 246.0 signal 29.0 all 52.0 purity 55.8% eff 11.8% ep 6.6%
       use same chi2 cut as for PiPlus:         kPiZero 1 fullsig 246.0 signal 27.0 all 51.0 purity 52.9% eff 11.0% ep 5.8%
       chi2 cut, no NdEdx cut:                  kPiZero 1 fullsig 246.0 signal 32.0 all 67.0 purity 47.8% eff 13.0% ep 6.2%
-      chi2, noNdE, NO nhi40, no260, lT3.5, showerdis<2 is shower: kPiZero 1 fullsig 246.0 signal 35.0 all 71.0 purity 49.3% eff 14.2% ep 7.0%
+      chi2, noNdE, NO nhi40, no260, lT3.5, showerdis>2 is shower: kPiZero 1 fullsig 246.0 signal 35.0 all 71.0 purity 49.3% eff 14.2% ep 7.0%
       chi2, no NdEdx, nhits40, trackSCore 0.3: kPiZero 1 fullsig 246.0 signal 30.0 all 47.0 purity 63.8% eff 12.2% ep 7.8%
-      chi2, noNdE, nhi20, no260, lT3.5, showerdis<2 is shower: kPiZero 1 fullsig 246.0 signal 37.0 all 70.0 purity 52.9% eff 15.0% ep 8.0%
-      chi2, noNdE, nhi30, no260, lT3.5, showerdis<2 is shower: kPiZero 1 fullsig 246.0 signal 37.0 all 66.0 purity 56.1% eff 15.0% ep 8.4%
-      chi2, noNdE, nhi50, no260, lT3.5, showerdis<2 is shower: kPiZero 1 fullsig 246.0 signal 36.0 all 57.0 purity 63.2% eff 14.6% ep 9.2%
+      chi2, noNdE, nhi20, no260, lT3.5, showerdis>2 is shower: kPiZero 1 fullsig 246.0 signal 37.0 all 70.0 purity 52.9% eff 15.0% ep 8.0%
+      chi2, noNdE, nhi30, no260, lT3.5, showerdis>2 is shower: kPiZero 1 fullsig 246.0 signal 37.0 all 66.0 purity 56.1% eff 15.0% ep 8.4%
+      chi2, noNdE, nhi50, no260, lT3.5, showerdis>2 is shower: kPiZero 1 fullsig 246.0 signal 36.0 all 57.0 purity 63.2% eff 14.6% ep 9.2%
       chi2, no NdEdx, cut nhits>40 for track:  kPiZero 1 fullsig 246.0 signal 33.0 all 55.0 purity 60.0% eff 13.4% ep 8.0%
       chi2, noNdEdx, nhits40, no nhits260:     kPiZero 1 fullsig 246.0 signal 35.0 all 60.0 purity 58.3% eff 14.2% ep 8.3%
       chi2, noNdE, nhi40, no260, lT3.5:kPiZero 1 fullsig 246.0 signal 39.0 all 68.0 purity 57.4% eff 15.9% ep 9.1%
-      chi2, noNdE, nhi40, no260, lT3.5, showerdis<7 is shower: kPiZero 1 fullsig 246.0 signal 24.0 all 35.0 purity 68.6% eff 9.8% ep 6.7%
-      chi2, noNdE, nhi40, no260, lT3.5, showerdis<5 is shower: kPiZero 1 fullsig 246.0 signal 29.0 all 43.0 purity 67.4% eff 11.8% ep 8.0%
-      chi2, noNdE, nhi40, no260, lT3.5, showerdis<1 is shower: kPiZero 1 fullsig 246.0 signal 39.0 all 67.0 purity 58.2% eff 15.9% ep 9.2%
-      chi2, noNdE, nhi40, no260, lT3.5, showerdis<2 is shower: kPiZero 1 fullsig 246.0 signal 38.0 all 60.0 purity 63.3% eff 15.4% ep 9.8%
-   ++ PiZero: chi2, noNdE, nhi40, no260, lT3.5, showerdis<3 is shower: kPiZero 1 fullsig 246.0 signal 36.0 all 54.0 purity 66.7% eff 14.6% ep 9.8%
+      chi2, noNdE, nhi40, no260, lT3.5, showerdis>7 is shower: kPiZero 1 fullsig 246.0 signal 24.0 all 35.0 purity 68.6% eff 9.8% ep 6.7%
+      chi2, noNdE, nhi40, no260, lT3.5, showerdis>5 is shower: kPiZero 1 fullsig 246.0 signal 29.0 all 43.0 purity 67.4% eff 11.8% ep 8.0%
+      chi2, noNdE, nhi40, no260, lT3.5, showerdis>1 is shower: kPiZero 1 fullsig 246.0 signal 39.0 all 67.0 purity 58.2% eff 15.9% ep 9.2%
+      chi2, noNdE, nhi40, no260, lT3.5, showerdis>2 is shower: kPiZero 1 fullsig 246.0 signal 38.0 all 60.0 purity 63.3% eff 15.4% ep 9.8%
+      chi2, noNdE, nhi40, no260, lT3.5, showerdis>3 is shower: kPiZero 1 fullsig 246.0 signal 36.0 all 54.0 purity 66.7% eff 14.6% ep 9.8%
+      chi2, noNdE, nhi40, no260, lT3.5, showerdis>3&<80 is shower: kPiZero 1 fullsig 246.0 signal 35.0 all 49.0 purity 71.4% eff 14.2% ep 10.2%
+      chi2, noNdE, nhi40, no260, lT3.5, showerdis>3&<70 is shower: kPiZero 1 fullsig 246.0 signal 32.0 all 46.0 purity 69.6% eff 13.0% ep 9.0%
+      chi2, noNdE, nhi40, no260, lT3.5, showerdis>3&<100 is shower: kPiZero 1 fullsig 246.0 signal 35.0 all 51.0 purity 68.6% eff 14.2% ep 9.8%
+   ++ PiZero: chi2, noNdE, nhi40, no260, lT3.5, showerdis>3&<90 is shower: kPiZero 1 fullsig 246.0 signal 35.0 all 49.0 purity 71.4% eff 14.2% ep 10.2%
 
+ 
 //old initial MC, also wrong Score variables below: 
 
       PiPlus: nshower = 0, nproton=1 -> 75/218=34% in signal sample; 63/467 = 13% purity, 63/218 = 29% efficiency, p*e = 63*63/218/467 = 3.9%
