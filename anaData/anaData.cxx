@@ -25,7 +25,7 @@
 const bool gkOnlySignal = false;
 
 //if true, observables will be filled before cuts; otherwise after. "false" if gkOnlySignal "true": only fill after all cuts
-const bool gkFillBefore = true;//false;//
+const bool gkFillBefore = false;//true;//
 
 //1 is mc, 2 is data, 3 is both
 const int gkDataBit = 3;
@@ -36,7 +36,9 @@ const bool gkFast = 1;//false;
 int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
   //_____________________________________________________ basic settings _____________________________________________________ 
-
+  cout<<"input file: ";
+  gSystem->Exec(Form("readlink -f %s", finName.Data()));
+  
   bool kMC = true;
   if(!finName.Contains("_mc_")){
     kMC = false;

@@ -20,7 +20,7 @@
       chi2, noNdE, nhi40, no260, l3.5, noMichel, showerdis<3 is shower: kPiZero 0 fullsig 224.0 signal 45.0 all 140.0 purity 32.1% eff 20.1% ep 6.5%
       chi2, noNdE, nhi40, no260, l3.5, noMichel, showerdis<2 is shower: kPiZero 0 fullsig 224.0 signal 44.0 all 131.0 purity 33.6% eff 19.6% ep 6.6%
       chi2, noNdE, nhi40, no260, l3.5, noMichel, showerdis<1 is shower: kPiZero 0 fullsig 224.0 signal 44.0 all 127.0 purity 34.6% eff 19.6% ep 6.8%
-  (*) PiPlus: chi2, noNdE, nhi40, no260, l3.5, noMichel, no showerdist: kPiZero 0 fullsig 224.0 signal 44.0 all 126.0 purity 34.9% eff 19.6% ep 6.9%
+   ++ PiPlus: chi2, noNdE, nhi40, no260, l3.5, noMichel, no showerdist: kPiZero 0 fullsig 224.0 signal 44.0 all 126.0 purity 34.9% eff 19.6% ep 6.9%
       
       PiZero:  
       no NdEdx cut,        kPiZero 1 fullsig 246.0 signal 31.0 all 60.0 purity 51.7% eff 12.6% ep 6.5%
@@ -42,7 +42,7 @@
       chi2, noNdE, nhi40, no260, lT3.5, showerdis<5 is shower: kPiZero 1 fullsig 246.0 signal 29.0 all 43.0 purity 67.4% eff 11.8% ep 8.0%
       chi2, noNdE, nhi40, no260, lT3.5, showerdis<1 is shower: kPiZero 1 fullsig 246.0 signal 39.0 all 67.0 purity 58.2% eff 15.9% ep 9.2%
       chi2, noNdE, nhi40, no260, lT3.5, showerdis<2 is shower: kPiZero 1 fullsig 246.0 signal 38.0 all 60.0 purity 63.3% eff 15.4% ep 9.8%
-  (*) PiZero: chi2, noNdE, nhi40, no260, lT3.5, showerdis<3 is shower: kPiZero 1 fullsig 246.0 signal 36.0 all 54.0 purity 66.7% eff 14.6% ep 9.8%
+   ++ PiZero: chi2, noNdE, nhi40, no260, lT3.5, showerdis<3 is shower: kPiZero 1 fullsig 246.0 signal 36.0 all 54.0 purity 66.7% eff 14.6% ep 9.8%
 
 //old initial MC, also wrong Score variables below: 
 

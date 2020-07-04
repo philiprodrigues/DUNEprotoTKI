@@ -6,7 +6,13 @@ using namespace std;
 namespace AnaUtils
 {
 
-enum{
+enum evtType{
+             gkSignal = 0,
+             gkEvtBkg,
+             gkBmBkg
+};
+  
+enum parType{
 
   //1-4
   gkProton=1,
@@ -93,6 +99,10 @@ TVector3 GetRecBeamFull()
       [3] fourth element: unit vector from 3D line fit of first/last 4 points (start/end direction)
      */
 
+    if(!AnaIO::reco_beam_calo_endDirX){
+      printf("AnaIO::reco_beam_calo_endDirX null!\n"); exit(1);
+    }
+    
     beamdir.SetXYZ((*AnaIO::reco_beam_calo_endDirX)[version], 
                            (*AnaIO::reco_beam_calo_endDirY)[version], 
                            (*AnaIO::reco_beam_calo_endDirZ)[version] );
@@ -160,7 +170,7 @@ TVector3 GetShowerVector(const int ii)
   return dist;
 }
   
-TLorentzVector * GetPiZero(const int truthEventType, const vector<TLorentzVector> & shws,  const bool kprint, const bool kfill)
+TLorentzVector * GetPiZero(const int truthEventType, const vector<TLorentzVector> & shws,  const vector<double> & showerEarr, const vector<int> & showerTypeArray, const bool kprint, const bool kfill)
 {
   //
   //combine shower-shower pair and return the most energetic one
@@ -171,10 +181,37 @@ TLorentzVector * GetPiZero(const int truthEventType, const vector<TLorentzVector
     style::FillInRange(AnaIO::hRecPi0Nshower, shsize, truthEventType);
   }
 
-  vector<TLorentzVector> piarr;
-  int maxEidx = -999;
-  double pi0Emax = -999;
+  TLorentzVector * outcopy = 0x0;
+
+  //for gkOnlySignal=true, due to non-reconstruction of shower can fail this
   if(shsize>=2){
+    const double* shE = &(showerEarr[0]);
+    int *nindex = new int[shsize];
+
+    TMath::Sort(shsize, shE, nindex, true);
+
+    const TLorentzVector ldShower = shws[nindex[0]];
+    const TLorentzVector slShower = shws[nindex[1]];
+
+    outcopy = new TLorentzVector(ldShower+slShower);
+
+    const double mpi0 = outcopy->M();
+    if(kfill){
+      style::FillInRange(AnaIO::hRecMpi0,   mpi0, truthEventType);
+      if(truthEventType==gkSignal){
+        style::FillInRange(AnaIO::hRecLDMpi0, mpi0, showerTypeArray[nindex[0]]);
+        style::FillInRange(AnaIO::hRecSLMpi0, mpi0, showerTypeArray[nindex[1]]);
+      }
+    }
+    
+    delete nindex;
+
+    //all combination followed by picking the leading Energy pi0 = use leading E showers directly to get pi0, identical results
+    /*
+    vector<TLorentzVector> piarr;
+    int maxEidx = -999;
+    double pi0Emax = -999;
+    
     for(int ii = 0; ii<shsize; ii++){
       for(int kk = ii+1; kk<shsize; kk++){
         const TLorentzVector tmpgg = shws[ii]+shws[kk];
@@ -182,22 +219,24 @@ TLorentzVector * GetPiZero(const int truthEventType, const vector<TLorentzVector
           printf("\n============ %d %d %d \n", shsize, ii, kk);
           tmpgg.Print();        
         }
-
+        
         if(tmpgg.E() > pi0Emax){
           pi0Emax = tmpgg.E();
           maxEidx = piarr.size();
         }
-
+        
         piarr.push_back(tmpgg);
       }
     }
-  }  
+    
 
-  TLorentzVector * outcopy = 0x0;
-  if(maxEidx>=0){
-    outcopy = new TLorentzVector(piarr[maxEidx]);
+    if(maxEidx>=0){
+      outcopy = new TLorentzVector(piarr[maxEidx]);
+    }
+    */
+    
   }
-
+  
   return outcopy;
 }
 
@@ -695,13 +734,13 @@ int GetFillEventType()
 {
   int filleventtype = -999;
   if(AnaIO::kSignal){
-    filleventtype = 0;
+    filleventtype = gkSignal;
   }
   else if(AnaIO::true_beam_PDG==211){
-    filleventtype = 1;
+    filleventtype = gkEvtBkg;
   }
   else{
-    filleventtype = 2;
+    filleventtype = gkBmBkg;
   }
   
   return filleventtype;

@@ -224,6 +224,9 @@ namespace AnaIO
 
   TH2D * hRecPi0Nshower = 0x0;
   TH2D * hRecMpi0 = 0x0;
+  TH2D * hRecLDMpi0 = 0x0;
+  TH2D * hRecSLMpi0 = 0x0;
+  TH2D * hRecShowerEnergy = 0x0;
 
   TH2D * hCutnHits = 0x0;
   TH2D * hCutNdEdx = 0x0;
@@ -535,6 +538,10 @@ void IniRecHist(TList * lout, const TString tag)
   const double resmin = -1;
   const double resmax = 1;
 
+  const int nbmRes = 20;
+  const double bmResmin = -0.5;
+  const double bmResmax = 0.5;
+
   //beam
   const int nbmTheta = 80;
   const double bmThetamin = 0;
@@ -547,6 +554,10 @@ void IniRecHist(TList * lout, const TString tag)
   const int nmomentum = 30;
   const double momentummin = 0;
   const double momentummax = 1.2;
+
+  const int nbmMomentum = 50;
+  const double bmMomentummin = 0;
+  const double bmMomentummax = 2;
 
   const int ndedx = 60;
   const double dedxmin = 0;
@@ -564,8 +575,8 @@ void IniRecHist(TList * lout, const TString tag)
 
   hBeamThetaRes       = new TH2D("b024BeamThetaResNOHTXT"+tag,"",      nbmTheta, bmThetamin, bmThetamax, 25, -20, 30); lout->Add(hBeamThetaRes);
   hRecBeamTheta       = new TH2D("b025RecBeamThetaSTKTXT"+tag,"",      nbmTheta, bmThetamin, bmThetamax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecBeamTheta);
-  hBeamMomentumRes    = new TH2D("b026BeamMomentumResNOHTXT"+tag,"",   nmomentum, momentummin, momentummax, nres, resmin, resmax); lout->Add(hBeamMomentumRes);
-  hRecBeamMomentum    = new TH2D("b027RecBeamMomentumSTKTXT"+tag,"",   nmomentum, momentummin, momentummax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecBeamMomentum);
+  hBeamMomentumRes    = new TH2D("b026BeamMomentumResNOHTXT"+tag,"",   nbmMomentum, bmMomentummin, bmMomentummax, nbmRes, bmResmin, bmResmax); lout->Add(hBeamMomentumRes);
+  hRecBeamMomentum    = new TH2D("b027RecBeamMomentumSTKTXT"+tag,"",   nbmMomentum, bmMomentummin, bmMomentummax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecBeamMomentum);
 
   hProtonThetaRes     = new TH2D("b100ProtonThetaResNOHTXT"+tag,"",    ndTheta, dThetamin, dThetamax, 25, -20, 30); lout->Add(hProtonThetaRes);
   hRecProtonTheta     = new TH2D("b101RecProtonThetaSTKTXT"+tag,"",     ndTheta, dThetamin, dThetamax, nparType, parTypemin, parTypemax); lout->Add(hRecProtonTheta);
@@ -590,7 +601,10 @@ void IniRecHist(TList * lout, const TString tag)
   hRecPiplusStartTME  = new TH2D("b207RecPiplusStartTMESTKTXT"+tag,"",     ndedx, dedxmin, dedxmax/2, nparType, parTypemin, parTypemax); lout->Add(hRecPiplusStartTME);
 
   hRecPi0Nshower      = new TH2D("b300bRecPi0NshowerSTKTXT"+tag,"",      ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hRecPi0Nshower);
-  hRecMpi0            = new TH2D("b301RecMpi0STKTXT"+tag,"", 15, 0, 0.3, nevtType, evtTypemin, evtTypemax); lout->Add(hRecMpi0);
+  hRecMpi0            = new TH2D("b301RecMpi0STKTXT"+tag,"",             15, 0, 0.3, nevtType, evtTypemin, evtTypemax); lout->Add(hRecMpi0);
+  hRecShowerEnergy    = new TH2D("b302RecShowerEnergySTKTXT"+tag,"",     50, 0, 0.5, nparType, parTypemin, parTypemax); lout->Add(hRecShowerEnergy);
+  hRecLDMpi0          = new TH2D("b303RecLDMpi0STKTXT"+tag,"",           15, 0, 0.3, nparType, parTypemin, parTypemax); lout->Add(hRecLDMpi0);
+  hRecSLMpi0          = new TH2D("b303RecSLMpi0STKTXT"+tag,"",           15, 0, 0.3, nparType, parTypemin, parTypemax); lout->Add(hRecSLMpi0);
 
   hRecOtherPDG        = new TH1I("b400RecOtherPDGTXT"+tag,"", 25, -0.5, 24.5); lout->Add(hRecOtherPDG);
 

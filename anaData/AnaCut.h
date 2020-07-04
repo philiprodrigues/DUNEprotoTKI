@@ -177,7 +177,7 @@ bool IsMichel(const int ii, const bool kfill, const int truthParticleType)
   return true;
 }
 
-bool IsShower(const bool kpi0, const int ii, vector<TLorentzVector> & showerArray, const bool kfill, const int truthParticleType)
+bool IsShower(const bool kpi0, const int ii, vector<TLorentzVector> & showerArray, vector<double> & showerEarr, vector<int> & showerTypeArray, const bool kfill, const int truthParticleType)
 {
   //
   //shower identification using score only for the momentum
@@ -210,19 +210,25 @@ bool IsShower(const bool kpi0, const int ii, vector<TLorentzVector> & showerArra
       return false;
     }
   }
-  
-  if(AnaIO::reco_daughter_allShower_energy){
-    const TVector3 showerDir((*AnaIO::reco_daughter_allShower_dirX)[ii], 
-                             (*AnaIO::reco_daughter_allShower_dirY)[ii], 
-                             (*AnaIO::reco_daughter_allShower_dirZ)[ii] );
 
-    const TVector3 showerMomentum = showerDir.Unit()*(*AnaIO::reco_daughter_allShower_energy)[ii] * 1E-3; //MeV to GeV
-    const TLorentzVector showerLv( showerMomentum, showerMomentum.Mag() );
-    showerArray.push_back(showerLv);
+  if(!AnaIO::reco_daughter_allShower_energy){
+     printf("shower energy null!!\n"); exit(1);
   }
-  else{
-    printf("shower energy null!!\n"); exit(1);
+
+  const double showerE = (*AnaIO::reco_daughter_allShower_energy)[ii] * 1E-3; //MeV to GeV
+  if(kfill){
+    style::FillInRange(AnaIO::hRecShowerEnergy, showerE, truthParticleType);
   }
+  
+  const TVector3 showerDir((*AnaIO::reco_daughter_allShower_dirX)[ii], 
+                           (*AnaIO::reco_daughter_allShower_dirY)[ii], 
+                           (*AnaIO::reco_daughter_allShower_dirZ)[ii] );
+
+  const TVector3 showerMomentum = showerDir.Unit()*showerE;
+  const TLorentzVector showerLv( showerMomentum, showerMomentum.Mag() );
+  showerArray.push_back(showerLv);
+  showerEarr.push_back(showerE);
+  showerTypeArray.push_back(truthParticleType);
 
   return true;
 }
@@ -451,6 +457,8 @@ void CountPFP(const bool kMC, const bool kpi0, const int truthEventType, int & n
   */
 
   vector<TLorentzVector> showerArray;
+  vector<double> showerEarr;
+  vector<int> showerTypeArray;
 
   //static bool kPrintCutInfo = true;
 
@@ -493,7 +501,7 @@ void CountPFP(const bool kMC, const bool kpi0, const int truthEventType, int & n
       npiplus++;
     }
 
-    if(IsShower(kpi0, ii, showerArray, kfill, truthParticleType)){
+    if(IsShower(kpi0, ii, showerArray, showerEarr, showerTypeArray, kfill, truthParticleType)){
       nshower++;
     }
 
@@ -521,14 +529,8 @@ void CountPFP(const bool kMC, const bool kpi0, const int truthEventType, int & n
 
   //leading pi0 is event-level info
   if(kpi0){
-    //only fill histnshowers when doing fill
     const bool kprint = false;
-    leadingPi0 = AnaUtils::GetPiZero(truthEventType, showerArray, kprint, kfill);
-
-    //for gkOnlySignal=true, this might be null due to non-reconstruction of shower    
-    if(kfill && leadingPi0){
-      style::FillInRange(AnaIO::hRecMpi0, leadingPi0->M(), truthEventType);
-    }
+    leadingPi0 = AnaUtils::GetPiZero(truthEventType, showerArray, showerEarr, showerTypeArray, kprint, kfill);
   }
 
   if(kprint){
