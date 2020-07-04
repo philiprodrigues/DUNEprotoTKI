@@ -57,15 +57,18 @@ double style::PrintStat(const TString tag, TH1 *hh, const double val0, const dou
 
 void style::FillInRange(TH1 * hh,  double xx, const double yy)
 {
+  const TString tag = hh->GetName();
+
+  const int nbx = hh->GetNbinsX();
   const double xmin = hh->GetXaxis()->GetBinLowEdge(1);
-  const double xmax = hh->GetXaxis()->GetBinUpEdge(hh->GetNbinsX());
+  const double xmax = hh->GetXaxis()->GetBinUpEdge(nbx);
 
   if(xx<xmin){
-    xx = xmin+0.5*hh->GetXaxis()->GetBinWidth(1);
+    xx = hh->GetXaxis()->GetBinCenter(1);
   }
   //= will be right filled
   if(xx>=xmax){
-    xx = xmax-0.5*hh->GetXaxis()->GetBinWidth(hh->GetNbinsX());
+    xx = hh->GetXaxis()->GetBinCenter(nbx);
   }
 
   TH2 * h2 = dynamic_cast<TH2*>(hh);
@@ -74,6 +77,17 @@ void style::FillInRange(TH1 * hh,  double xx, const double yy)
   }
   else{
     hh->Fill(xx);
+  }
+
+  double tmpoverflow = -999;
+  if(h2){
+    tmpoverflow = h2->Integral(nbx+1, nbx+1, 0, 10000);
+  }
+  else{
+    tmpoverflow = hh->GetBinContent(nbx+1);
+  }
+  if(tmpoverflow>EPSILON){
+    printf("style::FillInRange still overflow! %s %f %d %f %f\n", tag.Data(), tmpoverflow, nbx, xx, yy); exit(1);
   }
 }
 
@@ -296,7 +310,7 @@ THStack * style::ConvertToStack(const TH2D * hh)
 
   const int *col=GetColorArray(ny);
 
-  int colorcount=0;
+  //int colorcount=0;
   //need to take into account of overflow in y
   for(int iy = y0; iy<=y1; iy++){
     const double toty = hh->Integral(0, 100000, iy, iy);
@@ -322,7 +336,7 @@ THStack * style::ConvertToStack(const TH2D * hh)
     stk->Add(htmp);
   }
 
-  printf("style::ConvertToStack %s colorcount %d\n", tag.Data(), colorcount);
+  //printf("style::ConvertToStack %s colorcount %d\n", tag.Data(), colorcount);
   
   if(oldintegral!=newintegral){
     printf("style::ConvertToStack integral not matched! %s old %f new %f\n", tag.Data(), oldintegral, newintegral); exit(1);
