@@ -216,13 +216,17 @@ bool IsShower(const bool kpi0, const int ii, vector<TLorentzVector> & showerArra
   }
 
   const double showerE = (*AnaIO::reco_daughter_allShower_energy)[ii] * 1E-3; //MeV to GeV
-  if(kfill){
-    style::FillInRange(AnaIO::hRecShowerEnergy, showerE, truthParticleType);
-  }
-  
+    
   const TVector3 showerDir((*AnaIO::reco_daughter_allShower_dirX)[ii], 
                            (*AnaIO::reco_daughter_allShower_dirY)[ii], 
                            (*AnaIO::reco_daughter_allShower_dirZ)[ii] );
+
+  if(kfill){
+    style::FillInRange(AnaIO::hRecShowerEnergy, showerE, truthParticleType);
+    style::FillInRange(AnaIO::hRecShowerDirectPhi, showerDir.Phi()*TMath::RadToDeg(), truthParticleType);
+    style::FillInRange(AnaIO::hRecShowerDiffTheta, (dist.Theta()-showerDir.Theta())*TMath::RadToDeg(), truthParticleType);
+    style::FillInRange(AnaIO::hRecShowerDiffPhi, (dist.Phi()-showerDir.Phi())*TMath::RadToDeg(), truthParticleType);
+  }
 
   const TVector3 showerMomentum = showerDir.Unit()*showerE;
   const TLorentzVector showerLv( showerMomentum, showerMomentum.Mag() );

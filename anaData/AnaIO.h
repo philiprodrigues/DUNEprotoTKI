@@ -237,6 +237,9 @@ namespace AnaIO
   TH2D * hCutemScore = 0x0;
   TH2D * hCutShowerTheta = 0x0;
   TH2D * hCutShowerPhi = 0x0;
+  TH2D * hRecShowerDirectPhi = 0x0;
+  TH2D * hRecShowerDiffTheta = 0x0;
+  TH2D * hRecShowerDiffPhi = 0x0;
   TH2D * hCutShowerDist = 0x0;
   TH2D * hCutmichelScore = 0x0;
   TH2D * hCutChi2NDF = 0x0;
@@ -605,6 +608,9 @@ void IniRecHist(TList * lout, const TString tag)
   hRecShowerEnergy    = new TH2D("b302RecShowerEnergySTKTXT"+tag,"",     50, 0, 0.5, nparType, parTypemin, parTypemax); lout->Add(hRecShowerEnergy);
   hRecLDMpi0          = new TH2D("b303RecLDMpi0STKTXT"+tag,"",           15, 0, 0.3, nparType, parTypemin, parTypemax); lout->Add(hRecLDMpi0);
   hRecSLMpi0          = new TH2D("b303RecSLMpi0STKTXT"+tag,"",           15, 0, 0.3, nparType, parTypemin, parTypemax); lout->Add(hRecSLMpi0);
+  hRecShowerDirectPhi = new TH2D("b304RecShowerDirectPhiSTKTXT"+tag,"",  30, -180, 180, nparType, parTypemin, parTypemax); lout->Add(hRecShowerDirectPhi);
+  hRecShowerDiffTheta = new TH2D("b304RecShowerDiffThetaSTKTXT"+tag,"",  30, -90, 90, nparType, parTypemin, parTypemax); lout->Add(hRecShowerDiffTheta);
+  hRecShowerDiffPhi   = new TH2D("b304RecShowerDiffPhiSTKTXT"+tag,"",    30, -90, 90, nparType, parTypemin, parTypemax); lout->Add(hRecShowerDiffPhi);
 
   hRecOtherPDG        = new TH1I("b400RecOtherPDGTXT"+tag,"", 25, -0.5, 24.5); lout->Add(hRecOtherPDG);
 
@@ -624,7 +630,7 @@ void IniRecHist(TList * lout, const TString tag)
   hCutstartE3         = new TH2D("c107CutstartE3STKTXT"+tag,"",        ndedx, dedxmin, dedxmax, nparType, parTypemin, parTypemax); lout->Add(hCutstartE3);
   hCutlastTME         = new TH2D("c108CutlastTMESTKTXT"+tag,"",        ndedx, dedxmin, dedxmax/3, nparType, parTypemin, parTypemax); lout->Add(hCutlastTME);
   hCutShowerTheta     = new TH2D("c109CutShowerThetaSTKTXT"+tag,"",    ndTheta, dThetamin, dThetamax, nparType, parTypemin, parTypemax); lout->Add(hCutShowerTheta);
-  hCutShowerPhi       = new TH2D("c109CutShowerPhiSTKTXT"+tag,"",      ndTheta, dThetamin, dThetamax, nparType, parTypemin, parTypemax); lout->Add(hCutShowerPhi);
+  hCutShowerPhi       = new TH2D("c109CutShowerPhiSTKTXT"+tag,"",      30, -180, 180, nparType, parTypemin, parTypemax); lout->Add(hCutShowerPhi);
   hCutShowerDist      = new TH2D("c109CutShowerDistSTKTXT"+tag,"",     31, 0, 93, nparType, parTypemin, parTypemax); lout->Add(hCutShowerDist);
 
   hCutnshower         = new TH2D("c200CutnshowerSTKTXT"+tag,"", ncounter, countermin, countermax, nevtType, evtTypemin, evtTypemax); lout->Add(hCutnshower);
