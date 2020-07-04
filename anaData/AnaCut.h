@@ -559,8 +559,13 @@ bool CutTopology(const bool kMC, const bool kpi0, const bool kFillBefore)
   const int filleventtype = AnaUtils::GetFillEventType();
 
   //______________________________________________ Do cuts below ______________________________________________ 
+  //1. nproton  
+  style::FillInRange(AnaIO::hCutnproton, cutnproton, filleventtype);
+  if(cutnproton!=1){
+    return false;
+  }
 
-  //1. nshower
+  //2. nshower
   style::FillInRange(AnaIO::hCutnshower, cutnshower, filleventtype);
   if(kpi0){
     if(cutnshower<2){
@@ -571,13 +576,6 @@ bool CutTopology(const bool kMC, const bool kpi0, const bool kFillBefore)
     if(cutnshower!=0){
       return false;
     }
-  }
-  
-  //2. nmichel
-  style::FillInRange(AnaIO::hCutnmichel, cutnmichel, filleventtype);
-  //not found in signal, cut for both channels
-  if(cutnmichel!=0){
-    return false;
   }
   
   //3. npiplus
@@ -593,9 +591,10 @@ bool CutTopology(const bool kMC, const bool kpi0, const bool kFillBefore)
     }
   }
 
-  //4. nproton  
-  style::FillInRange(AnaIO::hCutnproton, cutnproton, filleventtype);
-  if(cutnproton!=1){
+  //4. nmichel
+  style::FillInRange(AnaIO::hCutnmichel, cutnmichel, filleventtype);
+  //not found in signal, cut for both channels
+  if(cutnmichel!=0){
     return false;
   }
   
