@@ -55,6 +55,22 @@ enum parType{
 };
 
 
+int GetFillEventType()
+{
+  int filleventtype = -999;
+  if(AnaIO::kSignal){
+    filleventtype = gkSignal;
+  }
+  else if(AnaIO::true_beam_PDG==211){
+    filleventtype = gkEvtBkg;
+  }
+  else{
+    filleventtype = gkBmBkg;
+  }
+  
+  return filleventtype;
+}
+
 double GetChi2NDF(const int ii)
 {
   const double chi2       = (*AnaIO::reco_daughter_allTrack_Chi2_proton)[ii];
@@ -169,13 +185,15 @@ TVector3 GetShowerVector(const int ii)
   const TVector3 dist=shw-vtx;
   return dist;
 }
-  
-TLorentzVector * GetPiZero(const int truthEventType, const vector<TLorentzVector> & shws,  const vector<double> & showerEarr, const vector<int> & showerTypeArray, const bool kprint, const bool kfill)
+
+TLorentzVector * GetPiZero(const vector<TLorentzVector> & shws,  const vector<double> & showerEarr, const vector<int> & showerTypeArray, const bool kprint, const bool kfill)
 {
   //
   //combine shower-shower pair and return the most energetic one
   //
 
+  const int truthEventType = GetFillEventType();
+  
   const int shsize = shws.size();
   if(kfill){
     style::FillInRange(AnaIO::hRecPi0Nshower, shsize, truthEventType);
@@ -579,11 +597,33 @@ void GetBeamdEdx(const int evtType)
   AnaIO::beamLastTME  = kfailN ? -999 : GetTruncatedMean(lastE,  0, 5,                    0.4,  0.95);
 }
 
-void FillBeamdEdx(const int evtType, const bool kBefore)
+void FillBeamKinematics(const int kmc)
+{
+  const int evtType = GetFillEventType();
+  const TVector3 recBeamFull = GetRecBeamFull();
+  
+  if(kmc){
+    const TVector3 truthBeam = GetTruthBeamFull();
+    
+    const double beamthetaRes    = (recBeamFull.Theta()-truthBeam.Theta())*TMath::RadToDeg();//use absolute difference 
+    const double beammomentumRes = recBeamFull.Mag()/truthBeam.Mag()-1;
+    
+    style::FillInRange(AnaIO::hBeamThetaRes,    truthBeam.Theta()*TMath::RadToDeg(), beamthetaRes);
+    style::FillInRange(AnaIO::hBeamMomentumRes, truthBeam.Mag(),                     beammomentumRes);
+  }
+  
+  style::FillInRange(AnaIO::hRecBeamTheta,    recBeamFull.Theta()*TMath::RadToDeg(), evtType);
+  style::FillInRange(AnaIO::hRecBeamMomentum, recBeamFull.Mag(),                     evtType);
+}
+
+void FillBeamdEdx(const bool kBefore)
 {
   //
   //
   //
+
+  const int evtType = GetFillEventType();
+  
   if(kBefore){
 
     GetBeamdEdx(evtType);
@@ -729,22 +769,6 @@ double GetRecFromTruth(const int protonIdx, const vector<double> * mombyrange)
 }
 
 
-
-int GetFillEventType()
-{
-  int filleventtype = -999;
-  if(AnaIO::kSignal){
-    filleventtype = gkSignal;
-  }
-  else if(AnaIO::true_beam_PDG==211){
-    filleventtype = gkEvtBkg;
-  }
-  else{
-    filleventtype = gkBmBkg;
-  }
-  
-  return filleventtype;
-}
 
 
 void PrintLegend()

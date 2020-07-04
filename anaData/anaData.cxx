@@ -88,12 +88,13 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
       TruthBeamType = AnaUtils::GetParticleType(AnaIO::true_beam_PDG);
       AnaUtils::SetFullSignal(kPiZero);
     }
-
-    const int evtType =  AnaUtils::GetFillEventType();
+    else{
+      AnaIO::kSignal = false;
+    }
 
     //====================== Do cuts ======================
     //just do the plotting to test
-    AnaUtils::FillBeamdEdx(evtType, true);
+    AnaUtils::FillBeamdEdx(true);
 
     //gkOnlySignal=true: use MC signal and no cuts
     if(gkOnlySignal){
@@ -110,25 +111,13 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     selBeamCount++;
 
     //just do the plotting to test
-    AnaUtils::FillBeamdEdx(evtType, false);
+    AnaUtils::FillBeamdEdx(false);
 
     //---------- fill beam kinematics ----------
-
-    const TVector3 recBeamFull = AnaUtils::GetRecBeamFull();
-
-    if(kMC){
-      const TVector3 truthBeam = AnaUtils::GetTruthBeamFull();
-
-      const double beamthetaRes    = (recBeamFull.Theta()-truthBeam.Theta())*TMath::RadToDeg();//use absolute difference 
-      const double beammomentumRes = recBeamFull.Mag()/truthBeam.Mag()-1;
-
-      style::FillInRange(AnaIO::hBeamThetaRes,    truthBeam.Theta()*TMath::RadToDeg(), beamthetaRes);
-      style::FillInRange(AnaIO::hBeamMomentumRes, truthBeam.Mag(),                     beammomentumRes);
+    if(gkFillBefore){
+      AnaUtils::FillBeamKinematics(kMC);
     }
     
-    style::FillInRange(AnaIO::hRecBeamTheta,    recBeamFull.Theta()*TMath::RadToDeg(), evtType);
-    style::FillInRange(AnaIO::hRecBeamMomentum, recBeamFull.Mag(),                     evtType);
-
     //---------- continue cut flow ----------
     if(!gkOnlySignal){  
       if(!AnaCut::CutTopology(kMC, kPiZero, gkFillBefore)){
@@ -138,6 +127,11 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
 
     //====================== No cuts any more ======================
 
+    //---------- fill beam kinematics ----------
+    if(!gkFillBefore){
+      AnaUtils::FillBeamKinematics(kMC);
+    }
+    
     if(kMC){
       AnaIO::hTruthBeamType->Fill(TruthBeamType);
       AnaIO::hTruthSignal->Fill(AnaIO::kSignal);
@@ -148,7 +142,7 @@ int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToSt
     int dummycounter = -999;
     const bool kprint = false;
     const bool kfill = !gkFillBefore;
-    AnaCut::CountPFP(kMC, kPiZero, evtType, dummycounter, dummycounter, dummycounter, dummycounter, dummypi0, kprint, kfill);
+    AnaCut::CountPFP(kMC, kPiZero, dummycounter, dummycounter, dummycounter, dummycounter, dummypi0, kprint, kfill);
     
     //--- to test
      /*   

@@ -428,7 +428,7 @@ bool IsPiplus(const int ii, const bool kfill, const int truthParticleType, const
   return true;
 }
 
-void CountPFP(const bool kMC, const bool kpi0, const int truthEventType, int & nproton, int & npiplus, int & nshower, int & nmichel, TLorentzVector *  & leadingPi0, const bool kprint, const bool kfill)
+void CountPFP(const bool kMC, const bool kpi0, int & nproton, int & npiplus, int & nshower, int & nmichel, TLorentzVector *  & leadingPi0, const bool kprint, const bool kfill)
 {
   //
   //to-do: need to pass out the proton and piplus
@@ -530,7 +530,7 @@ void CountPFP(const bool kMC, const bool kpi0, const int truthEventType, int & n
   //leading pi0 is event-level info
   if(kpi0){
     const bool kprint = false;
-    leadingPi0 = AnaUtils::GetPiZero(truthEventType, showerArray, showerEarr, showerTypeArray, kprint, kfill);
+    leadingPi0 = AnaUtils::GetPiZero(showerArray, showerEarr, showerTypeArray, kprint, kfill);
   }
 
   if(kprint){
@@ -554,7 +554,7 @@ bool CutTopology(const bool kMC, const bool kpi0, const bool kFillBefore)
 
   const bool kprint = false;
   const bool kfill = kFillBefore;
-  CountPFP(kMC, kpi0, AnaIO::kSignal, cutnproton, cutnpiplus, cutnshower, cutnmichel, leadingPi0, kprint, kfill);
+  CountPFP(kMC, kpi0, cutnproton, cutnpiplus, cutnshower, cutnmichel, leadingPi0, kprint, kfill);
   
   const int filleventtype = AnaUtils::GetFillEventType();
 
