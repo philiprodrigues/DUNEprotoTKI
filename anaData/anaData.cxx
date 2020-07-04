@@ -36,8 +36,9 @@ const bool gkFast = 1;//false;
 int anaRec(TString finName, TList *lout, const TString tag, const int nEntryToStop = -999)
 {
   //_____________________________________________________ basic settings _____________________________________________________ 
-  cout<<"input file: ";
+  cout<<"Input file:"<<endl;
   gSystem->Exec(Form("readlink -f %s", finName.Data()));
+  cout<<endl;
   
   bool kMC = true;
   if(!finName.Contains("_mc_")){
