@@ -2,11 +2,12 @@ code=$1
 
 rm -f lib${code}.so  *.o *Dict.* 
 
-incpath="-I$(root-config --incdir) -I$(pwd)"
-echo $incpath
+cflag="$(root-config --cflags) -I$(pwd)"
+
+echo $cflag
 
 echo 
-comm="g++ $incpath -fPIC -c ${code}.cxx -o ${code}.o"
+comm="g++ $cflag -fPIC -c ${code}.cxx -o ${code}.o"
 echo $comm
 eval $comm || exit 1
 
@@ -22,16 +23,16 @@ else
     exit 1
 fi
 
-comm="rootcint -f ${code}Dict.cxx ${rcopt} $incpath  ${code}.h ${code}LinkDef.h"
+comm="rootcint -f ${code}Dict.cxx ${rcopt} $cflag  ${code}.h ${code}LinkDef.h"
 echo $comm
 eval $comm  || exit 1
 
-comm="g++ $incpath  -fPIC -c ${code}Dict.cxx -o ${code}Dict.o"
+comm="g++ $cflag  -fPIC -c ${code}Dict.cxx -o ${code}Dict.o"
 echo $comm
 eval $comm || exit 1
 
 
-comm="g++ -shared -O3 -Wall -Werror $incpath $(root-config --libs) ${code}.o ${code}Dict.o -o lib${code}.so"
+comm="g++ -shared -O3 -Wall -Werror $cflag $(root-config --libs) ${code}.o ${code}Dict.o -o lib${code}.so"
 echo $comm
 eval $comm
     
