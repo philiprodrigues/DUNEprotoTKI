@@ -1573,6 +1573,9 @@ void style::SetGlobalStyle(const Int_t lStat, Bool_t kcolor)
   // Set gStyle
   // From plain
 
+  //turn off figure info
+  gErrorIgnoreLevel = kWarning;
+
   IniColorCB();
 
   gStyle->SetFrameBorderMode(0);
