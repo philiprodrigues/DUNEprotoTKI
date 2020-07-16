@@ -99,8 +99,9 @@ class style
 
   static void AddStackToLegend(THStack *stk, TLegend *lg, const TString tag, const double drawthres = 0.01);
   static TMatrixD * Hist2Matrix(const TH2D * hist, const double unit=1);
-  static void ScaleXaxis(TH1D * h0, const double scale);
-  static void ScaleXaxis(THStack * stk, const double scale);
+  static void ScaleXaxis(TH1D * h0, const double scale, const bool kprint=false);
+  static void ScaleXaxis(THStack * stk, const double scale, const bool kprint=false);
+  static double getIntegral(TH1D *hh, const double xmin, const double xmax, const TString opt);
   static TH1D * GetMCDataNsigma(TH1D * hmc, TH1D * hdata, const TString tag);
   static void SetStackColorCB(THStack * hh, const int *cbcol, const int lw=1);
   static void IniColorCB();

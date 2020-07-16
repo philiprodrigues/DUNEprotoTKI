@@ -965,13 +965,13 @@ TMatrixD * style::Hist2Matrix(const TH2D * hist, const double unit)
   return cov;
 }
 
-void style::ScaleXaxis(THStack * stk, const double scale)
+void style::ScaleXaxis(THStack * stk, const double scale, const bool kprint)
 {
   //THStack * sout = new THStack;
   const TList * ll = stk->GetHists();
   for(Int_t ii=0; ii<ll->GetEntries(); ii++){
     TH1D *hh = (TH1D*)ll->At(ii);
-    ScaleXaxis(hh, scale);
+    ScaleXaxis(hh, scale, kprint);
     //sout->Add((TH1D*)hh->Clone(hh->GetName()));
   }
 
@@ -979,14 +979,14 @@ void style::ScaleXaxis(THStack * stk, const double scale)
   //stk = sout;
 }
 
-void style::ScaleXaxis(TH1D * h0, const double scale)
+void style::ScaleXaxis(TH1D * h0, const double scale, const bool kprint)
 {
-  PrintHist(h0, "style::ScaleXaxis before: ");
+  if(kprint) PrintHist(h0, "style::ScaleXaxis before: ");
 
   const int nbin = h0->GetNbinsX();
-  double xxs[100]={0};
-  double yys[100]={0};
-  double ers[100]={0};
+  double *xxs=new double[nbin+10];
+  double *yys=new double[nbin+10];
+  double *ers=new double[nbin+10];
   for(int ii=1; ii<=nbin+1; ii++){
     const double iy = h0->GetBinContent(ii)/scale;
     const double ie = h0->GetBinError(ii)/scale;
@@ -994,7 +994,7 @@ void style::ScaleXaxis(TH1D * h0, const double scale)
     xxs[ii-1]=ix;
     yys[ii]=iy;
     ers[ii]=ie;
-    printf("style::ScaleXaxis test1 %s %d %f %e %e\n", h0->GetName(), ii, ix, iy, ie);
+    if(kprint) printf("style::ScaleXaxis test1 %s %d %f %e %e\n", h0->GetName(), ii, ix, iy, ie);
   }
 
   /*
@@ -1009,10 +1009,22 @@ void style::ScaleXaxis(TH1D * h0, const double scale)
   for(int ii=1; ii<=nbin+1; ii++){
     h0->SetBinContent(ii, yys[ii]);
     h0->SetBinError(ii, ers[ii]);
-    printf("style::ScaleXaxis test2 %d %s %f %e %e\n", ii, h0->GetName(), h0->GetXaxis()->GetBinLowEdge(ii), yys[ii], ers[ii]);
+    if(kprint) printf("style::ScaleXaxis test2 %d %s %f %e %e\n", ii, h0->GetName(), h0->GetXaxis()->GetBinLowEdge(ii), yys[ii], ers[ii]);
   }
 
-  PrintHist(h0, "style::ScaleXaxis after: ");
+  if(kprint) PrintHist(h0, "style::ScaleXaxis after: ");
+
+  delete xxs;
+  delete yys;
+  delete ers;
+}
+
+double style::getIntegral(TH1D *hh, const double xmin, const double xmax, const TString opt)
+{
+  const int bmin = hh->GetXaxis()->FindBin(xmin);
+  const int bmax = hh->GetXaxis()->FindBin(xmax);
+
+  return hh->Integral(bmin, bmax, opt);
 }
 
 TH1D * style::GetMCDataNsigma(TH1D * hmc, TH1D * hdata, const TString tag)
