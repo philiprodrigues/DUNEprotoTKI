@@ -1,2 +1,3 @@
-which mklib.sh
-mklib.sh style
+#which mklib.sh
+ls ${LOCALBIN}/mklib.sh
+${LOCALBIN}/mklib.sh style
