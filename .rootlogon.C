@@ -12,7 +12,7 @@
   */
   const TString pwd = gSystem->pwd();
   cout<<endl;
-  cout<<"Welcome to protoDUNETKI repository!"<<endl;
+  cout<<"Welcome to DUNEprotoTKI repository!"<<endl;
   cout<<"In path: "<<pwd<<endl;
   cout<<endl;
 
