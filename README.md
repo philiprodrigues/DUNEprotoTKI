@@ -1,5 +1,11 @@
 # DUNEprotoTKI: tools for TKI analyses on protoDUNE data
 
+
+0. style/, bin/, and include/AnaFunctions.h are from submodule. Need to load/update separately with
+   ```
+   git submodule update --init
+   ```
+   
 1. The symbolic links in 
    ```
    anaData/input/
